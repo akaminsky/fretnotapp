@@ -50,7 +50,7 @@ struct AddSongView: View {
         ScrollView {
             VStack(spacing: 20) {
                 // STEP 1: Spotify Search (if no track selected and not editing)
-                if selectedTrack == nil && !isEditing && title.isEmpty && !showSpotifySearch {
+                if selectedTrack == nil && !isEditing && title.isEmpty {
                     spotifySearchSection
                 } else {
                     // Show selected song header or editing header
@@ -58,9 +58,6 @@ struct AddSongView: View {
                         selectedTrackHeader(track)
                     } else if isEditing {
                         editingHeaderWithSpotify
-                    } else if showSpotifySearch {
-                        // Show search when user wants to link Spotify
-                        spotifyLinkSearchSection
                     }
                     
                     // Main form fields
@@ -379,7 +376,6 @@ struct AddSongView: View {
             } else {
                 Button {
                     showSpotifySearch = true
-                    searchQuery = "\(artist) \(title)".trimmingCharacters(in: .whitespaces)
                 } label: {
                     HStack {
                         Image(systemName: "link.badge.plus")
@@ -393,6 +389,18 @@ struct AddSongView: View {
                     .cornerRadius(8)
                 }
             }
+        }
+        .sheet(isPresented: $showSpotifySearch) {
+            SpotifyLinkSheetForEdit(
+                title: title,
+                artist: artist,
+                onSelect: { track in
+                    spotifyUrl = track.externalUrls.spotify
+                    albumCoverUrl = track.albumCoverUrl
+                    showSpotifySearch = false
+                }
+            )
+            .environmentObject(spotifyService)
         }
         .padding()
         .background(Color(.systemBackground))
@@ -439,7 +447,7 @@ struct AddSongView: View {
                     } label: {
                         HStack {
                             Image(systemName: isFavorite ? "star.fill" : "star")
-                                .foregroundColor(.appGold)
+                                .foregroundColor(.appAccent)
                             Text("Favorites")
                                 .foregroundColor(.primary)
                             Spacer()
@@ -450,7 +458,7 @@ struct AddSongView: View {
                             }
                         }
                         .padding(12)
-                        .background(isFavorite ? Color.appGold.opacity(0.15) : Color(.systemGray6))
+                        .background(isFavorite ? Color.appAccent.opacity(0.15) : Color(.systemGray6))
                         .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
@@ -467,7 +475,7 @@ struct AddSongView: View {
                             } label: {
                                 HStack {
                                     Image(systemName: "folder.fill")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.secondary)
                                     Text(category)
                                         .foregroundColor(.primary)
                                     Spacer()
@@ -478,7 +486,7 @@ struct AddSongView: View {
                                     }
                                 }
                                 .padding(12)
-                                .background(selectedCategories.contains(category) ? Color.blue.opacity(0.1) : Color(.systemGray6))
+                                .background(selectedCategories.contains(category) ? Color(.systemGray4) : Color(.systemGray6))
                                 .cornerRadius(8)
                             }
                             .buttonStyle(.plain)
@@ -720,6 +728,155 @@ struct FormTextField: View {
                 .padding(12)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
+        }
+    }
+}
+
+// MARK: - Spotify Link Sheet for Edit
+
+struct SpotifyLinkSheetForEdit: View {
+    @EnvironmentObject var spotifyService: SpotifyService
+    @Environment(\.dismiss) var dismiss
+    
+    let title: String
+    let artist: String
+    let onSelect: (SpotifyTrack) -> Void
+    
+    @State private var searchQuery: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                // Search field
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Search Spotify...", text: $searchQuery)
+                        .textFieldStyle(.plain)
+                        .onSubmit {
+                            searchSpotify()
+                        }
+                    
+                    if !searchQuery.isEmpty {
+                        Button {
+                            searchQuery = ""
+                            spotifyService.clearResults()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Button("Search") {
+                        searchSpotify()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.appAccent)
+                    .disabled(searchQuery.isEmpty)
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                
+                // Results
+                if spotifyService.isSearching {
+                    Spacer()
+                    ProgressView("Searching...")
+                    Spacer()
+                } else if spotifyService.searchResults.isEmpty && !searchQuery.isEmpty {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("No results found")
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                } else if spotifyService.searchResults.isEmpty {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "music.note")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("Search for a song on Spotify")
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(spotifyService.searchResults) { track in
+                                Button {
+                                    onSelect(track)
+                                    spotifyService.clearResults()
+                                    dismiss()
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        AsyncImage(url: URL(string: track.smallAlbumCoverUrl ?? "")) { image in
+                                            image.resizable().aspectRatio(contentMode: .fill)
+                                        } placeholder: {
+                                            Rectangle().fill(Color(.systemGray5))
+                                        }
+                                        .frame(width: 50, height: 50)
+                                        .cornerRadius(6)
+                                        
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(track.name)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.primary)
+                                                .lineLimit(1)
+                                            
+                                            Text(track.artistNames)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.title2)
+                                            .foregroundColor(.appAccent)
+                                    }
+                                    .padding(12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(10)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+            }
+            .navigationTitle("Link to Spotify")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        spotifyService.clearResults()
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                // Pre-fill with song info
+                if !artist.isEmpty || !title.isEmpty {
+                    searchQuery = "\(artist) \(title)".trimmingCharacters(in: .whitespaces)
+                    searchSpotify()
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+    
+    private func searchSpotify() {
+        Task {
+            await spotifyService.search(query: searchQuery)
         }
     }
 }

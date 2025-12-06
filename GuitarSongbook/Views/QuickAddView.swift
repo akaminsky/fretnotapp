@@ -14,10 +14,6 @@ extension Color {
     
     // Darker orange for text on light backgrounds (meets WCAG AA 4.5:1)
     static let appAccentText = Color(red: 0.702, green: 0.353, blue: 0.0) // #B35A00
-    
-    // Gold/amber for favorites - replaces yellow for better accessibility
-    static let appGold = Color(red: 0.85, green: 0.65, blue: 0.0) // #D9A600 - icons/stars
-    static let appGoldText = Color(red: 0.6, green: 0.4, blue: 0.0) // #996600 - text (4.7:1 contrast)
 }
 
 struct QuickAddView: View {

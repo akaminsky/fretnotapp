@@ -10,11 +10,14 @@ import SwiftUI
 struct SongDetailView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
+    @EnvironmentObject var tabURLDetector: TabURLDetector
     @Environment(\.dismiss) var dismiss
     
     let song: Song
     @State private var showingEditSheet = false
     @State private var showingCategoryPicker = false
+    @State private var showingTabSaveAlert = false
+    @State private var showingSpotifyLink = false
     
     // Get the live version of the song from the store
     private var liveSong: Song {
@@ -50,9 +53,6 @@ struct SongDetailView: View {
                         if let notes = liveSong.notes, !notes.isEmpty {
                             notesSection(notes)
                         }
-                        
-                        // Actions
-                        actionsSection
                     }
                     .padding(20)
                 }
@@ -81,7 +81,7 @@ struct SongDetailView: View {
                         } label: {
                             Image(systemName: liveSong.isFavorite ? "star.fill" : "star")
                                 .font(.body.weight(.medium))
-                                .foregroundColor(liveSong.isFavorite ? .appGold : .secondary)
+                                .foregroundColor(liveSong.isFavorite ? .appAccent : .secondary)
                         }
                         
                         Button {
@@ -146,7 +146,7 @@ struct SongDetailView: View {
                 
                 if liveSong.isFavorite {
                     Image(systemName: "star.fill")
-                        .foregroundColor(.appGold)
+                        .foregroundColor(.appAccent)
                 }
             }
             
@@ -181,10 +181,10 @@ struct SongDetailView: View {
                                 Text(chord)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.appAccentText)
+                                    .foregroundColor(.primary)
                                     .padding(.horizontal, 10)
                                     .padding(.vertical, 4)
-                                    .background(Color.appAccent.opacity(0.12))
+                                    .background(Color(.systemGray5))
                                     .cornerRadius(6)
                             }
                         }
@@ -202,20 +202,20 @@ struct SongDetailView: View {
                             Text("Favorites")
                         }
                         .font(.subheadline)
-                        .foregroundColor(.appGoldText)
+                        .foregroundColor(.primary)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 4)
-                        .background(Color.appGold.opacity(0.15))
+                        .background(Color(.systemGray5))
                         .cornerRadius(6)
                     }
                     
                     ForEach(liveSong.categories, id: \.self) { category in
                         Text(category)
                             .font(.subheadline)
-                            .foregroundColor(.blue)
+                            .foregroundColor(.primary)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 4)
-                            .background(Color.blue.opacity(0.1))
+                            .background(Color(.systemGray5))
                             .cornerRadius(6)
                     }
                     
@@ -233,15 +233,82 @@ struct SongDetailView: View {
             }
             
             // Spotify Link
-            if liveSong.spotifyUrl != nil {
-                PropertyRow(label: "Spotify", icon: "play.circle.fill") {
-                    HStack(spacing: 4) {
-                        Circle()
-                            .fill(Color.green)
-                            .frame(width: 8, height: 8)
-                        Text("Linked")
-                            .foregroundColor(.green)
+            PropertyRow(label: "Spotify", icon: "play.circle.fill") {
+                if let spotifyUrl = liveSong.spotifyUrl, let url = URL(string: spotifyUrl) {
+                    Link(destination: url) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "play.fill")
+                                .font(.caption)
+                                .foregroundColor(.green)
+                            Text("Linked")
+                                .foregroundColor(.green)
+                        }
                     }
+                } else {
+                    Button {
+                        showingSpotifyLink = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "link")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("Link to Spotify")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .sheet(isPresented: $showingSpotifyLink) {
+                SpotifyLinkSheet(song: liveSong)
+                    .environmentObject(songStore)
+                    .environmentObject(spotifyService)
+            }
+            
+            // Tabs
+            PropertyRow(label: "Tabs", icon: "doc.text") {
+                if let tabUrl = liveSong.tabUrl, let url = URL(string: tabUrl) {
+                    Link(destination: url) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundColor(.appAccentText)
+                            Text("Saved")
+                                .foregroundColor(.appAccentText)
+                        }
+                    }
+                } else {
+                    Button {
+                        searchUltimateGuitar()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                            Text("Search & copy URL to save")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .onReceive(tabURLDetector.$showingSavePrompt) { showing in
+                if showing && tabURLDetector.pendingSongId == song.id {
+                    showingTabSaveAlert = true
+                }
+            }
+            .alert("Save Tab URL?", isPresented: $showingTabSaveAlert) {
+                Button("Save") {
+                    saveDetectedTabURL()
+                }
+                Button("Cancel", role: .cancel) {
+                    tabURLDetector.clearDetection()
+                }
+            } message: {
+                if let siteName = tabURLDetector.detectedSiteName {
+                    Text("Found a \(siteName) link in your clipboard. Save it to \"\(liveSong.title)\"?")
+                } else {
+                    Text("Found a tab URL in your clipboard. Save it to this song?")
                 }
             }
         }
@@ -289,63 +356,26 @@ struct SongDetailView: View {
         .cornerRadius(12)
     }
     
-    // MARK: - Actions Section
-    
-    private var actionsSection: some View {
-        VStack(spacing: 12) {
-            if let spotifyUrl = liveSong.spotifyUrl, let url = URL(string: spotifyUrl) {
-                Link(destination: url) {
-                    HStack {
-                        Image(systemName: "play.fill")
-                            .font(.body.weight(.semibold))
-                        Text("Play on Spotify")
-                            .fontWeight(.semibold)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color.green)
-                    .foregroundColor(.white)
-                    .cornerRadius(12)
-                }
-            }
-            
-            if let tabUrl = liveSong.tabUrl, let url = URL(string: tabUrl) {
-                Link(destination: url) {
-                    HStack {
-                        Image(systemName: "doc.text")
-                        Text("View Tabs")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemGray6))
-                    .foregroundColor(.primary)
-                    .cornerRadius(12)
-                }
-            } else {
-                Button {
-                    searchUltimateGuitar()
-                } label: {
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                        Text("Search for Tabs")
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(Color(.systemGray6))
-                    .foregroundColor(.primary)
-                    .cornerRadius(12)
-                }
-            }
-        }
-        .padding(.top, 8)
-    }
     
     private func searchUltimateGuitar() {
+        // Start watching for tab URLs when user returns
+        tabURLDetector.startWatchingForSong(song.id)
+        
         let query = "\(liveSong.artist) \(liveSong.title)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "https://www.ultimate-guitar.com/search.php?search_type=title&value=\(query)"
         if let url = URL(string: urlString) {
             UIApplication.shared.open(url)
         }
+    }
+    
+    private func saveDetectedTabURL() {
+        guard let url = tabURLDetector.detectedURL else { return }
+        
+        var updatedSong = liveSong
+        updatedSong.tabUrl = url
+        songStore.updateSong(updatedSong)
+        
+        tabURLDetector.clearDetection()
     }
 }
 
@@ -402,7 +432,7 @@ struct CategoryPickerView: View {
                     } label: {
                         HStack {
                             Image(systemName: liveSong.isFavorite ? "star.fill" : "star")
-                                .foregroundColor(.appGold)
+                                .foregroundColor(.appAccent)
                             
                             Text("Favorites")
                                 .foregroundColor(.primary)
@@ -446,7 +476,7 @@ struct CategoryPickerView: View {
                         } label: {
                             HStack {
                                 Image(systemName: "folder.fill")
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(.secondary)
                                 
                                 Text(category)
                                     .foregroundColor(.primary)
@@ -503,6 +533,159 @@ struct CategoryPickerView: View {
     }
 }
 
+// MARK: - Spotify Link Sheet
+
+struct SpotifyLinkSheet: View {
+    @EnvironmentObject var songStore: SongStore
+    @EnvironmentObject var spotifyService: SpotifyService
+    @Environment(\.dismiss) var dismiss
+    
+    let song: Song
+    @State private var searchQuery: String = ""
+    
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 16) {
+                // Search field
+                HStack {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(.secondary)
+                    
+                    TextField("Search Spotify...", text: $searchQuery)
+                        .textFieldStyle(.plain)
+                        .onSubmit {
+                            searchSpotify()
+                        }
+                    
+                    if !searchQuery.isEmpty {
+                        Button {
+                            searchQuery = ""
+                            spotifyService.clearResults()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    
+                    Button("Search") {
+                        searchSpotify()
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.appAccent)
+                    .disabled(searchQuery.isEmpty)
+                }
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(12)
+                .padding(.horizontal)
+                
+                // Results
+                if spotifyService.isSearching {
+                    Spacer()
+                    ProgressView("Searching...")
+                    Spacer()
+                } else if spotifyService.searchResults.isEmpty && !searchQuery.isEmpty {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("No results found")
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                } else if spotifyService.searchResults.isEmpty {
+                    Spacer()
+                    VStack(spacing: 8) {
+                        Image(systemName: "music.note")
+                            .font(.largeTitle)
+                            .foregroundColor(.secondary)
+                        Text("Search for \"\(song.title)\" on Spotify")
+                            .foregroundColor(.secondary)
+                    }
+                    Spacer()
+                } else {
+                    ScrollView {
+                        LazyVStack(spacing: 8) {
+                            ForEach(spotifyService.searchResults) { track in
+                                Button {
+                                    linkTrack(track)
+                                } label: {
+                                    HStack(spacing: 12) {
+                                        AsyncImage(url: URL(string: track.smallAlbumCoverUrl ?? "")) { image in
+                                            image.resizable().aspectRatio(contentMode: .fill)
+                                        } placeholder: {
+                                            Rectangle().fill(Color(.systemGray5))
+                                        }
+                                        .frame(width: 50, height: 50)
+                                        .cornerRadius(6)
+                                        
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text(track.name)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.primary)
+                                                .lineLimit(1)
+                                            
+                                            Text(track.artistNames)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                                .lineLimit(1)
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "plus.circle.fill")
+                                            .font(.title2)
+                                            .foregroundColor(.appAccent)
+                                    }
+                                    .padding(12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(10)
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+            }
+            .navigationTitle("Link to Spotify")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        spotifyService.clearResults()
+                        dismiss()
+                    }
+                }
+            }
+            .onAppear {
+                // Pre-fill with song info
+                searchQuery = "\(song.artist) \(song.title)"
+                searchSpotify()
+            }
+        }
+        .presentationDetents([.medium, .large])
+    }
+    
+    private func searchSpotify() {
+        Task {
+            await spotifyService.search(query: searchQuery)
+        }
+    }
+    
+    private func linkTrack(_ track: SpotifyTrack) {
+        var updatedSong = song
+        updatedSong.spotifyUrl = track.externalUrls.spotify
+        updatedSong.albumCoverUrl = track.albumCoverUrl
+        songStore.updateSong(updatedSong)
+        
+        spotifyService.clearResults()
+        dismiss()
+    }
+}
+
 #Preview {
     SongDetailView(song: Song(
         title: "Wonderwall",
@@ -516,4 +699,5 @@ struct CategoryPickerView: View {
     ))
     .environmentObject(SongStore())
     .environmentObject(SpotifyService())
+    .environmentObject(TabURLDetector())
 }

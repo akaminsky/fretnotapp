@@ -98,7 +98,6 @@ struct ContentView: View {
         .sheet(isPresented: $showingTuner) {
             TunerView()
         }
-        .tint(.appAccent)
     }
     
     // MARK: - Category Pills
@@ -121,7 +120,7 @@ struct ContentView: View {
                     title: "Favorites",
                     count: songStore.favoritesCount,
                     isSelected: songStore.filterCategory == "favorites",
-                    color: .appGold,
+                    color: .appAccent,
                     icon: "star.fill"
                 ) {
                     songStore.filterCategory = songStore.filterCategory == "favorites" ? "" : "favorites"
@@ -133,7 +132,7 @@ struct ContentView: View {
                         title: category,
                         count: songStore.songsInCategory(category),
                         isSelected: songStore.filterCategory == category,
-                        color: .blue
+                        color: .appAccent
                     ) {
                         songStore.filterCategory = songStore.filterCategory == category ? "" : category
                     }
@@ -250,13 +249,14 @@ struct ContentView: View {
                         } label: {
                             Label("Delete", systemImage: "trash")
                         }
+                        .tint(.red)
                         
                         Button {
                             songToEdit = song
                         } label: {
                             Label("Edit", systemImage: "pencil")
                         }
-                        .tint(.orange)
+                        .tint(.appAccent)
                     }
                     .swipeActions(edge: .leading, allowsFullSwipe: true) {
                         Button {
@@ -264,7 +264,7 @@ struct ContentView: View {
                         } label: {
                             Label(song.isFavorite ? "Unfavorite" : "Favorite", systemImage: song.isFavorite ? "star.slash" : "star.fill")
                         }
-                        .tint(.appGold)
+                        .tint(.appAccent)
                         
                         if let spotifyUrl = song.spotifyUrl,
                            let url = URL(string: spotifyUrl) {
@@ -361,229 +361,161 @@ struct SongCard: View {
             // Main Card Content
             mainCardContent
             
-            // Expanded Chords Section
-            if !song.chords.isEmpty {
-                expandedChordsSection
+            // Chords Section
+            if !song.chords.isEmpty && showChords {
+                VStack(spacing: 0) {
+                    Divider()
+                        .padding(.horizontal, 14)
+                    
+                    chordContent
+                }
             }
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.04), radius: 8, y: 2)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.04), radius: 8, y: 2)
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
     
     // MARK: - Main Card Content
     
     private var mainCardContent: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header with album art and info
-            HStack(alignment: .top, spacing: 14) {
-                // Album Cover
-                AsyncImage(url: URL(string: song.albumCoverUrl ?? "")) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    LinearGradient(
-                        colors: [Color.appAccent.opacity(0.3), Color.appAccent.opacity(0.1)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
+        HStack(alignment: .center, spacing: 14) {
+            // Album Cover
+            AsyncImage(url: URL(string: song.albumCoverUrl ?? "")) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color(.systemGray5))
                     .overlay {
                         Image(systemName: "music.note")
-                            .font(.title2)
-                            .foregroundColor(.appAccent.opacity(0.5))
+                            .font(.title3)
+                            .foregroundColor(Color(.systemGray3))
                     }
-                }
-                .frame(width: 64, height: 64)
-                .cornerRadius(8)
+            }
+            .frame(width: 56, height: 56)
+            .cornerRadius(8)
+            
+            // Song Info
+            VStack(alignment: .leading, spacing: 3) {
+                Text(song.title)
+                    .font(.body)
+                    .fontWeight(.semibold)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
                 
-                // Song Info
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(song.title)
-                        .font(.headline)
-                        .fontWeight(.semibold)
-                        .foregroundColor(.primary)
-                        .lineLimit(1)
-                    
-                    Text(song.artist)
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                    
-                    // Date
-                    Text(song.formattedDate)
-                        .font(.caption)
-                        .foregroundColor(Color(.tertiaryLabel))
-                }
+                Text(song.artist)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
                 
-                Spacer()
-                
-                // Favorite Button
-                Button(action: onToggleFavorite) {
-                    Image(systemName: song.isFavorite ? "star.fill" : "star")
-                        .font(.title3)
-                        .foregroundColor(song.isFavorite ? .appGold : Color(.tertiaryLabel))
-                }
-                .buttonStyle(.plain)
-                
-                // Context Menu
-                Menu {
-                    Button {
-                        onTap()
-                    } label: {
-                        Label("View Details", systemImage: "eye")
-                    }
-                    
-                    Button {
-                        onEdit()
-                    } label: {
-                        Label("Edit", systemImage: "pencil")
-                    }
-                    
-                    Button {
-                        onToggleFavorite()
-                    } label: {
-                        Label(song.isFavorite ? "Remove from Favorites" : "Add to Favorites", systemImage: song.isFavorite ? "star.slash" : "star.fill")
-                    }
-                    
-                    if let spotifyUrl = song.spotifyUrl,
-                       let url = URL(string: spotifyUrl) {
-                        Button {
-                            UIApplication.shared.open(url)
-                        } label: {
-                            Label("Play on Spotify", systemImage: "play.fill")
+                // Chords and Capo as simple text
+                if !song.chords.isEmpty || song.capoPosition > 0 {
+                    HStack(spacing: 4) {
+                        if !song.chords.isEmpty {
+                            Text(song.chords.joined(separator: " · "))
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
+                                .lineLimit(1)
+                        }
+                        
+                        if song.capoPosition > 0 {
+                            if !song.chords.isEmpty {
+                                Text("•")
+                                    .font(.caption)
+                                    .foregroundColor(Color(.tertiaryLabel))
+                            }
+                            Text("Capo \(song.capoPosition)")
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
                         }
                     }
-                    
-                    Divider()
-                    
-                    Button(role: .destructive) {
-                        onDelete()
-                    } label: {
-                        Label("Delete", systemImage: "trash")
-                    }
-                } label: {
-                    Image(systemName: "ellipsis")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .frame(width: 32, height: 32)
-                        .contentShape(Rectangle())
                 }
             }
             
-            // Properties Row
-            HStack(spacing: 8) {
-                // Chords - show actual chords
-                if !song.chords.isEmpty {
-                    HStack(spacing: 4) {
-                        Image(systemName: showChords ? "chevron.up" : "chevron.down")
-                            .font(.caption2)
-                            .foregroundColor(.secondary)
-                        
-                        Text(song.chords.joined(separator: " · "))
-                            .font(.caption)
-                            .foregroundColor(.appAccentText)
-                            .lineLimit(1)
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Color.appAccent.opacity(0.1))
-                    .cornerRadius(6)
+            Spacer()
+            
+            // Favorite Button
+            Button(action: onToggleFavorite) {
+                Image(systemName: song.isFavorite ? "star.fill" : "star")
+                    .font(.body)
+                    .foregroundColor(song.isFavorite ? .appAccent : Color(.quaternaryLabel))
+            }
+            .buttonStyle(.plain)
+            
+            // Context Menu
+            Menu {
+                Button {
+                    onTap()
+                } label: {
+                    Label("View Details", systemImage: "eye")
                 }
                 
-                // Capo
-                if song.capoPosition > 0 {
-                    PropertyBadge(
-                        icon: "guitars",
-                        text: "Capo \(song.capoPosition)",
-                        color: .orange
-                    )
+                Button {
+                    onEdit()
+                } label: {
+                    Label("Edit", systemImage: "pencil")
                 }
                 
-                // Spotify play button
                 if let spotifyUrl = song.spotifyUrl,
                    let url = URL(string: spotifyUrl) {
                     Button {
                         UIApplication.shared.open(url)
                     } label: {
-                        Image(systemName: "play.circle.fill")
-                            .font(.body)
-                            .foregroundColor(.green)
-                            .padding(6)
-                            .background(Color.green.opacity(0.1))
-                            .cornerRadius(6)
+                        Label("Play on Spotify", systemImage: "play.fill")
                     }
                 }
                 
-                // Notes indicator
-                if song.notes != nil && !song.notes!.isEmpty {
-                    PropertyBadge(
-                        icon: "note.text",
-                        text: nil,
-                        color: .secondary
-                    )
-                }
+                Divider()
                 
-                // Category indicators
-                if !song.categories.isEmpty {
-                    PropertyBadge(
-                        icon: "folder",
-                        text: "\(song.categories.count)",
-                        color: .blue
-                    )
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                        .foregroundColor(.red)
                 }
-                
-                Spacer()
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.body)
+                    .foregroundColor(Color(.tertiaryLabel))
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
             }
         }
-        .padding(16)
-        .background(Color(.systemBackground))
+        .padding(14)
+        .frame(minHeight: 84)
         .contentShape(Rectangle())
         .onTapGesture {
             if !song.chords.isEmpty {
-                // Use transaction to disable List's row animation
-                var transaction = Transaction()
-                transaction.disablesAnimations = true
-                withTransaction(transaction) {
-                    showChords.toggle()
-                }
+                showChords.toggle()
             }
         }
     }
     
-    // MARK: - Expanded Chords Section
-    
-    private var expandedChordsSection: some View {
-        VStack(spacing: 0) {
-            if showChords {
-                Divider()
-                    .padding(.horizontal, 16)
-                
-                chordContent
-                    .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
-            }
-        }
-        .animation(.easeInOut(duration: 0.25), value: showChords)
-    }
+    // MARK: - Chord Content
     
     private var chordContent: some View {
         VStack(alignment: .leading, spacing: 12) {
             FlowLayout(spacing: 8) {
                 ForEach(song.chords, id: \.self) { chord in
-                            Text(chord)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.appAccentText)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.appAccent.opacity(0.12))
-                                .cornerRadius(6)
+                    Text(chord)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.primary)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 6)
+                        .background(Color(.systemGray5))
+                        .cornerRadius(6)
                 }
             }
             
             ChordDiagramsGrid(chords: song.chords)
         }
-        .padding(16)
+        .padding(14)
         .background(Color(.systemGray6).opacity(0.5))
     }
 }

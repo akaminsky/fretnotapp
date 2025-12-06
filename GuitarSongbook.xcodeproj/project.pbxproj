@@ -24,6 +24,7 @@
 		0015 /* CategoryManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1015 /* CategoryManagerView.swift */; };
 		0016 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1016 /* TunerView.swift */; };
 		0017 /* AudioPitchDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017 /* AudioPitchDetector.swift */; };
+		0018 /* TabURLDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1018 /* TabURLDetector.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 		1015 /* CategoryManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagerView.swift; sourceTree = "<group>"; };
 		1016 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		1017 /* AudioPitchDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPitchDetector.swift; sourceTree = "<group>"; };
+		1018 /* TabURLDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabURLDetector.swift; sourceTree = "<group>"; };
 		112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GuitarSongbook.entitlements; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -104,6 +106,7 @@
 				1007 /* SongStore.swift */,
 				1008 /* SpotifyService.swift */,
 				1017 /* AudioPitchDetector.swift */,
+				1018 /* TabURLDetector.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 				0015 /* CategoryManagerView.swift in Sources */,
 				0016 /* TunerView.swift in Sources */,
 				0017 /* AudioPitchDetector.swift in Sources */,
+				0018 /* TabURLDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

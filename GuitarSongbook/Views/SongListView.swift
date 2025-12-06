@@ -13,41 +13,44 @@ struct SongListView: View {
     @Binding var songToEdit: Song?
     
     var body: some View {
-        List {
-            ForEach(songStore.filteredAndSortedSongs) { song in
-                SongRowView(song: song)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        selectedSong = song
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            songStore.deleteSong(song)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
+        ScrollView {
+            LazyVStack(spacing: 0) {
+                ForEach(songStore.filteredAndSortedSongs) { song in
+                    SongRowView(song: song)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            selectedSong = song
                         }
-                        
-                        Button {
-                            songToEdit = song
-                        } label: {
-                            Label("Edit", systemImage: "pencil")
-                        }
-                        .tint(.orange)
-                    }
-                    .swipeActions(edge: .leading) {
-                        if let spotifyUrl = song.spotifyUrl,
-                           let url = URL(string: spotifyUrl) {
+                        .contextMenu {
                             Button {
-                                UIApplication.shared.open(url)
+                                songToEdit = song
                             } label: {
-                                Label("Play", systemImage: "play.fill")
+                                Label("Edit", systemImage: "pencil")
                             }
-                            .tint(.green)
+                            
+                            if let spotifyUrl = song.spotifyUrl,
+                               let url = URL(string: spotifyUrl) {
+                                Button {
+                                    UIApplication.shared.open(url)
+                                } label: {
+                                    Label("Play on Spotify", systemImage: "play.fill")
+                                }
+                            }
+                            
+                            Divider()
+                            
+                            Button(role: .destructive) {
+                                songStore.deleteSong(song)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
-                    }
+                    
+                    Divider()
+                        .padding(.leading, 74)
+                }
             }
         }
-        .listStyle(.plain)
     }
 }
 
@@ -59,7 +62,7 @@ struct SongRowView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Main Row Content - Fixed, doesn't move
+            // Main Row Content
             HStack(spacing: 12) {
                 // Album Cover
                 AsyncImage(url: URL(string: song.albumCoverUrl ?? "")) { image in
@@ -92,9 +95,7 @@ struct SongRowView: View {
                     HStack(spacing: 8) {
                         if !song.chords.isEmpty {
                             Button {
-                                withAnimation(.easeInOut(duration: 0.25)) {
-                                    showChords.toggle()
-                                }
+                                showChords.toggle()
                             } label: {
                                 HStack(spacing: 4) {
                                     ForEach(song.chords.prefix(4), id: \.self) { chord in
@@ -123,15 +124,20 @@ struct SongRowView: View {
             }
             .padding(.vertical, 8)
             
-            // Expanded Chord Diagrams - Slides open below
-            if showChords && !song.chords.isEmpty {
-                Divider()
-                    .padding(.top, 4)
-                
-                ChordDiagramsGrid(chords: song.chords)
-                    .padding(.vertical, 12)
+            // Expanded Chord Diagrams - smooth slide animation
+            if !song.chords.isEmpty {
+                VStack(spacing: 0) {
+                    Divider()
+                    
+                    ChordDiagramsGrid(chords: song.chords)
+                        .padding(.vertical, 12)
+                }
+                .frame(maxHeight: showChords ? nil : 0, alignment: .top)
+                .clipped()
+                .opacity(showChords ? 1 : 0)
             }
         }
+        .animation(.easeInOut(duration: 0.3), value: showChords)
     }
 }
 
@@ -145,15 +151,11 @@ struct ChordBadge: View {
         Text(chord)
             .font(small ? .caption2 : .caption)
             .fontWeight(.semibold)
-            .foregroundColor(.appAccentText)
+            .foregroundColor(.primary)
             .padding(.horizontal, small ? 6 : 8)
             .padding(.vertical, small ? 2 : 4)
-            .background(Color.appAccent.opacity(0.12))
+            .background(Color(.systemGray5))
             .cornerRadius(4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4)
-                    .stroke(Color.appAccent.opacity(0.3), lineWidth: 1)
-            )
     }
 }
 

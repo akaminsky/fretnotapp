@@ -11,12 +11,14 @@ import SwiftUI
 struct GuitarSongbookApp: App {
     @StateObject private var songStore = SongStore()
     @StateObject private var spotifyService = SpotifyService()
+    @StateObject private var tabURLDetector = TabURLDetector()
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
+                .environmentObject(tabURLDetector)
         }
     }
 }

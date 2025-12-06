@@ -42,7 +42,7 @@ struct CategoryManagerView: View {
                 Section {
                     HStack {
                         Image(systemName: "star.fill")
-                            .foregroundColor(.appGold)
+                            .foregroundColor(.appAccent)
                             .frame(width: 24)
                         
                         Text("Favorites")
@@ -83,7 +83,7 @@ struct CategoryManagerView: View {
                                 // Editing mode
                                 HStack {
                                     Image(systemName: "folder.fill")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.secondary)
                                         .frame(width: 24)
                                     
                                     TextField("Category name", text: $editedName)
@@ -106,7 +106,7 @@ struct CategoryManagerView: View {
                                 // Display mode
                                 HStack {
                                     Image(systemName: "folder.fill")
-                                        .foregroundColor(.blue)
+                                        .foregroundColor(.secondary)
                                         .frame(width: 24)
                                     
                                     Text(category)
@@ -133,6 +133,7 @@ struct CategoryManagerView: View {
                                         showingDeleteAlert = true
                                     } label: {
                                         Label("Delete", systemImage: "trash")
+                                            .foregroundColor(.red)
                                     }
                                 }
                                 .swipeActions(edge: .trailing) {
@@ -142,6 +143,7 @@ struct CategoryManagerView: View {
                                     } label: {
                                         Label("Delete", systemImage: "trash")
                                     }
+                                    .tint(.red)
                                     
                                     Button {
                                         editingCategory = category
@@ -149,7 +151,7 @@ struct CategoryManagerView: View {
                                     } label: {
                                         Label("Rename", systemImage: "pencil")
                                     }
-                                    .tint(.orange)
+                                    .tint(.appAccent)
                                 }
                             }
                         }

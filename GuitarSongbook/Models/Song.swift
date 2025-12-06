@@ -52,6 +52,40 @@ struct Song: Identifiable, Codable, Equatable {
         self.categories = categories
     }
     
+    // MARK: - Custom Decoding for Data Migration
+    // Handles old data that might be missing newer fields
+    
+    enum CodingKeys: String, CodingKey {
+        case id, title, artist, chords, capoPosition, dateAdded
+        case spotifyUrl, tabUrl, albumCoverUrl, notes, createdAt
+        case isFavorite, categories
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        // Required fields
+        id = try container.decode(UUID.self, forKey: .id)
+        title = try container.decode(String.self, forKey: .title)
+        artist = try container.decode(String.self, forKey: .artist)
+        
+        // Fields with defaults for backwards compatibility
+        chords = try container.decodeIfPresent([String].self, forKey: .chords) ?? []
+        capoPosition = try container.decodeIfPresent(Int.self, forKey: .capoPosition) ?? 0
+        dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
+        
+        // Optional fields
+        spotifyUrl = try container.decodeIfPresent(String.self, forKey: .spotifyUrl)
+        tabUrl = try container.decodeIfPresent(String.self, forKey: .tabUrl)
+        albumCoverUrl = try container.decodeIfPresent(String.self, forKey: .albumCoverUrl)
+        notes = try container.decodeIfPresent(String.self, forKey: .notes)
+        
+        // Newer fields - provide defaults if missing
+        createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? dateAdded
+        isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
+        categories = try container.decodeIfPresent([String].self, forKey: .categories) ?? []
+    }
+    
     var capoDisplayText: String {
         if capoPosition == 0 {
             return "No Capo"
