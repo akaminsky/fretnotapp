@@ -15,7 +15,7 @@ struct GuitarSongbookApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainTabView()
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
                 .environmentObject(tabURLDetector)

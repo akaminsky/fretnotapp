@@ -193,7 +193,7 @@ struct SongDetailView: View {
             }
             
             // Categories
-            PropertyRow(label: "Categories", icon: "folder") {
+            PropertyRow(label: "Lists", icon: "folder") {
                 HStack(spacing: 6) {
                     if liveSong.isFavorite {
                         HStack(spacing: 4) {
@@ -268,14 +268,28 @@ struct SongDetailView: View {
             // Tabs
             PropertyRow(label: "Tabs", icon: "doc.text") {
                 if let tabUrl = liveSong.tabUrl, let url = URL(string: tabUrl) {
-                    Link(destination: url) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundColor(.appAccentText)
-                            Text("Saved")
-                                .foregroundColor(.appAccentText)
+                    HStack(spacing: 12) {
+                        Link(destination: url) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundColor(.appAccentText)
+                                Text("Saved")
+                                    .foregroundColor(.appAccentText)
+                            }
                         }
+                        
+                        // Remove tab link button
+                        Button {
+                            var updatedSong = liveSong
+                            updatedSong.tabUrl = nil
+                            songStore.updateSong(updatedSong)
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
+                        .buttonStyle(.plain)
                     }
                 } else {
                     Button {
@@ -508,10 +522,10 @@ struct CategoryPickerView: View {
                         }
                     }
                 } header: {
-                    Text("Categories")
+                    Text("Lists")
                 }
             }
-            .navigationTitle("Add to Category")
+            .navigationTitle("Add to List")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -650,6 +664,9 @@ struct SpotifyLinkSheet: View {
                     }
                 }
             }
+            .onTapGesture {
+                hideKeyboard()
+            }
             .navigationTitle("Link to Spotify")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -667,6 +684,10 @@ struct SpotifyLinkSheet: View {
             }
         }
         .presentationDetents([.medium, .large])
+    }
+    
+    private func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
     
     private func searchSpotify() {

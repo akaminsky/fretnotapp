@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class SpotifyService: ObservableObject {
     @Published var isConnected = false
     @Published var isSearching = false
@@ -25,7 +26,6 @@ class SpotifyService: ObservableObject {
     
     // MARK: - Authentication
     
-    @MainActor
     func authenticate() async {
         guard let url = URL(string: "https://accounts.spotify.com/api/token") else { return }
         
@@ -56,7 +56,6 @@ class SpotifyService: ObservableObject {
     
     // MARK: - Search
     
-    @MainActor
     func search(query: String) async {
         guard !query.isEmpty else {
             searchResults = []

@@ -66,6 +66,10 @@ struct AddSongView: View {
             }
             .padding()
         }
+        .scrollDismissesKeyboard(.interactively)
+        .onTapGesture {
+            hideKeyboard()
+        }
         .background(Color(.systemGroupedBackground))
         .navigationTitle(isEditing ? "Edit Song" : "Add Song")
         .navigationBarTitleDisplayMode(.inline)
@@ -439,7 +443,7 @@ struct AddSongView: View {
             }
             
             // Categories
-            FormSection(title: "Categories") {
+            FormSection(title: "Lists") {
                 VStack(alignment: .leading, spacing: 12) {
                     // Favorites toggle
                     Button {
@@ -493,11 +497,11 @@ struct AddSongView: View {
                         }
                     }
                     
-                    // Add new category inline
+                    // Add new list inline
                     HStack {
                         Image(systemName: "plus.circle")
                             .foregroundColor(.secondary)
-                        TextField("Create new category...", text: $newCategoryName)
+                        TextField("Create new list...", text: $newCategoryName)
                         
                         if !newCategoryName.isEmpty {
                             Button {
@@ -526,6 +530,34 @@ struct AddSongView: View {
                     .padding(12)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
+            }
+            
+            // Tab URL (optional)
+            FormSection(title: "Tab Link (Optional)") {
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Tab URL")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                    
+                    HStack {
+                        TextField("https://ultimate-guitar.com/...", text: $tabUrl)
+                        
+                        if !tabUrl.isEmpty {
+                            Button {
+                                tabUrl = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(Color(.tertiaryLabel))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding(12)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                }
             }
             
             // Notes (optional)
@@ -853,6 +885,9 @@ struct SpotifyLinkSheetForEdit: View {
                     }
                 }
             }
+            .onTapGesture {
+                hideKeyboard()
+            }
             .navigationTitle("Link to Spotify")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -878,6 +913,14 @@ struct SpotifyLinkSheetForEdit: View {
         Task {
             await spotifyService.search(query: searchQuery)
         }
+    }
+}
+
+// MARK: - Keyboard Dismissal
+
+extension View {
+    func hideKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
     }
 }
 

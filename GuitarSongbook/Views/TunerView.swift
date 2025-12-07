@@ -9,7 +9,6 @@ import SwiftUI
 
 struct TunerView: View {
     @StateObject private var pitchDetector = AudioPitchDetector()
-    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         NavigationStack {
@@ -53,14 +52,6 @@ struct TunerView: View {
             }
             .navigationTitle("Tuner")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        pitchDetector.stopListening()
-                        dismiss()
-                    }
-                }
-            }
         }
         .onDisappear {
             pitchDetector.stopListening()

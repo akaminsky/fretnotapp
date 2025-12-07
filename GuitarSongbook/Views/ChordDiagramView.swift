@@ -16,8 +16,8 @@ struct ChordDiagramView: View {
     var body: some View {
         VStack(spacing: 4) {
             Text(chordName)
-                .font(.subheadline)
-                .fontWeight(.semibold)
+                .font(.title3)
+                .fontWeight(.bold)
             
             if let chordData = chordLibrary.findChord(chordName) {
                 Text(chordData.name)

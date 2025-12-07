@@ -14,8 +14,6 @@ struct ContentView: View {
     @State private var showingAddSong = false
     @State private var selectedSong: Song?
     @State private var songToEdit: Song?
-    @State private var showingCategoryManager = false
-    @State private var showingTuner = false
     
     var body: some View {
         NavigationStack {
@@ -52,25 +50,6 @@ struct ContentView: View {
             }
             .navigationTitle("Never Fret")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        showingTuner = true
-                    } label: {
-                        Image(systemName: "tuningfork")
-                            .foregroundColor(.appAccent)
-                    }
-                }
-                
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showingCategoryManager = true
-                    } label: {
-                        Image(systemName: "folder.badge.gearshape")
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
         }
         .sheet(isPresented: $showingAddSong) {
             NavigationStack {
@@ -90,13 +69,6 @@ struct ContentView: View {
             SongDetailView(song: song)
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
-        }
-        .sheet(isPresented: $showingCategoryManager) {
-            CategoryManagerView()
-                .environmentObject(songStore)
-        }
-        .sheet(isPresented: $showingTuner) {
-            TunerView()
         }
     }
     

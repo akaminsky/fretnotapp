@@ -98,6 +98,7 @@ class TabURLDetector: ObservableObject {
         lastCheckedURL = nil // Reset so we can detect new URLs
     }
     
+    @MainActor
     func stopWatching() {
         pendingSongId = nil
         detectedURL = nil
@@ -105,6 +106,7 @@ class TabURLDetector: ObservableObject {
         showingSavePrompt = false
     }
     
+    @MainActor
     func clearDetection() {
         detectedURL = nil
         detectedSiteName = nil

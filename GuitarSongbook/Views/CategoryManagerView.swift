@@ -15,6 +15,7 @@ struct CategoryManagerView: View {
     @State private var editingCategory: String? = nil
     @State private var editedName = ""
     @State private var showingDeleteAlert = false
+    @State private var showingFavoritesAlert = false
     @State private var categoryToDelete: String? = nil
     
     var body: some View {
@@ -23,7 +24,7 @@ struct CategoryManagerView: View {
                 // Add new category section
                 Section {
                     HStack {
-                        TextField("New category name...", text: $newCategoryName)
+                        TextField("New list name...", text: $newCategoryName)
                         
                         Button {
                             addCategory()
@@ -35,11 +36,12 @@ struct CategoryManagerView: View {
                         .disabled(newCategoryName.isEmpty)
                     }
                 } header: {
-                    Text("Create Category")
+                    Text("Create List")
                 }
                 
-                // Favorites (built-in, can't delete)
+                // All categories (Favorites + Custom)
                 Section {
+                    // Favorites row
                     HStack {
                         Image(systemName: "star.fill")
                             .foregroundColor(.appAccent)
@@ -55,116 +57,120 @@ struct CategoryManagerView: View {
                             .foregroundColor(.secondary)
                     }
                     .padding(.vertical, 4)
-                } header: {
-                    Text("Built-in")
-                } footer: {
-                    Text("Favorites cannot be deleted or renamed")
-                }
-                
-                // Custom categories
-                Section {
-                    if songStore.categories.isEmpty {
-                        HStack {
-                            Spacer()
-                            VStack(spacing: 8) {
-                                Image(systemName: "folder")
-                                    .font(.title)
+                    .swipeActions(edge: .trailing) {
+                        Button {
+                            showingFavoritesAlert = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .tint(.red)
+                        
+                        Button {
+                            showingFavoritesAlert = true
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        .tint(.appAccent)
+                    }
+                    .contextMenu {
+                        Button {
+                            showingFavoritesAlert = true
+                        } label: {
+                            Label("Rename", systemImage: "pencil")
+                        }
+                        
+                        Button(role: .destructive) {
+                            showingFavoritesAlert = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
+                    
+                    // Custom categories
+                    ForEach(songStore.categories, id: \.self) { category in
+                        if editingCategory == category {
+                            // Editing mode
+                            HStack {
+                                Image(systemName: "folder.fill")
                                     .foregroundColor(.secondary)
-                                Text("No custom categories yet")
+                                    .frame(width: 24)
+                                
+                                TextField("List name", text: $editedName)
+                                    .textFieldStyle(.roundedBorder)
+                                
+                                Button("Save") {
+                                    saveEdit(oldName: category)
+                                }
+                                .buttonStyle(.borderedProminent)
+                                .tint(.appAccent)
+                                
+                                Button {
+                                    editingCategory = nil
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        } else {
+                            // Display mode
+                            HStack {
+                                Image(systemName: "folder.fill")
+                                    .foregroundColor(.secondary)
+                                    .frame(width: 24)
+                                
+                                Text(category)
+                                    .fontWeight(.medium)
+                                
+                                Spacer()
+                                
+                                Text("\(songStore.songsInCategory(category)) songs")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
-                            .padding(.vertical, 20)
-                            Spacer()
-                        }
-                    } else {
-                        ForEach(songStore.categories, id: \.self) { category in
-                            if editingCategory == category {
-                                // Editing mode
-                                HStack {
-                                    Image(systemName: "folder.fill")
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 24)
-                                    
-                                    TextField("Category name", text: $editedName)
-                                        .textFieldStyle(.roundedBorder)
-                                    
-                                    Button("Save") {
-                                        saveEdit(oldName: category)
-                                    }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.appAccent)
-                                    
-                                    Button {
-                                        editingCategory = nil
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(.secondary)
-                                    }
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
+                            .contextMenu {
+                                Button {
+                                    editingCategory = category
+                                    editedName = category
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
                                 }
-                            } else {
-                                // Display mode
-                                HStack {
-                                    Image(systemName: "folder.fill")
-                                        .foregroundColor(.secondary)
-                                        .frame(width: 24)
-                                    
-                                    Text(category)
-                                        .fontWeight(.medium)
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(songStore.songsInCategory(category)) songs")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
+                                
+                                Button(role: .destructive) {
+                                    categoryToDelete = category
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                        .foregroundColor(.red)
                                 }
-                                .padding(.vertical, 4)
-                                .contentShape(Rectangle())
-                                .contextMenu {
-                                    Button {
-                                        editingCategory = category
-                                        editedName = category
-                                    } label: {
-                                        Label("Rename", systemImage: "pencil")
-                                    }
-                                    
-                                    Button(role: .destructive) {
-                                        categoryToDelete = category
-                                        showingDeleteAlert = true
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                            .foregroundColor(.red)
-                                    }
+                            }
+                            .swipeActions(edge: .trailing) {
+                                Button(role: .destructive) {
+                                    categoryToDelete = category
+                                    showingDeleteAlert = true
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
                                 }
-                                .swipeActions(edge: .trailing) {
-                                    Button(role: .destructive) {
-                                        categoryToDelete = category
-                                        showingDeleteAlert = true
-                                    } label: {
-                                        Label("Delete", systemImage: "trash")
-                                    }
-                                    .tint(.red)
-                                    
-                                    Button {
-                                        editingCategory = category
-                                        editedName = category
-                                    } label: {
-                                        Label("Rename", systemImage: "pencil")
-                                    }
-                                    .tint(.appAccent)
+                                .tint(.red)
+                                
+                                Button {
+                                    editingCategory = category
+                                    editedName = category
+                                } label: {
+                                    Label("Rename", systemImage: "pencil")
                                 }
+                                .tint(.appAccent)
                             }
                         }
                     }
                 } header: {
-                    Text("Custom Categories")
+                    Text("Lists")
                 } footer: {
-                    if !songStore.categories.isEmpty {
-                        Text("Swipe left to edit or delete. Long press for more options.")
-                    }
+                    Text("Swipe left to edit or delete lists.")
                 }
             }
-            .navigationTitle("Categories")
+            .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
@@ -173,7 +179,7 @@ struct CategoryManagerView: View {
                     }
                 }
             }
-            .alert("Delete Category", isPresented: $showingDeleteAlert) {
+            .alert("Delete List", isPresented: $showingDeleteAlert) {
                 Button("Cancel", role: .cancel) {
                     categoryToDelete = nil
                 }
@@ -185,8 +191,13 @@ struct CategoryManagerView: View {
                 }
             } message: {
                 if let category = categoryToDelete {
-                    Text("Are you sure you want to delete \"\(category)\"? Songs will not be deleted, but they will be removed from this category.")
+                    Text("Are you sure you want to delete \"\(category)\"? Songs will not be deleted, but they will be removed from this list.")
                 }
+            }
+            .alert("Favorites", isPresented: $showingFavoritesAlert) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Favorites cannot be deleted or renamed.")
             }
         }
     }
@@ -208,4 +219,3 @@ struct CategoryManagerView: View {
     CategoryManagerView()
         .environmentObject(SongStore())
 }
-
