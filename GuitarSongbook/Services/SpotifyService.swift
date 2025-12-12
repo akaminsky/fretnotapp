@@ -16,12 +16,13 @@ class SpotifyService: ObservableObject {
     
     private var accessToken: String?
     
-    // TODO: Replace with your Netlify site URL after deployment
-    // Example: "https://your-site-name.netlify.app"
+    // Your Netlify site URL (use .netlify.app domain or your custom domain)
+    // If you set up a custom domain in Netlify, you can use that instead
     private let netlifyBaseURL = "https://fretnot.netlify.app"
     
     private var useNetlify: Bool {
-        return !netlifyBaseURL.contains("https://fretnot.netlify.app") && !netlifyBaseURL.isEmpty
+        // Use Netlify if URL is set and looks valid
+        return !netlifyBaseURL.isEmpty && netlifyBaseURL.hasPrefix("https://")
     }
     
     init() {

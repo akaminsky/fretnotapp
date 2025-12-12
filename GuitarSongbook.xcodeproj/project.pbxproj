@@ -366,9 +366,9 @@
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Never Fret";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fret Not";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Never Fret needs microphone access to detect the pitch of your guitar strings for tuning.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Fret Not needs microphone access to detect the pitch of your guitar strings for tuning.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -400,9 +400,9 @@
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = "Never Fret";
+				INFOPLIST_KEY_CFBundleDisplayName = "Fret Not";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Never Fret needs microphone access to detect the pitch of your guitar strings for tuning.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Fret Not needs microphone access to detect the pitch of your guitar strings for tuning.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

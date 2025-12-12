@@ -153,7 +153,7 @@ struct ContentView: View {
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                 } else {
-                    Text("Never Fret")
+                    Text("Fret Not")
                         .font(.title2)
                         .fontWeight(.semibold)
                     

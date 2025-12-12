@@ -191,12 +191,12 @@ struct SettingsView: View {
                 } header: {
                     Text("Feedback")
                 } footer: {
-                    Text("Help us make Never Fret better!")
+                        Text("Help us make Fret Not better!")
                 }
                 
                 // About Section
                 Section {
-                    Link(destination: URL(string: "https://neverfret.app")!) {
+                    Link(destination: URL(string: "http://fretnot.app")!) {
                         HStack {
                             Image(systemName: "globe")
                                 .foregroundColor(.appAccent)
@@ -207,7 +207,7 @@ struct SettingsView: View {
                             
                             Spacer()
                             
-                            Text("neverfret.app")
+                            Text("fretnot.app")
                                 .foregroundColor(.secondary)
                             
                             Image(systemName: "arrow.up.right")

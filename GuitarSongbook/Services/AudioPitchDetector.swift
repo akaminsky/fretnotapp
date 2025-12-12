@@ -79,7 +79,7 @@ class AudioPitchDetector: ObservableObject {
         
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.record, mode: .measurement, options: [.allowBluetooth])
+            try session.setCategory(.record, mode: .measurement, options: [.allowBluetoothHFP])
             try session.setPreferredSampleRate(44100)
             try session.setPreferredIOBufferDuration(0.01) // Lower latency
             try session.setActive(true)
