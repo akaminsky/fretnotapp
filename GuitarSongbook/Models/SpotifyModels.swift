@@ -75,3 +75,20 @@ struct SpotifyTokenResponse: Codable {
     }
 }
 
+// MARK: - Playlist Models
+
+struct SpotifyPlaylistResponse: Codable {
+    let items: [SpotifyPlaylistItem]
+    let next: String?
+    let total: Int
+}
+
+struct SpotifyPlaylistItem: Codable {
+    let track: SpotifyTrack?
+}
+
+struct SpotifyPlaylistInfo: Codable {
+    let name: String
+    let description: String?
+}
+

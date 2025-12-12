@@ -19,8 +19,10 @@ class AudioPitchDetector: ObservableObject {
     
     private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
-    private let sampleRate: Float = 44100
-    private let bufferSize: AVAudioFrameCount = 4096
+    private var actualSampleRate: Float = 44100 // Will be set from actual audio format
+    private let bufferSize: AVAudioFrameCount = 8192 // Increased for better frequency resolution
+    private var frequencyHistory: [Float] = [] // For smoothing
+    private let historySize = 5
     
     // Standard guitar tuning frequencies
     static let guitarStrings: [GuitarString] = [
@@ -77,7 +79,9 @@ class AudioPitchDetector: ObservableObject {
         
         do {
             let session = AVAudioSession.sharedInstance()
-            try session.setCategory(.playAndRecord, mode: .measurement, options: [.defaultToSpeaker, .allowBluetooth])
+            try session.setCategory(.record, mode: .measurement, options: [.allowBluetooth])
+            try session.setPreferredSampleRate(44100)
+            try session.setPreferredIOBufferDuration(0.01) // Lower latency
             try session.setActive(true)
             
             audioEngine = AVAudioEngine()
@@ -87,6 +91,7 @@ class AudioPitchDetector: ObservableObject {
             guard let inputNode = inputNode else { return }
             
             let format = inputNode.outputFormat(forBus: 0)
+            actualSampleRate = Float(format.sampleRate) // Use actual device sample rate
             
             inputNode.installTap(onBus: 0, bufferSize: bufferSize, format: format) { [weak self] buffer, _ in
                 self?.processAudioBuffer(buffer)
@@ -111,6 +116,7 @@ class AudioPitchDetector: ObservableObject {
             self.currentFrequency = 0
             self.currentNote = "-"
             self.centsOff = 0
+            self.frequencyHistory = []
         }
     }
     
@@ -118,65 +124,143 @@ class AudioPitchDetector: ObservableObject {
         guard let channelData = buffer.floatChannelData?[0] else { return }
         let frameLength = Int(buffer.frameLength)
         
-        // Check if there's enough signal
-        var rms: Float = 0
-        vDSP_rmsqv(channelData, 1, &rms, vDSP_Length(frameLength))
+        // Apply windowing to reduce spectral leakage
+        var windowedData = [Float](repeating: 0, count: frameLength)
+        vDSP_hann_window(&windowedData, vDSP_Length(frameLength), Int32(vDSP_HANN_NORM))
         
-        // Threshold to ignore silence/noise
-        guard rms > 0.01 else {
+        var processedData = [Float](repeating: 0, count: frameLength)
+        vDSP_vmul(channelData, 1, windowedData, 1, &processedData, 1, vDSP_Length(frameLength))
+        
+        // Check if there's enough signal (lowered threshold for sensitivity)
+        var rms: Float = 0
+        vDSP_rmsqv(processedData, 1, &rms, vDSP_Length(frameLength))
+        
+        // Lower threshold to pick up quieter strings
+        guard rms > 0.003 else {
             DispatchQueue.main.async {
-                self.currentFrequency = 0
-                self.currentNote = "-"
-                self.centsOff = 0
+                if self.currentFrequency > 0 {
+                    // Don't immediately clear, allow some persistence
+                    self.frequencyHistory = []
+                } else {
+                    self.currentFrequency = 0
+                    self.currentNote = "-"
+                    self.centsOff = 0
+                }
             }
             return
         }
         
-        // Detect pitch using autocorrelation
-        let frequency = detectPitch(data: channelData, count: frameLength)
+        // Detect pitch using improved autocorrelation
+        let rawFrequency = detectPitchImproved(data: processedData, count: frameLength)
         
-        guard frequency > 50 && frequency < 1000 else { return } // Guitar range
+        guard rawFrequency > 50 && rawFrequency < 1000 else {
+            DispatchQueue.main.async {
+                self.frequencyHistory = []
+            }
+            return
+        }
+        
+        // Add to history for smoothing
+        frequencyHistory.append(rawFrequency)
+        if frequencyHistory.count > historySize {
+            frequencyHistory.removeFirst()
+        }
+        
+        // Calculate smoothed frequency (median filter)
+        let sortedFreqs = frequencyHistory.sorted()
+        let smoothedFrequency: Float
+        if sortedFreqs.count > 0 {
+            let mid = sortedFreqs.count / 2
+            smoothedFrequency = sortedFreqs.count % 2 == 0
+                ? (sortedFreqs[mid - 1] + sortedFreqs[mid]) / 2
+                : sortedFreqs[mid]
+        } else {
+            smoothedFrequency = rawFrequency
+        }
         
         // Find closest note
-        let (note, octave, cents) = findClosestNote(frequency: frequency)
+        let (note, octave, cents) = findClosestNote(frequency: smoothedFrequency)
         
         DispatchQueue.main.async {
-            self.currentFrequency = frequency
+            self.currentFrequency = smoothedFrequency
             self.currentNote = note
             self.currentOctave = octave
             self.centsOff = cents
             
             // Auto-detect which string is being played
             self.targetNote = Self.guitarStrings.min(by: { string1, string2 in
-                abs(string1.frequency - frequency) < abs(string2.frequency - frequency)
+                abs(string1.frequency - smoothedFrequency) < abs(string2.frequency - smoothedFrequency)
             })
         }
     }
     
-    private func detectPitch(data: UnsafeMutablePointer<Float>, count: Int) -> Float {
-        // Autocorrelation-based pitch detection
-        let minPeriod = Int(sampleRate / 500) // Max frequency 500 Hz
-        let maxPeriod = Int(sampleRate / 60)  // Min frequency 60 Hz
+    private func detectPitchImproved(data: [Float], count: Int) -> Float {
+        // Improved autocorrelation with normalization (YIN-like approach)
+        let minPeriod = Int(actualSampleRate / 1000.0) // Max frequency ~1000 Hz
+        let maxPeriod = Int(actualSampleRate / 60.0)   // Min frequency ~60 Hz
         
-        var maxCorrelation: Float = 0
-        var bestPeriod = 0
+        guard maxPeriod < count / 2 else { return 0 }
         
-        for period in minPeriod..<min(maxPeriod, count / 2) {
+        var maxCorrelation: Float = -Float.infinity
+        var bestPeriod = minPeriod
+        
+        // Calculate autocorrelation for each possible period
+        for period in minPeriod..<maxPeriod {
             var correlation: Float = 0
+            var normalization: Float = 0
             
+            // Calculate normalized autocorrelation
             for i in 0..<(count - period) {
                 correlation += data[i] * data[i + period]
+                normalization += data[i] * data[i]
             }
             
-            if correlation > maxCorrelation {
-                maxCorrelation = correlation
-                bestPeriod = period
+            // Normalize by the energy to avoid bias toward longer periods
+            if normalization > 0 {
+                let normalizedCorrelation = correlation / sqrt(normalization)
+                
+                if normalizedCorrelation > maxCorrelation {
+                    maxCorrelation = normalizedCorrelation
+                    bestPeriod = period
+                }
             }
         }
         
-        guard bestPeriod > 0 else { return 0 }
+        // Require a minimum correlation threshold (lowered for better sensitivity)
+        guard maxCorrelation > 0.15 else { return 0 }
         
-        return sampleRate / Float(bestPeriod)
+        // Refine the period estimate using parabolic interpolation
+        if bestPeriod > minPeriod && bestPeriod < maxPeriod - 1 {
+            let prevPeriod = bestPeriod - 1
+            let nextPeriod = bestPeriod + 1
+            
+            var prevCorr: Float = 0
+            var nextCorr: Float = 0
+            var prevNorm: Float = 0
+            var nextNorm: Float = 0
+            
+            for i in 0..<(count - prevPeriod) {
+                prevCorr += data[i] * data[i + prevPeriod]
+                prevNorm += data[i] * data[i]
+            }
+            for i in 0..<(count - nextPeriod) {
+                nextCorr += data[i] * data[i + nextPeriod]
+                nextNorm += data[i] * data[i]
+            }
+            
+            let prevNormCorr = prevNorm > 0 ? prevCorr / sqrt(prevNorm) : 0
+            let nextNormCorr = nextNorm > 0 ? nextCorr / sqrt(nextNorm) : 0
+            
+            // Parabolic interpolation for sub-sample accuracy
+            let denom = 2 * (2 * maxCorrelation - prevNormCorr - nextNormCorr)
+            if abs(denom) > 0.001 {
+                let offset = (nextNormCorr - prevNormCorr) / denom
+                let refinedPeriod = Float(bestPeriod) + offset
+                return actualSampleRate / refinedPeriod
+            }
+        }
+        
+        return actualSampleRate / Float(bestPeriod)
     }
     
     private func findClosestNote(frequency: Float) -> (note: String, octave: Int, cents: Float) {

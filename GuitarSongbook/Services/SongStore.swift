@@ -98,7 +98,16 @@ class SongStore: ObservableObject {
         
         // Apply chord filter
         if !filterChord.isEmpty {
-            result = result.filter { $0.chords.contains(filterChord) }
+            if filterChord == "__NO_CHORDS__" {
+                // Filter for songs with no chords
+                result = result.filter { $0.chords.isEmpty }
+            } else if filterChord == "__HAS_CHORDS__" {
+                // Filter for songs that have at least one chord
+                result = result.filter { !$0.chords.isEmpty }
+            } else {
+                // Filter for songs containing the selected chord
+                result = result.filter { $0.chords.contains(filterChord) }
+            }
         }
         
         // Apply capo filter

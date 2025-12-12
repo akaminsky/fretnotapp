@@ -41,6 +41,7 @@ struct AddSongView: View {
     @State private var isFavorite = false
     @State private var selectedCategories: Set<String> = []
     @State private var newCategoryName = ""
+    @State private var showingBulkImport = false
     
     var isEditing: Bool {
         editingSong != nil
@@ -55,7 +56,11 @@ struct AddSongView: View {
                 } else {
                     // Show selected song header or editing header
                     if let track = selectedTrack {
-                        selectedTrackHeader(track)
+                        if track.id == "manual" {
+                            manualEntryHeader
+                        } else {
+                            selectedTrackHeader(track)
+                        }
                     } else if isEditing {
                         editingHeaderWithSpotify
                     }
@@ -90,6 +95,11 @@ struct AddSongView: View {
         }
         .onAppear {
             setupInitialValues()
+        }
+        .sheet(isPresented: $showingBulkImport) {
+            BulkImportView()
+                .environmentObject(songStore)
+                .environmentObject(spotifyService)
         }
         .alert("Delete Song", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
@@ -145,19 +155,32 @@ struct AddSongView: View {
                 }
                 .padding(.top, 20)
                 
-                Button {
-                    // Switch to manual entry
-                    selectedTrack = SpotifyTrack(
-                        id: "manual",
-                        name: "",
-                        artists: [SpotifyArtist(name: "")],
-                        album: SpotifyAlbum(name: "", images: []),
-                        externalUrls: SpotifyExternalUrls(spotify: "")
-                    )
-                } label: {
-                    Text("Add song manually")
+                VStack(spacing: 12) {
+                    Button {
+                        // Switch to manual entry
+                        selectedTrack = SpotifyTrack(
+                            id: "manual",
+                            name: "",
+                            artists: [SpotifyArtist(name: "")],
+                            album: SpotifyAlbum(name: "", images: []),
+                            externalUrls: SpotifyExternalUrls(spotify: "")
+                        )
+                    } label: {
+                        Text("Add song manually")
+                            .font(.subheadline)
+                            .foregroundColor(.appAccentText)
+                    }
+                    
+                    Button {
+                        showingBulkImport = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down")
+                            Text("Import Spotify Playlist")
+                        }
                         .font(.subheadline)
                         .foregroundColor(.appAccentText)
+                    }
                 }
             }
         }
@@ -306,6 +329,109 @@ struct AddSongView: View {
         .cornerRadius(12)
     }
     
+    // MARK: - Manual Entry Header with Spotify Options
+    
+    private var manualEntryHeader: some View {
+        VStack(spacing: 12) {
+            HStack(spacing: 12) {
+                // Album Cover with remove option
+                ZStack(alignment: .topTrailing) {
+                    AsyncImage(url: URL(string: albumCoverUrl ?? "")) { image in
+                        image.resizable().aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color(.systemGray5))
+                            .overlay {
+                                Image(systemName: "music.note")
+                                    .foregroundColor(.gray)
+                            }
+                    }
+                    .frame(width: 70, height: 70)
+                    .cornerRadius(8)
+                    
+                    // Remove album cover button
+                    if albumCoverUrl != nil {
+                        Button {
+                            albumCoverUrl = nil
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(.white)
+                                .background(Circle().fill(Color.black.opacity(0.6)))
+                        }
+                        .offset(x: 6, y: -6)
+                    }
+                }
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Adding manually")
+                        .font(.headline)
+                    Text("Fill in the details below")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+            }
+            
+            // Spotify Link Section
+            if !spotifyUrl.isEmpty {
+                HStack {
+                    Image(systemName: "link")
+                        .foregroundColor(.green)
+                    Text("Linked to Spotify")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    Spacer()
+                    
+                    Button {
+                        spotifyUrl = ""
+                        albumCoverUrl = nil
+                    } label: {
+                        Text("Remove")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(Color.green.opacity(0.1))
+                .cornerRadius(8)
+            } else {
+                Button {
+                    showSpotifySearch = true
+                } label: {
+                    HStack {
+                        Image(systemName: "link.badge.plus")
+                        Text("Link to Spotify")
+                            .font(.subheadline)
+                    }
+                    .foregroundColor(.appAccentText)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(Color.appAccent.opacity(0.12))
+                    .cornerRadius(8)
+                }
+            }
+        }
+        .sheet(isPresented: $showSpotifySearch) {
+            SpotifyLinkSheetForEdit(
+                title: title,
+                artist: artist,
+                onSelect: { track in
+                    spotifyUrl = track.externalUrls.spotify
+                    albumCoverUrl = track.albumCoverUrl
+                    showSpotifySearch = false
+                }
+            )
+            .environmentObject(spotifyService)
+        }
+        .padding()
+        .background(Color(.systemBackground))
+        .cornerRadius(12)
+    }
+    
     // MARK: - Editing Header with Spotify Options
     
     private var editingHeaderWithSpotify: some View {
@@ -417,8 +543,8 @@ struct AddSongView: View {
         VStack(spacing: 16) {
             // Song Details
             FormSection(title: "Song Details") {
-                FormTextField(label: "Song Title", text: $title, placeholder: "Enter song title")
-                FormTextField(label: "Artist", text: $artist, placeholder: "Enter artist name")
+                FormTextField(label: "Song Title *", text: $title, placeholder: "Enter song title")
+                FormTextField(label: "Artist *", text: $artist, placeholder: "Enter artist name")
             }
             
             // Guitar Info
@@ -576,7 +702,9 @@ struct AddSongView: View {
                 } label: {
                     HStack {
                         Image(systemName: "trash")
+                            .foregroundColor(.red)
                         Text("Delete Song")
+                            .foregroundColor(.red)
                     }
                     .frame(maxWidth: .infinity)
                     .padding()

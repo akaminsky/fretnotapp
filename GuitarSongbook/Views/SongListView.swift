@@ -43,6 +43,7 @@ struct SongListView: View {
                                 songStore.deleteSong(song)
                             } label: {
                                 Label("Delete", systemImage: "trash")
+                                    .foregroundColor(.red)
                             }
                         }
                     

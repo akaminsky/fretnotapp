@@ -21,11 +21,17 @@ struct ChordLogView: View {
     
     var body: some View {
         NavigationStack {
-            Group {
-                if songStore.allUniqueChords.isEmpty {
-                    emptyState
-                } else {
-                    chordGrid
+            ZStack {
+                // Background
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                
+                Group {
+                    if songStore.allUniqueChords.isEmpty {
+                        emptyState
+                    } else {
+                        chordGrid
+                    }
                 }
             }
             .navigationTitle("Chord Log")
@@ -113,7 +119,6 @@ struct ChordLogView: View {
             }
             .padding()
         }
-        .background(Color(.systemGroupedBackground))
     }
     
     private func songsWithChord(_ chord: String) -> Int {
@@ -131,7 +136,6 @@ struct ChordCard: View {
         // Chord diagram (includes chord name at top)
         ChordDiagramView(chordName: chord)
             .frame(maxWidth: .infinity)
-            .frame(height: 140)
             .background(Color(.systemBackground))
             .cornerRadius(12)
     }

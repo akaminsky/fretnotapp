@@ -48,7 +48,7 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Never Fret")
+            .navigationTitle("Songs")
             .navigationBarTitleDisplayMode(.large)
         }
         .sheet(isPresented: $showingAddSong) {
@@ -252,6 +252,10 @@ struct ContentView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .animation(nil, value: songStore.filterChord)
+            .animation(nil, value: songStore.filterCapo)
+            .animation(nil, value: songStore.filterCategory)
+            .animation(nil, value: songStore.searchText)
         }
         .background(Color(.systemGroupedBackground))
     }
@@ -333,13 +337,33 @@ struct SongCard: View {
             // Main Card Content
             mainCardContent
             
-            // Chords Section
+            // Chords Section or Add Chords Button
             if !song.chords.isEmpty && showChords {
                 VStack(spacing: 0) {
                     Divider()
                         .padding(.horizontal, 14)
                     
                     chordContent
+                }
+            } else if song.chords.isEmpty {
+                VStack(spacing: 0) {
+                    Divider()
+                        .padding(.horizontal, 14)
+                    
+                    Button {
+                        onEdit()
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.appAccent)
+                            Text("Add Chords")
+                                .foregroundColor(.appAccent)
+                                .fontWeight(.medium)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 16)
+                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
@@ -448,8 +472,9 @@ struct SongCard: View {
                     onDelete()
                 } label: {
                     Label("Delete", systemImage: "trash")
-                        .foregroundColor(.red)
                 }
+                .buttonStyle(.plain)
+                .tint(.red)
             } label: {
                 Image(systemName: "ellipsis")
                     .font(.body)

@@ -15,8 +15,14 @@ class SpotifyService: ObservableObject {
     @Published var errorMessage: String?
     
     private var accessToken: String?
-    private let clientId = "b43e82c8141440d3b47fd8f5456a2015"
-    private let clientSecret = "59ca8582f8c2434494e1f41efee70166"
+    
+    // TODO: Replace with your Netlify site URL after deployment
+    // Example: "https://your-site-name.netlify.app"
+    private let netlifyBaseURL = "YOUR_NETLIFY_SITE_URL_HERE"
+    
+    private var useNetlify: Bool {
+        return !netlifyBaseURL.contains("YOUR_NETLIFY_SITE_URL_HERE") && !netlifyBaseURL.isEmpty
+    }
     
     init() {
         Task {
@@ -27,30 +33,48 @@ class SpotifyService: ObservableObject {
     // MARK: - Authentication
     
     func authenticate() async {
-        guard let url = URL(string: "https://accounts.spotify.com/api/token") else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
-        
-        let body = "grant_type=client_credentials&client_id=\(clientId)&client_secret=\(clientSecret)"
-        request.httpBody = body.data(using: .utf8)
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
+        if useNetlify {
+            // Use Netlify function for authentication
+            guard let url = URL(string: "\(netlifyBaseURL)/.netlify/functions/spotify-token") else {
+                print("❌ Spotify: Invalid Netlify URL")
                 isConnected = false
                 return
             }
             
-            let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
-            accessToken = tokenResponse.accessToken
-            isConnected = true
-        } catch {
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("❌ Spotify: Invalid response")
+                    isConnected = false
+                    return
+                }
+                
+                if httpResponse.statusCode == 200 {
+                    let tokenResponse = try JSONDecoder().decode(SpotifyTokenResponse.self, from: data)
+                    accessToken = tokenResponse.accessToken
+                    isConnected = true
+                    print("✅ Spotify: Authentication successful via Netlify")
+                } else {
+                    if let errorData = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let errorMessage = errorData["error"] as? String {
+                        print("❌ Spotify Auth Error (\(httpResponse.statusCode)): \(errorMessage)")
+                    } else {
+                        print("❌ Spotify Auth Error: Status code \(httpResponse.statusCode)")
+                    }
+                    isConnected = false
+                }
+            } catch {
+                isConnected = false
+                print("❌ Spotify auth error: \(error.localizedDescription)")
+            }
+        } else {
+            // Fallback: Not using Netlify (for development)
+            print("⚠️ Spotify: Netlify URL not configured, using demo mode")
             isConnected = false
-            print("Spotify auth error: \(error)")
         }
     }
     
@@ -65,42 +89,44 @@ class SpotifyService: ObservableObject {
         isSearching = true
         errorMessage = nil
         
-        // If connected to Spotify, use real API
-        if let token = accessToken {
-            await searchSpotify(query: query, token: token)
+        if useNetlify {
+            // Use Netlify function for search
+            guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+                  let url = URL(string: "\(netlifyBaseURL)/.netlify/functions/spotify-search?q=\(encodedQuery)") else {
+                searchWithDemoData(query: query)
+                isSearching = false
+                return
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200 else {
+                    print("⚠️ Spotify: Search failed, using demo data")
+                    searchWithDemoData(query: query)
+                    isSearching = false
+                    return
+                }
+                
+                let searchResponse = try JSONDecoder().decode(SpotifySearchResponse.self, from: data)
+                searchResults = searchResponse.tracks?.items ?? []
+                isConnected = true
+            } catch {
+                print("Spotify search error: \(error)")
+                searchWithDemoData(query: query)
+            }
         } else {
-            // Fallback to demo data
+            // Fallback to demo data if Netlify not configured
+            print("⚠️ Spotify: Using demo data (Netlify not configured)")
+            errorMessage = "Spotify search unavailable. Showing sample results."
             searchWithDemoData(query: query)
         }
         
         isSearching = false
-    }
-    
-    private func searchSpotify(query: String, token: String) async {
-        guard let encodedQuery = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = URL(string: "https://api.spotify.com/v1/search?q=\(encodedQuery)&type=track&limit=10") else {
-            searchWithDemoData(query: query)
-            return
-        }
-        
-        var request = URLRequest(url: url)
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        
-        do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200 else {
-                searchWithDemoData(query: query)
-                return
-            }
-            
-            let searchResponse = try JSONDecoder().decode(SpotifySearchResponse.self, from: data)
-            searchResults = searchResponse.tracks?.items ?? []
-        } catch {
-            print("Spotify search error: \(error)")
-            searchWithDemoData(query: query)
-        }
     }
     
     private func searchWithDemoData(query: String) {
@@ -129,6 +155,75 @@ class SpotifyService: ObservableObject {
     
     func clearResults() {
         searchResults = []
+    }
+    
+    // MARK: - Playlist Import
+    
+    func fetchPlaylistTracks(playlistURL: String) async -> [SpotifyTrack] {
+        // Extract playlist ID from URL
+        guard let playlistId = extractPlaylistId(from: playlistURL) else {
+            print("❌ Spotify: Could not extract playlist ID from URL")
+            return []
+        }
+        
+        if useNetlify {
+            // Use Netlify function for playlist fetching
+            guard let url = URL(string: "\(netlifyBaseURL)/.netlify/functions/spotify-playlist?id=\(playlistId)") else {
+                print("❌ Spotify: Invalid Netlify URL for playlist")
+                return []
+            }
+            
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+            
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+                
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200 else {
+                    print("❌ Spotify: Failed to fetch playlist")
+                    return []
+                }
+                
+                let playlistResponse = try JSONDecoder().decode(SpotifyPlaylistResponse.self, from: data)
+                
+                // Extract valid tracks
+                let validTracks = playlistResponse.items.compactMap { $0.track }
+                return validTracks
+            } catch {
+                print("Error fetching playlist: \(error)")
+                return []
+            }
+        } else {
+            print("❌ Spotify: Cannot fetch playlist (Netlify not configured)")
+            return []
+        }
+    }
+    
+    private func extractPlaylistId(from urlString: String) -> String? {
+        // Handle spotify:playlist: format
+        if urlString.hasPrefix("spotify:playlist:") {
+            return String(urlString.dropFirst(17))
+        }
+        
+        // Handle https://open.spotify.com/playlist/{id}
+        if let url = URL(string: urlString),
+           url.host?.contains("spotify.com") == true {
+            let pathComponents = url.pathComponents
+            if let playlistIndex = pathComponents.firstIndex(of: "playlist"),
+               playlistIndex + 1 < pathComponents.count {
+                // Get the ID and remove query parameters
+                let idWithParams = pathComponents[playlistIndex + 1]
+                return idWithParams.components(separatedBy: "?").first
+            }
+        }
+        
+        // If it's just an ID
+        if !urlString.contains("/") && !urlString.contains(":") {
+            return urlString
+        }
+        
+        return nil
     }
     
     // MARK: - Demo Data

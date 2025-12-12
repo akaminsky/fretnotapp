@@ -46,7 +46,9 @@ struct MainTabView: View {
 
 struct SettingsView: View {
     @EnvironmentObject var songStore: SongStore
+    @EnvironmentObject var spotifyService: SpotifyService
     @State private var showingCategoryManager = false
+    @State private var showingBulkImport = false
     
     var body: some View {
         NavigationStack {
@@ -74,6 +76,25 @@ struct SettingsView: View {
                                 .foregroundColor(Color(.tertiaryLabel))
                         }
                     }
+                    
+                    Button {
+                        showingBulkImport = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "square.and.arrow.down")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+                            
+                            Text("Import Playlist")
+                                .foregroundColor(.primary)
+                            
+                            Spacer()
+                            
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
+                    }
                 } header: {
                     Text("Library")
                 }
@@ -91,6 +112,7 @@ struct SettingsView: View {
                         
                         Text("\(songStore.songs.count)")
                             .foregroundColor(.secondary)
+                            .padding(.trailing, 3)
                     }
                     
                     HStack {
@@ -104,6 +126,7 @@ struct SettingsView: View {
                         
                         Text("\(songStore.favoritesCount)")
                             .foregroundColor(.secondary)
+                            .padding(.trailing, 3)
                     }
                     
                     HStack {
@@ -117,6 +140,7 @@ struct SettingsView: View {
                         
                         Text("\(songStore.allUniqueChords.count)")
                             .foregroundColor(.secondary)
+                            .padding(.trailing, 3)
                     }
                 } header: {
                     Text("Stats")
@@ -229,6 +253,11 @@ struct SettingsView: View {
             .sheet(isPresented: $showingCategoryManager) {
                 CategoryManagerView()
                     .environmentObject(songStore)
+            }
+            .sheet(isPresented: $showingBulkImport) {
+                BulkImportView()
+                    .environmentObject(songStore)
+                    .environmentObject(spotifyService)
             }
         }
     }

@@ -122,15 +122,24 @@ struct FilterControlsView: View {
                                 songStore.filterChord = ""
                             }
                             Divider()
-                            ForEach(songStore.allUniqueChords, id: \.self) { chord in
-                                Button(chord) {
-                                    songStore.filterChord = chord
+                            Button("Has Chords") {
+                                songStore.filterChord = "__HAS_CHORDS__"
+                            }
+                            Button("No Chords") {
+                                songStore.filterChord = "__NO_CHORDS__"
+                            }
+                            if !songStore.allUniqueChords.isEmpty {
+                                Divider()
+                                ForEach(songStore.allUniqueChords, id: \.self) { chord in
+                                    Button(chord) {
+                                        songStore.filterChord = chord
+                                    }
                                 }
                             }
                         } label: {
                             FilterPill(
                                 label: "Chord",
-                                value: songStore.filterChord.isEmpty ? nil : songStore.filterChord
+                                value: songStore.filterChord.isEmpty ? nil : getChordFilterDisplayValue(songStore.filterChord)
                             )
                         }
                         
@@ -178,7 +187,7 @@ struct FilterControlsView: View {
                         if !songStore.filterChord.isEmpty {
                             ActiveFilterChip(
                                 icon: "music.note",
-                                label: songStore.filterChord
+                                label: getChordFilterDisplayValue(songStore.filterChord)
                             ) {
                                 songStore.filterChord = ""
                             }
@@ -220,6 +229,17 @@ struct FilterControlsView: View {
         case 2: return "nd"
         case 3: return "rd"
         default: return "th"
+        }
+    }
+    
+    private func getChordFilterDisplayValue(_ filterValue: String) -> String {
+        switch filterValue {
+        case "__NO_CHORDS__":
+            return "No Chords"
+        case "__HAS_CHORDS__":
+            return "Has Chords"
+        default:
+            return filterValue
         }
     }
 }
