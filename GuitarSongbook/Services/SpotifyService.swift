@@ -18,10 +18,10 @@ class SpotifyService: ObservableObject {
     
     // TODO: Replace with your Netlify site URL after deployment
     // Example: "https://your-site-name.netlify.app"
-    private let netlifyBaseURL = "YOUR_NETLIFY_SITE_URL_HERE"
+    private let netlifyBaseURL = "https://fretnot.netlify.app"
     
     private var useNetlify: Bool {
-        return !netlifyBaseURL.contains("YOUR_NETLIFY_SITE_URL_HERE") && !netlifyBaseURL.isEmpty
+        return !netlifyBaseURL.contains("https://fretnot.netlify.app") && !netlifyBaseURL.isEmpty
     }
     
     init() {
