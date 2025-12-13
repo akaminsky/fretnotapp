@@ -28,6 +28,7 @@
 		0019 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1019 /* MainTabView.swift */; };
 		0020 /* ChordLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1020 /* ChordLogView.swift */; };
 		0021 /* BulkImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1021 /* BulkImportView.swift */; };
+		0022 /* ChordIdentifierView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1022 /* ChordIdentifierView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		1019 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		1020 /* ChordLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordLogView.swift; sourceTree = "<group>"; };
 		1021 /* BulkImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkImportView.swift; sourceTree = "<group>"; };
+		1022 /* ChordIdentifierView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordIdentifierView.swift; sourceTree = "<group>"; };
 		112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GuitarSongbook.entitlements; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -132,6 +134,7 @@
 				1016 /* TunerView.swift */,
 				1020 /* ChordLogView.swift */,
 				1021 /* BulkImportView.swift */,
+				1022 /* ChordIdentifierView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -225,6 +228,7 @@
 				0019 /* MainTabView.swift in Sources */,
 				0020 /* ChordLogView.swift in Sources */,
 				0021 /* BulkImportView.swift in Sources */,
+				0022 /* ChordIdentifierView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

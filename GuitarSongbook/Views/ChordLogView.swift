@@ -10,7 +10,8 @@ import SwiftUI
 struct ChordLogView: View {
     @EnvironmentObject var songStore: SongStore
     @State private var searchText = ""
-    
+    @State private var showingIdentifier = false
+
     var filteredChords: [String] {
         let allChords = songStore.allUniqueChords
         if searchText.isEmpty {
@@ -18,24 +19,39 @@ struct ChordLogView: View {
         }
         return allChords.filter { $0.lowercased().contains(searchText.lowercased()) }
     }
-    
+
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Background
-                Color(.systemGroupedBackground)
-                    .ignoresSafeArea()
-                
-                Group {
-                    if songStore.allUniqueChords.isEmpty {
-                        emptyState
-                    } else {
-                        chordGrid
-                    }
+            Group {
+                if songStore.allUniqueChords.isEmpty {
+                    emptyState
+                } else {
+                    chordGrid
                 }
             }
             .navigationTitle("Chord Log")
             .searchable(text: $searchText, prompt: "Search chords")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Identify a Chord") {
+                        showingIdentifier = true
+                    }
+                }
+            }
+            .sheet(isPresented: $showingIdentifier) {
+                NavigationStack {
+                    ChordIdentifierView()
+                        .navigationTitle("Identify Chord")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Done") {
+                                    showingIdentifier = false
+                                }
+                            }
+                        }
+                }
+            }
         }
     }
     
