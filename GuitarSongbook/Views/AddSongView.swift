@@ -541,23 +541,25 @@ struct AddSongView: View {
     
     private var formFields: some View {
         VStack(spacing: 16) {
-            // Song Details
-            FormSection(title: "Song Details") {
-                FormTextField(label: "Song Title *", text: $title, placeholder: "Enter song title")
-                FormTextField(label: "Artist *", text: $artist, placeholder: "Enter artist name")
-            }
-            
             // Guitar Info
             FormSection(title: "Guitar Info") {
-                FormTextField(label: "Chords", text: $chords, placeholder: "Am, F, C, G")
-                
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Chords")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+
+                    ChordPillInput(chords: $chords)
+                }
+
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Capo Position")
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                         .textCase(.uppercase)
-                    
+
                     Picker("Capo", selection: $capoPosition) {
                         Text("No Capo").tag(0)
                         ForEach(1...7, id: \.self) { fret in
@@ -565,6 +567,24 @@ struct AddSongView: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                }
+            }
+
+            // Song Details
+            FormSection(title: "Song Details") {
+                VStack(spacing: 12) {
+                    FormTextField(label: "Song Title *", text: $title, placeholder: "Enter song title")
+                    FormTextField(label: "Artist *", text: $artist, placeholder: "Enter artist name")
+
+                    if selectedTrack != nil && selectedTrack?.id != "manual" {
+                        HStack(spacing: 6) {
+                            Image(systemName: "sparkles")
+                                .font(.caption2)
+                            Text("Auto-filled from Spotify • Edit if needed")
+                                .font(.caption)
+                        }
+                        .foregroundColor(.secondary)
+                    }
                 }
             }
             
@@ -1049,6 +1069,221 @@ struct SpotifyLinkSheetForEdit: View {
 extension View {
     func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+// MARK: - Chord Pill Input
+
+struct ChordPillInput: View {
+    @Binding var chords: String
+    @State private var inputText: String = ""
+    @State private var validatedChords: [ValidatedChord] = []
+    @FocusState private var isInputFocused: Bool
+
+    private let chordLibrary = ChordLibrary.shared
+
+    struct ValidatedChord: Identifiable {
+        let id = UUID()
+        let name: String
+        let isValid: Bool
+    }
+
+    private var chordSuggestions: [String] {
+        guard !inputText.isEmpty else { return [] }
+
+        let allChordNames = chordLibrary.allChordNames
+        let searchText = inputText.lowercased()
+
+        return allChordNames
+            .filter { $0.lowercased().starts(with: searchText) }
+            .filter { chordName in !validatedChords.contains(where: { $0.name.lowercased() == chordName.lowercased() }) }
+            .prefix(5)
+            .map { $0 }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Input field
+            HStack {
+                TextField("Type a chord (e.g. C or Am)", text: $inputText)
+                    .textFieldStyle(.plain)
+                    .focused($isInputFocused)
+                    .onSubmit {
+                        addChord()
+                    }
+
+                if !inputText.isEmpty {
+                    Button {
+                        addChord()
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.appAccent)
+                    }
+                }
+            }
+            .padding(12)
+            .background(Color(.systemGray6))
+            .cornerRadius(8)
+
+            // Autocomplete suggestions
+            if !chordSuggestions.isEmpty {
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(chordSuggestions, id: \.self) { suggestion in
+                        Button {
+                            inputText = suggestion
+                            addChord()
+                        } label: {
+                            HStack {
+                                Text(suggestion)
+                                    .font(.subheadline)
+                                    .foregroundColor(.primary)
+                                Spacer()
+                                Image(systemName: "arrow.turn.down.left")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemBackground))
+                        }
+                        .buttonStyle(.plain)
+
+                        if suggestion != chordSuggestions.last {
+                            Divider()
+                                .padding(.leading, 12)
+                        }
+                    }
+                }
+                .background(Color(.systemBackground))
+                .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color(.systemGray4), lineWidth: 1)
+                )
+            }
+
+            // Pills display
+            if !validatedChords.isEmpty {
+                FlowLayout(spacing: 8) {
+                    ForEach(validatedChords) { chord in
+                        ChordPill(
+                            name: chord.name,
+                            isValid: chord.isValid,
+                            onRemove: {
+                                removeChord(chord)
+                            }
+                        )
+                    }
+                }
+            }
+
+            // Validation message
+            if let invalidChord = validatedChords.first(where: { !$0.isValid }) {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption)
+                    Text("\"\(invalidChord.name)\" is not in the chord library")
+                        .font(.caption)
+                }
+                .foregroundColor(.red)
+            }
+
+            // Helper text
+            if validatedChords.isEmpty {
+                Text("Press the add button or hit return to add")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .onAppear {
+            loadExistingChords()
+        }
+    }
+
+    private func loadExistingChords() {
+        guard validatedChords.isEmpty else { return }
+
+        let existingChords = chords
+            .split(whereSeparator: { $0 == "," || $0.isWhitespace })
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        validatedChords = existingChords.map { chordName in
+            ValidatedChord(
+                name: chordName,
+                isValid: chordLibrary.findChord(chordName) != nil
+            )
+        }
+
+        updateBinding()
+    }
+
+    private func addChord() {
+        let newChords = inputText
+            .split(whereSeparator: { $0 == "," || $0.isWhitespace })
+            .map { String($0).trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        for chordName in newChords {
+            // Check if not already added
+            if !validatedChords.contains(where: { $0.name.lowercased() == chordName.lowercased() }) {
+                let isValid = chordLibrary.findChord(chordName) != nil
+                validatedChords.append(ValidatedChord(name: chordName, isValid: isValid))
+            }
+        }
+
+        inputText = ""
+        updateBinding()
+
+        // Keep focus in the input field
+        isInputFocused = true
+    }
+
+    private func removeChord(_ chord: ValidatedChord) {
+        validatedChords.removeAll { $0.id == chord.id }
+        updateBinding()
+    }
+
+    private func updateBinding() {
+        chords = validatedChords.map { $0.name }.joined(separator: ", ")
+    }
+}
+
+// MARK: - Chord Pill
+
+struct ChordPill: View {
+    let name: String
+    let isValid: Bool
+    let onRemove: () -> Void
+
+    var body: some View {
+        HStack(spacing: 6) {
+            if !isValid {
+                Image(systemName: "exclamationmark.circle.fill")
+                    .font(.caption2)
+                    .foregroundColor(.red)
+            }
+
+            Text(name)
+                .font(.subheadline)
+                .fontWeight(.medium)
+
+            Button(action: onRemove) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.caption)
+                    .foregroundColor(isValid ? .secondary : .red)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(isValid ? Color.appAccent.opacity(0.15) : Color.red.opacity(0.15))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(isValid ? Color.appAccent.opacity(0.3) : Color.red.opacity(0.5), lineWidth: 1)
+        )
     }
 }
 

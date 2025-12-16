@@ -11,7 +11,12 @@ struct MainTabView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
     @EnvironmentObject var tabURLDetector: TabURLDetector
-    
+
+    init() {
+        // Force bottom tab bar style on iPad
+        UITabBar.appearance().isHidden = false
+    }
+
     var body: some View {
         TabView {
             // Songs Tab
@@ -39,6 +44,7 @@ struct MainTabView: View {
                 }
         }
         .tint(.appAccent)
+        .tabViewStyle(.automatic)
     }
 }
 
@@ -172,18 +178,18 @@ struct SettingsView: View {
                 
                 // Feedback Section
                 Section {
-                    Link(destination: URL(string: "https://forms.gle/eYaCmNPsNSFG7KLw6")!) {
+                    Link(destination: URL(string: "mailto:fretnotapp@gmail.com")!) {
                         HStack {
                             Image(systemName: "bubble.left.and.bubble.right")
                                 .foregroundColor(.appAccent)
                                 .frame(width: 28)
-                            
+
                             Text("Send Feedback")
                                 .foregroundColor(.primary)
-                            
+
                             Spacer()
-                            
-                            Image(systemName: "arrow.up.right")
+
+                            Image(systemName: "envelope")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }

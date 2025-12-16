@@ -29,6 +29,7 @@
 		0020 /* ChordLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1020 /* ChordLogView.swift */; };
 		0021 /* BulkImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1021 /* BulkImportView.swift */; };
 		0022 /* ChordIdentifierView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1022 /* ChordIdentifierView.swift */; };
+		1107F1332EF2170B0076A235 /* ChordPillInput.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F1322EF2170B0076A235 /* ChordPillInput.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -54,6 +55,7 @@
 		1020 /* ChordLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordLogView.swift; sourceTree = "<group>"; };
 		1021 /* BulkImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkImportView.swift; sourceTree = "<group>"; };
 		1022 /* ChordIdentifierView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordIdentifierView.swift; sourceTree = "<group>"; };
+		1107F1322EF2170B0076A235 /* ChordPillInput.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordPillInput.swift; sourceTree = "<group>"; };
 		112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GuitarSongbook.entitlements; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -122,6 +124,7 @@
 		4006 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				1107F1322EF2170B0076A235 /* ChordPillInput.swift */,
 				1019 /* MainTabView.swift */,
 				1002 /* ContentView.swift */,
 				1009 /* SongListView.swift */,
@@ -220,6 +223,7 @@
 				0011 /* QuickAddView.swift in Sources */,
 				0012 /* AddSongView.swift in Sources */,
 				0013 /* SongDetailView.swift in Sources */,
+				1107F1332EF2170B0076A235 /* ChordPillInput.swift in Sources */,
 				0014 /* ChordDiagramView.swift in Sources */,
 				0015 /* CategoryManagerView.swift in Sources */,
 				0016 /* TunerView.swift in Sources */,

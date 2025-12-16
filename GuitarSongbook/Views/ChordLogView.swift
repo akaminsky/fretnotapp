@@ -29,15 +29,8 @@ struct ChordLogView: View {
                     chordGrid
                 }
             }
-            .navigationTitle("Chord Log")
+            .navigationTitle("Chords")
             .searchable(text: $searchText, prompt: "Search chords")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Identify a Chord") {
-                        showingIdentifier = true
-                    }
-                }
-            }
             .sheet(isPresented: $showingIdentifier) {
                 NavigationStack {
                     ChordIdentifierView()
@@ -60,28 +53,40 @@ struct ChordLogView: View {
     private var emptyState: some View {
         VStack(spacing: 24) {
             Spacer()
-            
+
             ZStack {
                 Circle()
                     .fill(Color.appAccent.opacity(0.1))
                     .frame(width: 100, height: 100)
-                
+
                 Image(systemName: "hand.raised.fingers.spread")
                     .font(.system(size: 40))
                     .foregroundColor(.appAccent)
             }
-            
+
             VStack(spacing: 8) {
                 Text("No Chords Yet")
                     .font(.title2)
                     .fontWeight(.semibold)
-                
+
                 Text("Add songs with chords to build\nyour chord library")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
             }
-            
+
+            Button {
+                showingIdentifier = true
+            } label: {
+                Text("Identify a Chord")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 12)
+                    .background(Color.appAccent)
+                    .cornerRadius(10)
+            }
+
             Spacer()
         }
         .padding()
@@ -91,25 +96,39 @@ struct ChordLogView: View {
     
     private var chordGrid: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 20) {
                 // Stats header
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("\(songStore.allUniqueChords.count)")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.appAccent)
-                        
-                        Text("chords learned")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                    }
-                    
+                HStack(alignment: .lastTextBaseline, spacing: 12) {
+                    Text("\(songStore.allUniqueChords.count)")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(.appAccent)
+
+                    Text("chords learned")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
                     Spacer()
+
+                    Button {
+                        showingIdentifier = true
+                    } label: {
+                        Text("Identify a Chord")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .foregroundColor(.appAccent)
                 }
-                .padding()
-                .background(Color(.systemBackground))
-                .cornerRadius(12)
+                .padding(20)
+                .background(
+                    RoundedRectangle(cornerRadius: 16)
+                        .fill(Color(.systemBackground))
+                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(Color(.systemGray6), lineWidth: 0.5)
+                )
                 
                 // Chord cards
                 if filteredChords.isEmpty {
@@ -124,9 +143,10 @@ struct ChordLogView: View {
                     .padding(.vertical, 40)
                 } else {
                     LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12)
-                    ], spacing: 12) {
+                        GridItem(.flexible(), spacing: 28),
+                        GridItem(.flexible(), spacing: 28),
+                        GridItem(.flexible(), spacing: 28)
+                    ], spacing: 28) {
                         ForEach(filteredChords, id: \.self) { chord in
                             ChordCard(chord: chord, songCount: songsWithChord(chord))
                         }
@@ -147,13 +167,21 @@ struct ChordLogView: View {
 struct ChordCard: View {
     let chord: String
     let songCount: Int
-    
+
     var body: some View {
-        // Chord diagram (includes chord name at top)
         ChordDiagramView(chordName: chord)
             .frame(maxWidth: .infinity)
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
+            .padding(12)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color(.systemBackground))
+                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                    .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(Color(.systemGray5), lineWidth: 0.5)
+            )
     }
 }
 
