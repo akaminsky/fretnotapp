@@ -210,7 +210,12 @@ struct ContentView: View {
                         onTap: { selectedSong = song },
                         onEdit: { songToEdit = song },
                         onDelete: { songStore.deleteSong(song) },
-                        onToggleFavorite: { songStore.toggleFavorite(song) }
+                        onToggleFavorite: { songStore.toggleFavorite(song) },
+                        onUpdateChords: { newChords in
+                            var updatedSong = song
+                            updatedSong.chords = newChords
+                            songStore.updateSong(updatedSong)
+                        }
                     )
                     .listRowBackground(Color.clear)
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -231,13 +236,6 @@ struct ContentView: View {
                         .tint(.appAccent)
                     }
                     .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                        Button {
-                            songStore.toggleFavorite(song)
-                        } label: {
-                            Label(song.isFavorite ? "Unfavorite" : "Favorite", systemImage: song.isFavorite ? "star.slash" : "star.fill")
-                        }
-                        .tint(.appAccent)
-                        
                         if let spotifyUrl = song.spotifyUrl,
                            let url = URL(string: spotifyUrl) {
                             Button {
@@ -329,8 +327,11 @@ struct SongCard: View {
     let onEdit: () -> Void
     let onDelete: () -> Void
     let onToggleFavorite: () -> Void
-    
+    let onUpdateChords: ([String]) -> Void
+
     @State private var showChords = false
+    @State private var showQuickAddChords = false
+    @State private var quickChordInput = ""
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -342,28 +343,32 @@ struct SongCard: View {
                 VStack(spacing: 0) {
                     Divider()
                         .padding(.horizontal, 14)
-                    
+
                     chordContent
                 }
             } else if song.chords.isEmpty {
                 VStack(spacing: 0) {
                     Divider()
                         .padding(.horizontal, 14)
-                    
-                    Button {
-                        onEdit()
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus.circle")
-                                .foregroundColor(.appAccent)
-                            Text("Add Chords")
-                                .foregroundColor(.appAccent)
-                                .fontWeight(.medium)
+
+                    if showQuickAddChords {
+                        quickAddChordsSection
+                    } else {
+                        Button {
+                            showQuickAddChords = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle")
+                                    .foregroundColor(.appAccent)
+                                Text("Add Chords")
+                                    .foregroundColor(.appAccent)
+                                    .fontWeight(.medium)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 16)
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }
@@ -494,7 +499,7 @@ struct SongCard: View {
     }
     
     // MARK: - Chord Content
-    
+
     private var chordContent: some View {
         VStack(alignment: .leading, spacing: 12) {
             FlowLayout(spacing: 8) {
@@ -509,11 +514,65 @@ struct SongCard: View {
                         .cornerRadius(6)
                 }
             }
-            
+
             ChordDiagramsGrid(chords: song.chords)
         }
         .padding(14)
         .background(Color(.systemGray6).opacity(0.5))
+    }
+
+    // MARK: - Quick Add Chords Section
+
+    private var quickAddChordsSection: some View {
+        VStack(spacing: 12) {
+            ChordPillInput(chords: $quickChordInput, allowReordering: false)
+
+            HStack(spacing: 8) {
+                Button {
+                    showQuickAddChords = false
+                    quickChordInput = ""
+                } label: {
+                    Text("Cancel")
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(.secondary)
+
+                Button {
+                    saveChords()
+                } label: {
+                    Text("Save Chords")
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.appAccent)
+                .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(14)
+        .background(Color(.systemGray6).opacity(0.5))
+    }
+
+    private func saveChords() {
+        let input = quickChordInput.trimmingCharacters(in: .whitespaces)
+        guard !input.isEmpty else { return }
+
+        // ChordPillInput formats chords as comma-separated, so parse them
+        let newChords = input
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        guard !newChords.isEmpty else { return }
+
+        // Update song with new chords via callback
+        onUpdateChords(newChords)
+
+        // Reset state
+        quickChordInput = ""
+        showQuickAddChords = false
     }
 }
 

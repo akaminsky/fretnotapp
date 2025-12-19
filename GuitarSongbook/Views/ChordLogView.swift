@@ -43,6 +43,7 @@ struct ChordLogView: View {
                                 }
                             }
                         }
+                        .environmentObject(songStore)
                 }
             }
         }

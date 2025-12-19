@@ -13,6 +13,7 @@ struct Song: Identifiable, Codable, Equatable {
     var artist: String
     var chords: [String]
     var capoPosition: Int
+    var tuning: String
     var dateAdded: Date
     var spotifyUrl: String?
     var tabUrl: String?
@@ -28,6 +29,7 @@ struct Song: Identifiable, Codable, Equatable {
         artist: String,
         chords: [String] = [],
         capoPosition: Int = 0,
+        tuning: String = "EADGBE",
         dateAdded: Date = Date(),
         spotifyUrl: String? = nil,
         tabUrl: String? = nil,
@@ -42,6 +44,7 @@ struct Song: Identifiable, Codable, Equatable {
         self.artist = artist
         self.chords = chords
         self.capoPosition = capoPosition
+        self.tuning = tuning
         self.dateAdded = dateAdded
         self.spotifyUrl = spotifyUrl
         self.tabUrl = tabUrl
@@ -56,7 +59,7 @@ struct Song: Identifiable, Codable, Equatable {
     // Handles old data that might be missing newer fields
     
     enum CodingKeys: String, CodingKey {
-        case id, title, artist, chords, capoPosition, dateAdded
+        case id, title, artist, chords, capoPosition, tuning, dateAdded
         case spotifyUrl, tabUrl, albumCoverUrl, notes, createdAt
         case isFavorite, categories
     }
@@ -72,6 +75,7 @@ struct Song: Identifiable, Codable, Equatable {
         // Fields with defaults for backwards compatibility
         chords = try container.decodeIfPresent([String].self, forKey: .chords) ?? []
         capoPosition = try container.decodeIfPresent(Int.self, forKey: .capoPosition) ?? 0
+        tuning = try container.decodeIfPresent(String.self, forKey: .tuning) ?? "EADGBE"
         dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
         
         // Optional fields

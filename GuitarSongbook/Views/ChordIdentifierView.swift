@@ -8,7 +8,8 @@
 import SwiftUI
 
 struct ChordIdentifierView: View {
-    @State private var selectedFingers: [Int] = [-1, -1, -1, -1, -1, -1] // [E, A, D, G, B, e]
+    @EnvironmentObject var songStore: SongStore
+    @State private var selectedFingers: [Int] = [0, 0, 0, 0, 0, 0] // [E, A, D, G, B, e] - default to open
 
     private let strings = ["E", "A", "D", "G", "B", "e"]
     private let chordLibrary = ChordLibrary.shared
@@ -22,7 +23,7 @@ struct ChordIdentifierView: View {
                         .font(.headline)
                         .foregroundColor(.primary)
 
-                    Text("Tap string names at top to toggle open (O) or muted (×)")
+                    Text("Tap string names to toggle open (O) or muted (×)")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -38,7 +39,7 @@ struct ChordIdentifierView: View {
 
                 // Control button
                 Button {
-                    selectedFingers = [-1, -1, -1, -1, -1, -1]
+                    selectedFingers = [0, 0, 0, 0, 0, 0]
                 } label: {
                     Label("Clear All", systemImage: "arrow.counterclockwise")
                         .font(.subheadline)
@@ -48,6 +49,7 @@ struct ChordIdentifierView: View {
 
                 // Results
                 ChordResultsView(selectedFingers: selectedFingers, chordLibrary: chordLibrary)
+                    .environmentObject(songStore)
             }
             .padding()
         }
@@ -175,7 +177,7 @@ struct TappableFretboard: View {
 
     private func tapFret(stringIndex: Int, fret: Int) {
         if selectedFingers[stringIndex] == fret {
-            selectedFingers[stringIndex] = -1
+            selectedFingers[stringIndex] = 0  // Reset to open instead of muted
         } else {
             selectedFingers[stringIndex] = fret
         }
@@ -193,9 +195,18 @@ struct TappableFretboard: View {
 
 // MARK: - Chord Results
 
+struct IdentifiableString: Identifiable {
+    let id = UUID()
+    let value: String
+}
+
 struct ChordResultsView: View {
+    @EnvironmentObject var songStore: SongStore
     let selectedFingers: [Int]
     let chordLibrary: ChordLibrary
+
+    @State private var selectedChordForAdding: IdentifiableString?
+    @State private var selectedChordIndex: Int?
 
     private var hasFingers: Bool {
         selectedFingers.contains { $0 >= 0 }
@@ -216,6 +227,10 @@ struct ChordResultsView: View {
             } else {
                 placeholderView
             }
+        }
+        .sheet(item: $selectedChordForAdding) { identifiableChord in
+            SongSelectorSheet(chordName: identifiableChord.value)
+                .environmentObject(songStore)
         }
     }
 
@@ -239,17 +254,46 @@ struct ChordResultsView: View {
 
     private var matchedChordsView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Matching Chords (\(matchedChords.count))")
-                .font(.headline)
-                .padding(.horizontal)
+            // Header with title and Add to Songs button
+            HStack {
+                Text("Matched Chord")
+                    .font(.headline)
 
-            ForEach(Array(matchedChords.prefix(10).enumerated()), id: \.offset) { index, match in
-                let (name, chordData) = match
+                Spacer()
+
+                Button {
+                    // Use first match if nothing selected
+                    let index = selectedChordIndex ?? 0
+                    if index < matchedChords.count {
+                        let chordName = matchedChords[index].0
+                        selectedChordForAdding = IdentifiableString(value: chordName)
+                    }
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus.circle.fill")
+                        Text("Add to Songs")
+                            .fontWeight(.medium)
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Color.appAccent)
+                    .cornerRadius(8)
+                }
+            }
+            .padding(.horizontal)
+
+            ForEach(0..<min(matchedChords.count, 10), id: \.self) { index in
+                let chordTuple = matchedChords[index]
+                let chordName = chordTuple.0
+                let chordData = chordTuple.1
+                let isSelected = (selectedChordIndex ?? 0) == index
+
                 VStack(spacing: 12) {
-                    // Chord diagram (includes chord name)
-                    ChordDiagramView(chordName: name)
+                    // Chord diagram (includes name)
+                    ChordDiagramView(chordName: chordName)
                         .frame(height: 140)
-                        .padding(.vertical, 8)
 
                     if let barre = chordData.barre {
                         Text("Barre at fret \(barre)")
@@ -259,13 +303,26 @@ struct ChordResultsView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding()
-                .background(Color(.systemGray6))
+                .background(isSelected ? Color.appAccent.opacity(0.15) : Color(.systemGray6))
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSelected ? Color.appAccent : Color.clear, lineWidth: 2)
+                )
+                .onTapGesture {
+                    selectedChordIndex = index
+                }
             }
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
+        .onAppear {
+            // Auto-select first chord
+            if selectedChordIndex == nil && !matchedChords.isEmpty {
+                selectedChordIndex = 0
+            }
+        }
     }
 
     private var placeholderView: some View {
@@ -284,9 +341,152 @@ struct ChordResultsView: View {
     }
 }
 
+// MARK: - Song Selector Sheet
+
+struct SongSelectorSheet: View {
+    @EnvironmentObject var songStore: SongStore
+    @Environment(\.dismiss) var dismiss
+
+    let chordName: String
+    @State private var selectedSongIds: Set<UUID> = []
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 0) {
+                if songStore.songs.isEmpty {
+                    // Empty state
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "music.note.list")
+                            .font(.system(size: 50))
+                            .foregroundColor(.secondary)
+                        Text("No songs yet")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Text("Add songs to your library first")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                } else {
+                    // Song list
+                    List {
+                        ForEach(songStore.songs) { song in
+                            Button {
+                                toggleSongSelection(song.id)
+                            } label: {
+                                HStack(spacing: 12) {
+                                    // Album cover
+                                    AsyncImage(url: URL(string: song.albumCoverUrl ?? "")) { image in
+                                        image.resizable().aspectRatio(contentMode: .fill)
+                                    } placeholder: {
+                                        Rectangle()
+                                            .fill(Color(.systemGray5))
+                                            .overlay {
+                                                Image(systemName: "music.note")
+                                                    .font(.caption)
+                                                    .foregroundColor(.gray)
+                                            }
+                                    }
+                                    .frame(width: 50, height: 50)
+                                    .cornerRadius(6)
+
+                                    // Song info
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(song.title)
+                                            .font(.body)
+                                            .fontWeight(.medium)
+                                            .foregroundColor(.primary)
+                                            .lineLimit(1)
+
+                                        Text(song.artist)
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(1)
+
+                                        // Show if chord already exists
+                                        if song.chords.contains(chordName) {
+                                            Text("Already has \(chordName)")
+                                                .font(.caption)
+                                                .foregroundColor(.orange)
+                                        }
+                                    }
+
+                                    Spacer()
+
+                                    // Checkbox
+                                    Image(systemName: selectedSongIds.contains(song.id) ? "checkmark.circle.fill" : "circle")
+                                        .font(.title3)
+                                        .foregroundColor(selectedSongIds.contains(song.id) ? .appAccent : .secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .listStyle(.plain)
+                }
+            }
+            .navigationTitle("Add \(chordName) to Songs")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button {
+                        addChordToSelectedSongs()
+                    } label: {
+                        if selectedSongIds.isEmpty {
+                            Text("Done")
+                        } else {
+                            Text("Add to \(selectedSongIds.count)")
+                                .fontWeight(.semibold)
+                        }
+                    }
+                    .disabled(selectedSongIds.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func toggleSongSelection(_ songId: UUID) {
+        if selectedSongIds.contains(songId) {
+            selectedSongIds.remove(songId)
+        } else {
+            selectedSongIds.insert(songId)
+        }
+    }
+
+    private func addChordToSelectedSongs() {
+        // Ensure updates happen on main thread
+        DispatchQueue.main.async {
+            for songId in self.selectedSongIds {
+                if let song = self.songStore.songs.first(where: { $0.id == songId }) {
+                    var updatedSong = song
+
+                    // Add chord if it doesn't already exist
+                    if !updatedSong.chords.contains(self.chordName) {
+                        updatedSong.chords.append(self.chordName)
+                        self.songStore.updateSong(updatedSong)
+                    }
+                }
+            }
+
+            // Small delay to ensure updates propagate before dismissing
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.dismiss()
+            }
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
         ChordIdentifierView()
             .navigationTitle("Identify Chord")
+            .environmentObject(SongStore())
     }
 }

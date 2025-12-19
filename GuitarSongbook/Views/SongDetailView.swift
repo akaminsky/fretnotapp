@@ -18,6 +18,7 @@ struct SongDetailView: View {
     @State private var showingCategoryPicker = false
     @State private var showingTabSaveAlert = false
     @State private var showingSpotifyLink = false
+    @State private var quickChordInput = ""
     
     // Get the live version of the song from the store
     private var liveSong: Song {
@@ -47,6 +48,8 @@ struct SongDetailView: View {
                         // Chord Diagrams
                         if !liveSong.chords.isEmpty {
                             chordSection
+                        } else {
+                            emptyChordSection
                         }
                         
                         // Notes
@@ -171,7 +174,13 @@ struct SongDetailView: View {
                 Text(liveSong.capoDisplayText)
                     .foregroundColor(.primary)
             }
-            
+
+            // Tuning
+            PropertyRow(label: "Tuning", icon: "tuningfork") {
+                Text(liveSong.tuning)
+                    .foregroundColor(.primary)
+            }
+
             // Chords
             if !liveSong.chords.isEmpty {
                 PropertyRow(label: "Chords", icon: "music.note.list") {
@@ -298,9 +307,9 @@ struct SongDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "magnifyingglass")
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.appAccentText)
                             Text("Search & copy URL to save")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.appAccentText)
                         }
                     }
                     .buttonStyle(.plain)
@@ -329,7 +338,7 @@ struct SongDetailView: View {
     }
     
     // MARK: - Chord Section
-    
+
     private var chordSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
@@ -339,14 +348,48 @@ struct SongDetailView: View {
                     .font(.headline)
                     .fontWeight(.semibold)
             }
-            
+
             ChordDiagramsGrid(chords: liveSong.chords)
         }
         .padding(20)
         .background(Color(.systemGray6).opacity(0.5))
         .cornerRadius(12)
     }
-    
+
+    private var emptyChordSection: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            HStack {
+                Image(systemName: "hand.raised")
+                    .foregroundColor(.secondary)
+                Text("Chord Diagrams")
+                    .font(.headline)
+                    .fontWeight(.semibold)
+            }
+
+            VStack(spacing: 12) {
+                Text("No chords added yet")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+
+                ChordPillInput(chords: $quickChordInput)
+
+                Button {
+                    saveChords()
+                } label: {
+                    Text("Save Chords")
+                        .fontWeight(.medium)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.appAccent)
+                .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+        }
+        .padding(20)
+        .background(Color(.systemGray6).opacity(0.5))
+        .cornerRadius(12)
+    }
+
     // MARK: - Notes Section
     
     private func notesSection(_ notes: String) -> some View {
@@ -384,12 +427,33 @@ struct SongDetailView: View {
     
     private func saveDetectedTabURL() {
         guard let url = tabURLDetector.detectedURL else { return }
-        
+
         var updatedSong = liveSong
         updatedSong.tabUrl = url
         songStore.updateSong(updatedSong)
-        
+
         tabURLDetector.clearDetection()
+    }
+
+    private func saveChords() {
+        let input = quickChordInput.trimmingCharacters(in: .whitespaces)
+        guard !input.isEmpty else { return }
+
+        // ChordPillInput formats chords as comma-separated, so parse them
+        let newChords = input
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        guard !newChords.isEmpty else { return }
+
+        // Update song with new chords
+        var updatedSong = liveSong
+        updatedSong.chords = newChords
+        songStore.updateSong(updatedSong)
+
+        // Clear input
+        quickChordInput = ""
     }
 }
 

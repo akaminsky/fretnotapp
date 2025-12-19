@@ -28,6 +28,9 @@ struct AddSongView: View {
     @State private var artist = ""
     @State private var chords = ""
     @State private var capoPosition = 0
+    @State private var tuning = "EADGBE"
+    @State private var selectedTuningOption = "Standard"
+    @State private var customTuning = ""
     @State private var dateAdded = Date()
     @State private var spotifyUrl = ""
     @State private var tabUrl = ""
@@ -42,7 +45,8 @@ struct AddSongView: View {
     @State private var selectedCategories: Set<String> = []
     @State private var newCategoryName = ""
     @State private var showingBulkImport = false
-    
+    @State private var isSaving = false
+
     var isEditing: Bool {
         editingSong != nil
     }
@@ -86,11 +90,15 @@ struct AddSongView: View {
             }
             
             ToolbarItem(placement: .confirmationAction) {
-                Button(isEditing ? "Save" : "Add Song") {
-                    saveSong()
+                if isSaving {
+                    ProgressView()
+                } else {
+                    Button(isEditing ? "Save" : "Add Song") {
+                        saveSong()
+                    }
+                    .fontWeight(.semibold)
+                    .disabled(title.isEmpty)
                 }
-                .fontWeight(.semibold)
-                .disabled(title.isEmpty || artist.isEmpty)
             }
         }
         .onAppear {
@@ -568,6 +576,36 @@ struct AddSongView: View {
                     }
                     .pickerStyle(.segmented)
                 }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Tuning")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+
+                    Picker("Tuning", selection: $selectedTuningOption) {
+                        Text("Standard (EADGBE)").tag("Standard")
+                        Text("Drop D (DADGBE)").tag("Drop D")
+                        Text("Drop C (CGCFAD)").tag("Drop C")
+                        Text("Half Step Down (D#G#C#F#A#D#)").tag("Half Step Down")
+                        Text("Open D (DADF#AD)").tag("Open D")
+                        Text("Open G (DGDGBD)").tag("Open G")
+                        Text("Other...").tag("Other")
+                    }
+                    .pickerStyle(.menu)
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+
+                    if selectedTuningOption == "Other" {
+                        TextField("Enter custom tuning", text: $customTuning)
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                    }
+                }
             }
 
             // Song Details
@@ -750,6 +788,8 @@ struct AddSongView: View {
             artist = song.artist
             chords = song.chords.joined(separator: ", ")
             capoPosition = song.capoPosition
+            tuning = song.tuning
+            selectedTuningOption = tuningOption(for: song.tuning)
             dateAdded = song.dateAdded
             spotifyUrl = song.spotifyUrl ?? ""
             tabUrl = song.tabUrl ?? ""
@@ -786,18 +826,49 @@ struct AddSongView: View {
         default: return "th"
         }
     }
-    
+
+    private func tuningValue(for option: String) -> String {
+        switch option {
+        case "Standard": return "EADGBE"
+        case "Drop D": return "DADGBE"
+        case "Drop C": return "CGCFAD"
+        case "Half Step Down": return "D#G#C#F#A#D#"
+        case "Open D": return "DADF#AD"
+        case "Open G": return "DGDGBD"
+        case "Other": return customTuning.isEmpty ? "EADGBE" : customTuning.uppercased()
+        default: return "EADGBE"
+        }
+    }
+
+    private func tuningOption(for value: String) -> String {
+        let normalized = value.uppercased()
+        switch normalized {
+        case "EADGBE": return "Standard"
+        case "DADGBE": return "Drop D"
+        case "CGCFAD": return "Drop C"
+        case "D#G#C#F#A#D#": return "Half Step Down"
+        case "DADF#AD": return "Open D"
+        case "DGDGBD": return "Open G"
+        default:
+            customTuning = value
+            return "Other"
+        }
+    }
+
     private func saveSong() {
+        isSaving = true
+
         let parsedChords = chords
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
-        
+
         if var song = editingSong {
             song.title = title
             song.artist = artist
             song.chords = parsedChords
             song.capoPosition = capoPosition
+            song.tuning = tuningValue(for: selectedTuningOption)
             song.dateAdded = dateAdded
             song.spotifyUrl = spotifyUrl.isEmpty ? nil : spotifyUrl
             song.tabUrl = tabUrl.isEmpty ? nil : tabUrl
@@ -812,6 +883,7 @@ struct AddSongView: View {
                 artist: artist,
                 chords: parsedChords,
                 capoPosition: capoPosition,
+                tuning: tuningValue(for: selectedTuningOption),
                 dateAdded: dateAdded,
                 spotifyUrl: spotifyUrl.isEmpty ? nil : spotifyUrl,
                 tabUrl: tabUrl.isEmpty ? nil : tabUrl,
@@ -822,8 +894,12 @@ struct AddSongView: View {
             )
             songStore.addSong(song)
         }
-        
-        dismiss()
+
+        // Small delay to show feedback, then dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            isSaving = false
+            dismiss()
+        }
     }
 }
 
@@ -1076,16 +1152,23 @@ extension View {
 
 struct ChordPillInput: View {
     @Binding var chords: String
+    var allowReordering: Bool = true
     @State private var inputText: String = ""
     @State private var validatedChords: [ValidatedChord] = []
     @FocusState private var isInputFocused: Bool
+    @State private var draggingChord: ValidatedChord?
 
     private let chordLibrary = ChordLibrary.shared
+    private let haptics = HapticManager.shared
 
-    struct ValidatedChord: Identifiable {
+    struct ValidatedChord: Identifiable, Equatable {
         let id = UUID()
         let name: String
         let isValid: Bool
+
+        static func == (lhs: ValidatedChord, rhs: ValidatedChord) -> Bool {
+            lhs.id == rhs.id
+        }
     }
 
     private var chordSuggestions: [String] {
@@ -1108,6 +1191,7 @@ struct ChordPillInput: View {
                 TextField("Type a chord (e.g. C or Am)", text: $inputText)
                     .textFieldStyle(.plain)
                     .focused($isInputFocused)
+                    .disableAutocorrection(true)
                     .onSubmit {
                         addChord()
                     }
@@ -1169,10 +1253,29 @@ struct ChordPillInput: View {
                         ChordPill(
                             name: chord.name,
                             isValid: chord.isValid,
+                            showDragHandle: allowReordering,
                             onRemove: {
                                 removeChord(chord)
                             }
                         )
+                        .if(allowReordering) { view in
+                            view
+                                .onDrag {
+                                    self.draggingChord = chord
+                                    return NSItemProvider(object: chord.id.uuidString as NSString)
+                                }
+                                .onDrop(of: [.text], delegate: ChordDropDelegate(
+                                    chord: chord,
+                                    chords: $validatedChords,
+                                    draggingChord: $draggingChord,
+                                    onDrop: {
+                                        haptics.light()
+                                        updateBinding()
+                                    }
+                                ))
+                                .opacity(draggingChord == chord ? 0.5 : 1.0)
+                                .zIndex(draggingChord == chord ? 1 : 0)
+                        }
                     }
                 }
             }
@@ -1197,6 +1300,10 @@ struct ChordPillInput: View {
         }
         .onAppear {
             loadExistingChords()
+            // Auto-focus the input field
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                isInputFocused = true
+            }
         }
     }
 
@@ -1224,12 +1331,18 @@ struct ChordPillInput: View {
             .map { String($0).trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
+        var addedAny = false
         for chordName in newChords {
             // Check if not already added
             if !validatedChords.contains(where: { $0.name.lowercased() == chordName.lowercased() }) {
                 let isValid = chordLibrary.findChord(chordName) != nil
                 validatedChords.append(ValidatedChord(name: chordName, isValid: isValid))
+                addedAny = true
             }
+        }
+
+        if addedAny {
+            haptics.light()
         }
 
         inputText = ""
@@ -1241,6 +1354,7 @@ struct ChordPillInput: View {
 
     private func removeChord(_ chord: ValidatedChord) {
         validatedChords.removeAll { $0.id == chord.id }
+        haptics.light()
         updateBinding()
     }
 
@@ -1254,10 +1368,17 @@ struct ChordPillInput: View {
 struct ChordPill: View {
     let name: String
     let isValid: Bool
+    var showDragHandle: Bool = false
     let onRemove: () -> Void
 
     var body: some View {
         HStack(spacing: 6) {
+            if showDragHandle {
+                Image(systemName: "line.3.horizontal")
+                    .font(.caption2)
+                    .foregroundColor(.secondary.opacity(0.5))
+            }
+
             if !isValid {
                 Image(systemName: "exclamationmark.circle.fill")
                     .font(.caption2)
@@ -1284,6 +1405,47 @@ struct ChordPill: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(isValid ? Color.appAccent.opacity(0.3) : Color.red.opacity(0.5), lineWidth: 1)
         )
+    }
+}
+
+// MARK: - Chord Drop Delegate
+
+struct ChordDropDelegate: DropDelegate {
+    let chord: ChordPillInput.ValidatedChord
+    @Binding var chords: [ChordPillInput.ValidatedChord]
+    @Binding var draggingChord: ChordPillInput.ValidatedChord?
+    let onDrop: () -> Void
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingChord = nil
+        return true
+    }
+
+    func dropEntered(info: DropInfo) {
+        guard let draggingChord = draggingChord,
+              draggingChord != chord,
+              let fromIndex = chords.firstIndex(of: draggingChord),
+              let toIndex = chords.firstIndex(of: chord) else {
+            return
+        }
+
+        withAnimation(.default) {
+            chords.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
+        }
+        onDrop()
+    }
+}
+
+// MARK: - View Extension for Conditional Modifiers
+
+extension View {
+    @ViewBuilder
+    func `if`<Transform: View>(_ condition: Bool, transform: (Self) -> Transform) -> some View {
+        if condition {
+            transform(self)
+        } else {
+            self
+        }
     }
 }
 

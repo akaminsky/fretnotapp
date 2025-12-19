@@ -16,14 +16,20 @@ class AudioPitchDetector: ObservableObject {
     @Published var isListening: Bool = false
     @Published var hasPermission: Bool = false
     @Published var targetNote: GuitarString? = nil
-    
+    @Published var selectedTuning: String = "Standard"
+
     private var audioEngine: AVAudioEngine?
     private var inputNode: AVAudioInputNode?
     private var actualSampleRate: Float = 44100 // Will be set from actual audio format
     private let bufferSize: AVAudioFrameCount = 8192 // Increased for better frequency resolution
     private var frequencyHistory: [Float] = [] // For smoothing
     private let historySize = 5
-    
+
+    // Computed property for guitar strings based on selected tuning
+    var guitarStrings: [GuitarString] {
+        Self.stringsForTuning(selectedTuning)
+    }
+
     // Standard guitar tuning frequencies
     static let guitarStrings: [GuitarString] = [
         GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
@@ -33,6 +39,69 @@ class AudioPitchDetector: ObservableObject {
         GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
         GuitarString(name: "E", octave: 2, frequency: 82.41, stringNumber: 6),
     ]
+
+    // Generate strings for different tunings
+    static func stringsForTuning(_ tuning: String) -> [GuitarString] {
+        switch tuning {
+        case "Standard":
+            return [
+                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "E", octave: 2, frequency: 82.41, stringNumber: 6),
+            ]
+        case "Drop D":
+            return [
+                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+            ]
+        case "Drop C":
+            return [
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
+                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
+                GuitarString(name: "F", octave: 3, frequency: 174.61, stringNumber: 3),
+                GuitarString(name: "C", octave: 3, frequency: 130.81, stringNumber: 4),
+                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
+                GuitarString(name: "C", octave: 2, frequency: 65.41, stringNumber: 6),
+            ]
+        case "Half Step Down":
+            return [
+                GuitarString(name: "D#", octave: 4, frequency: 311.13, stringNumber: 1),
+                GuitarString(name: "A#", octave: 3, frequency: 233.08, stringNumber: 2),
+                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
+                GuitarString(name: "C#", octave: 3, frequency: 138.59, stringNumber: 4),
+                GuitarString(name: "G#", octave: 2, frequency: 103.83, stringNumber: 5),
+                GuitarString(name: "D#", octave: 2, frequency: 77.78, stringNumber: 6),
+            ]
+        case "Open D":
+            return [
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
+                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
+                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+            ]
+        case "Open G":
+            return [
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+            ]
+        default:
+            // For custom tunings, return standard
+            return stringsForTuning("Standard")
+        }
+    }
     
     // All note frequencies for detection
     private let noteFrequencies: [(note: String, frequency: Float)] = {
@@ -188,7 +257,7 @@ class AudioPitchDetector: ObservableObject {
             self.centsOff = cents
             
             // Auto-detect which string is being played
-            self.targetNote = Self.guitarStrings.min(by: { string1, string2 in
+            self.targetNote = self.guitarStrings.min(by: { string1, string2 in
                 abs(string1.frequency - smoothedFrequency) < abs(string2.frequency - smoothedFrequency)
             })
         }

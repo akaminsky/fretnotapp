@@ -26,23 +26,26 @@ struct TunerView: View {
                         permissionView
                     } else {
                         // Main tuner content
-                        VStack(spacing: 24) {
+                        VStack(spacing: 16) {
                             Spacer()
-                            
+
                             // Current note display
                             noteDisplay
-                            
+
                             // Tuning indicator
                             tuningIndicator
-                            
+
                             // Frequency display
                             frequencyDisplay
-                            
+
                             Spacer()
-                            
+
+                            // Tuning selector
+                            tuningSelector
+
                             // String selector
                             stringSelector
-                            
+
                             // Start/Stop button
                             tunerButton
                         }
@@ -107,20 +110,12 @@ struct TunerView: View {
     
     private var noteDisplay: some View {
         VStack(spacing: 8) {
-            // Target note (if selected)
-            if let target = pitchDetector.targetNote {
-                Text("Tuning: String \(target.stringNumber)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .textCase(.uppercase)
-            }
-            
             // Current detected note
             HStack(alignment: .firstTextBaseline, spacing: 4) {
                 Text(pitchDetector.currentNote)
                     .font(.system(size: 96, weight: .bold, design: .rounded))
                     .foregroundColor(noteColor)
-                
+
                 if pitchDetector.currentNote != "-" {
                     Text("\(pitchDetector.currentOctave)")
                         .font(.system(size: 32, weight: .semibold, design: .rounded))
@@ -129,7 +124,7 @@ struct TunerView: View {
                 }
             }
             .frame(height: 120)
-            
+
             // In tune indicator
             if pitchDetector.isListening && pitchDetector.currentNote != "-" {
                 Text(tuningStatus)
@@ -251,8 +246,34 @@ struct TunerView: View {
         .frame(height: 50)
     }
     
+    // MARK: - Tuning Selector
+
+    private var tuningSelector: some View {
+        VStack(spacing: 12) {
+            Text("TUNING")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+
+            Picker("Tuning", selection: $pitchDetector.selectedTuning) {
+                Text("Standard").tag("Standard")
+                Text("Drop D").tag("Drop D")
+                Text("Drop C").tag("Drop C")
+                Text("Half Step Down").tag("Half Step Down")
+                Text("Open D").tag("Open D")
+                Text("Open G").tag("Open G")
+            }
+            .pickerStyle(.menu)
+            .padding(12)
+            .frame(maxWidth: .infinity)
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+        }
+        .padding(.horizontal)
+    }
+
     // MARK: - String Selector
-    
+
     private var stringSelector: some View {
         VStack(spacing: 12) {
             Text("SELECT STRING")
@@ -261,7 +282,7 @@ struct TunerView: View {
                 .foregroundColor(.secondary)
             
             HStack(spacing: 12) {
-                ForEach(AudioPitchDetector.guitarStrings) { string in
+                ForEach(pitchDetector.guitarStrings) { string in
                     Button {
                         pitchDetector.selectString(string)
                     } label: {
@@ -269,7 +290,7 @@ struct TunerView: View {
                             Text(string.name)
                                 .font(.title2)
                                 .fontWeight(.bold)
-                            
+
                             Text("\(string.stringNumber)")
                                 .font(.caption2)
                                 .foregroundColor(.secondary)

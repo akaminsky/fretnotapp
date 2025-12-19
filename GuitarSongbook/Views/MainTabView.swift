@@ -226,12 +226,12 @@ struct SettingsView: View {
                         Image(systemName: "info.circle")
                             .foregroundColor(.appAccent)
                             .frame(width: 28)
-                        
+
                         Text("Version")
-                        
+
                         Spacer()
-                        
-                        Text("1.0.0")
+
+                        Text("1.1.0")
                             .foregroundColor(.secondary)
                     }
                     

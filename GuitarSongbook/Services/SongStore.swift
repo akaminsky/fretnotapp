@@ -185,12 +185,14 @@ class SongStore: ObservableObject {
     
     func deleteSong(_ song: Song) {
         songs.removeAll { $0.id == song.id }
+        HapticManager.shared.medium()
         saveSongs()
     }
-    
+
     func toggleFavorite(_ song: Song) {
         if let index = songs.firstIndex(where: { $0.id == song.id }) {
             songs[index].isFavorite.toggle()
+            HapticManager.shared.light()
             saveSongs()
         }
     }

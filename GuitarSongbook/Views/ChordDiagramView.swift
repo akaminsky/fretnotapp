@@ -19,13 +19,13 @@ struct ChordDiagramView: View {
                 .font(.title3)
                 .fontWeight(.bold)
                 .lineLimit(1)
-            
+
             if let chordData = chordLibrary.findChord(chordName) {
                 Text(chordData.name)
                     .font(.caption2)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                
+
                 ChordDiagramCanvas(chordData: chordData, strings: strings)
                     .frame(width: 90, height: 110)
             } else {
@@ -109,7 +109,7 @@ struct ChordDiagramCanvas: View {
 
 struct ChordDiagramsGrid: View {
     let chords: [String]
-    
+
     var body: some View {
         LazyVGrid(columns: [
             GridItem(.adaptive(minimum: 100), spacing: 12)
