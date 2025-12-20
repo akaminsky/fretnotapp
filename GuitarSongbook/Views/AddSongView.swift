@@ -31,6 +31,7 @@ struct AddSongView: View {
     @State private var tuning = "EADGBE"
     @State private var selectedTuningOption = "Standard"
     @State private var customTuning = ""
+    @State private var strumPatterns: [StrumPattern] = []
     @State private var dateAdded = Date()
     @State private var spotifyUrl = ""
     @State private var tabUrl = ""
@@ -46,6 +47,16 @@ struct AddSongView: View {
     @State private var newCategoryName = ""
     @State private var showingBulkImport = false
     @State private var isSaving = false
+    @State private var guitarSection: GuitarSection = .chords
+    @FocusState private var focusedField: FocusField?
+
+    enum GuitarSection {
+        case chords, strumPatterns, tuning
+    }
+
+    enum FocusField {
+        case title, chords
+    }
 
     var isEditing: Bool {
         editingSong != nil
@@ -60,15 +71,13 @@ struct AddSongView: View {
                 } else {
                     // Show selected song header or editing header
                     if let track = selectedTrack {
-                        if track.id == "manual" {
-                            manualEntryHeader
-                        } else {
+                        if track.id != "manual" {
                             selectedTrackHeader(track)
                         }
-                    } else if isEditing {
+                    } else if isEditing && !spotifyUrl.isEmpty {
                         editingHeaderWithSpotify
                     }
-                    
+
                     // Main form fields
                     formFields
                 }
@@ -176,7 +185,7 @@ struct AddSongView: View {
                     } label: {
                         Text("Add song manually")
                             .font(.subheadline)
-                            .foregroundColor(.appAccentText)
+                            .foregroundColor(.appAccent)
                     }
                     
                     Button {
@@ -187,7 +196,7 @@ struct AddSongView: View {
                             Text("Import Spotify Playlist")
                         }
                         .font(.subheadline)
-                        .foregroundColor(.appAccentText)
+                        .foregroundColor(.appAccent)
                     }
                 }
             }
@@ -342,35 +351,20 @@ struct AddSongView: View {
     private var manualEntryHeader: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Album Cover with remove option
-                ZStack(alignment: .topTrailing) {
-                    AsyncImage(url: URL(string: albumCoverUrl ?? "")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(Color(.systemGray5))
-                            .overlay {
-                                Image(systemName: "music.note")
-                                    .foregroundColor(.gray)
-                            }
-                    }
-                    .frame(width: 70, height: 70)
-                    .cornerRadius(8)
-                    
-                    // Remove album cover button
-                    if albumCoverUrl != nil {
-                        Button {
-                            albumCoverUrl = nil
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .background(Circle().fill(Color.black.opacity(0.6)))
+                // Album Cover
+                AsyncImage(url: URL(string: albumCoverUrl ?? "")) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color(.systemGray5))
+                        .overlay {
+                            Image(systemName: "music.note")
+                                .foregroundColor(.gray)
                         }
-                        .offset(x: 6, y: -6)
-                    }
                 }
-                
+                .frame(width: 70, height: 70)
+                .cornerRadius(8)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Adding manually")
                         .font(.headline)
@@ -415,7 +409,7 @@ struct AddSongView: View {
                         Text("Link to Spotify")
                             .font(.subheadline)
                     }
-                    .foregroundColor(.appAccentText)
+                    .foregroundColor(.appAccent)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.appAccent.opacity(0.12))
@@ -445,35 +439,20 @@ struct AddSongView: View {
     private var editingHeaderWithSpotify: some View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
-                // Album Cover with remove option
-                ZStack(alignment: .topTrailing) {
-                    AsyncImage(url: URL(string: albumCoverUrl ?? "")) { image in
-                        image.resizable().aspectRatio(contentMode: .fill)
-                    } placeholder: {
-                        Rectangle()
-                            .fill(Color(.systemGray5))
-                            .overlay {
-                                Image(systemName: "music.note")
-                                    .foregroundColor(.gray)
-                            }
-                    }
-                    .frame(width: 70, height: 70)
-                    .cornerRadius(8)
-                    
-                    // Remove album cover button
-                    if albumCoverUrl != nil {
-                        Button {
-                            albumCoverUrl = nil
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.system(size: 20))
-                                .foregroundColor(.white)
-                                .background(Circle().fill(Color.black.opacity(0.6)))
+                // Album Cover
+                AsyncImage(url: URL(string: albumCoverUrl ?? "")) { image in
+                    image.resizable().aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color(.systemGray5))
+                        .overlay {
+                            Image(systemName: "music.note")
+                                .foregroundColor(.gray)
                         }
-                        .offset(x: 6, y: -6)
-                    }
                 }
-                
+                .frame(width: 70, height: 70)
+                .cornerRadius(8)
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title.isEmpty ? editingSong?.title ?? "" : title)
                         .font(.headline)
@@ -520,7 +499,7 @@ struct AddSongView: View {
                         Text("Link to Spotify")
                             .font(.subheadline)
                     }
-                    .foregroundColor(.appAccentText)
+                    .foregroundColor(.appAccent)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.appAccent.opacity(0.12))
@@ -549,69 +528,12 @@ struct AddSongView: View {
     
     private var formFields: some View {
         VStack(spacing: 16) {
-            // Guitar Info
-            FormSection(title: "Guitar Info") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Chords")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-
-                    ChordPillInput(chords: $chords)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Capo Position")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-
-                    Picker("Capo", selection: $capoPosition) {
-                        Text("No Capo").tag(0)
-                        ForEach(1...7, id: \.self) { fret in
-                            Text("\(fret)\(ordinalSuffix(fret)) Fret").tag(fret)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-                }
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Tuning")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-
-                    Picker("Tuning", selection: $selectedTuningOption) {
-                        Text("Standard (EADGBE)").tag("Standard")
-                        Text("Drop D (DADGBE)").tag("Drop D")
-                        Text("Drop C (CGCFAD)").tag("Drop C")
-                        Text("Half Step Down (D#G#C#F#A#D#)").tag("Half Step Down")
-                        Text("Open D (DADF#AD)").tag("Open D")
-                        Text("Open G (DGDGBD)").tag("Open G")
-                        Text("Other...").tag("Other")
-                    }
-                    .pickerStyle(.menu)
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-
-                    if selectedTuningOption == "Other" {
-                        TextField("Enter custom tuning", text: $customTuning)
-                            .padding(12)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                    }
-                }
-            }
-
-            // Song Details
-            FormSection(title: "Song Details") {
+            // Song Details (only show when editing without Spotify link or adding manually)
+            if (isEditing && spotifyUrl.isEmpty) || selectedTrack?.id == "manual" {
+                FormSection(title: "Song Details") {
                 VStack(spacing: 12) {
                     FormTextField(label: "Song Title *", text: $title, placeholder: "Enter song title")
+                        .focused($focusedField, equals: .title)
                     FormTextField(label: "Artist *", text: $artist, placeholder: "Enter artist name")
 
                     if selectedTrack != nil && selectedTrack?.id != "manual" {
@@ -623,9 +545,177 @@ struct AddSongView: View {
                         }
                         .foregroundColor(.secondary)
                     }
+
+                    // Spotify Link Section (for manual entry or editing)
+                    if selectedTrack?.id == "manual" || isEditing {
+                        Divider()
+                            .padding(.vertical, 4)
+
+                        if !spotifyUrl.isEmpty {
+                            HStack {
+                                Image(systemName: "link")
+                                    .foregroundColor(.green)
+                                Text("Linked to Spotify")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+
+                                Spacer()
+
+                                Button {
+                                    spotifyUrl = ""
+                                    albumCoverUrl = nil
+                                } label: {
+                                    Text("Remove")
+                                        .font(.caption)
+                                        .foregroundColor(.red)
+                                }
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color.green.opacity(0.1))
+                            .cornerRadius(8)
+                        } else {
+                            Button {
+                                showSpotifySearch = true
+                            } label: {
+                                HStack {
+                                    Image(systemName: "link.badge.plus")
+                                    Text("Link to Spotify")
+                                        .font(.subheadline)
+                                }
+                                .foregroundColor(.appAccent)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.appAccent.opacity(0.12))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
                 }
             }
-            
+            .sheet(isPresented: $showSpotifySearch) {
+                SpotifyLinkSheetForEdit(
+                    title: title,
+                    artist: artist,
+                    onSelect: { track in
+                        spotifyUrl = track.externalUrls.spotify
+                        albumCoverUrl = track.albumCoverUrl
+                        showSpotifySearch = false
+                    }
+                )
+                .environmentObject(spotifyService)
+            }
+            }
+
+            // Guitar Info
+            FormSection(title: "Guitar Info") {
+                VStack(spacing: 16) {
+                    // Segmented control for sections
+                    Picker("Guitar Section", selection: $guitarSection) {
+                        Text("Chords").tag(GuitarSection.chords)
+                        Text("Tuning").tag(GuitarSection.tuning)
+                        Text("Strumming").tag(GuitarSection.strumPatterns)
+                    }
+                    .pickerStyle(.segmented)
+
+                    // Conditional content based on selected section
+                    if guitarSection == .chords {
+                        VStack(alignment: .leading, spacing: 6) {
+                            ChordPillInput(chords: $chords, focusOnAppear: selectedTrack?.id != "manual" && !isEditing)
+                        }
+                    } else if guitarSection == .strumPatterns {
+                        VStack(alignment: .leading, spacing: 12) {
+                            if strumPatterns.isEmpty {
+                                Text("No strum patterns added")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(12)
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+                            } else {
+                                ForEach(strumPatterns) { pattern in
+                                    StrumPatternRow(
+                                        pattern: binding(for: pattern),
+                                        onDelete: { removeStrumPattern(pattern) }
+                                    )
+                                }
+                            }
+
+                            Button {
+                                addStrumPattern()
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: "plus.circle.fill")
+                                    Text("Add Pattern")
+                                }
+                                .font(.caption)
+                                .foregroundColor(.appAccent)
+                                .frame(maxWidth: .infinity)
+                            }
+                        }
+                    } else {
+                        VStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 12) {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Capo Position")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                        .textCase(.uppercase)
+
+                                    Picker("Capo", selection: $capoPosition) {
+                                        Text("No Capo").tag(0)
+                                        ForEach(1...7, id: \.self) { fret in
+                                            Text("\(fret)\(ordinalSuffix(fret)) Fret").tag(fret)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                }
+
+                                VStack(alignment: .leading, spacing: 6) {
+                                    Text("Tuning")
+                                        .font(.caption)
+                                        .fontWeight(.medium)
+                                        .foregroundColor(.secondary)
+                                        .textCase(.uppercase)
+
+                                    Picker("Tuning", selection: $selectedTuningOption) {
+                                        Text("Standard (EADGBE)").tag("Standard")
+                                        Text("Drop D (DADGBE)").tag("Drop D")
+                                        Text("Drop C (CGCFAD)").tag("Drop C")
+                                        Text("Half Step Down (D#G#C#F#A#D#)").tag("Half Step Down")
+                                        Text("Open D (DADF#AD)").tag("Open D")
+                                        Text("Open G (DGDGBD)").tag("Open G")
+                                        Text("Other...").tag("Other")
+                                    }
+                                    .pickerStyle(.menu)
+                                    .labelsHidden()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 6)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(6)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                                    .fixedSize(horizontal: false, vertical: true)
+
+                                    if selectedTuningOption == "Other" {
+                                        TextField("Enter custom tuning", text: $customTuning)
+                                            .padding(8)
+                                            .background(Color(.systemBackground))
+                                            .cornerRadius(6)
+                                    }
+                                }
+                            }
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                        }
+                    }
+                }
+            }
+
             // Categories
             FormSection(title: "Lists") {
                 VStack(alignment: .leading, spacing: 12) {
@@ -696,7 +786,7 @@ struct AddSongView: View {
                                 Text("Add")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                    .foregroundColor(.appAccentText)
+                                    .foregroundColor(.appAccent)
                             }
                         }
                     }
@@ -716,8 +806,8 @@ struct AddSongView: View {
                     .cornerRadius(8)
             }
             
-            // Tab URL (optional)
-            FormSection(title: "Tab Link (Optional)") {
+            // Tab URL
+            FormSection(title: "Tab Link") {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Tab URL")
                         .font(.caption)
@@ -744,8 +834,8 @@ struct AddSongView: View {
                 }
             }
             
-            // Notes (optional)
-            FormSection(title: "Notes (Optional)") {
+            // Notes
+            FormSection(title: "Notes") {
                 TextField("Any notes about this song...", text: $notes, axis: .vertical)
                     .lineLimit(3...6)
                     .padding(12)
@@ -790,6 +880,7 @@ struct AddSongView: View {
             capoPosition = song.capoPosition
             tuning = song.tuning
             selectedTuningOption = tuningOption(for: song.tuning)
+            strumPatterns = song.strumPatterns
             dateAdded = song.dateAdded
             spotifyUrl = song.spotifyUrl ?? ""
             tabUrl = song.tabUrl ?? ""
@@ -855,6 +946,22 @@ struct AddSongView: View {
         }
     }
 
+    private func addStrumPattern() {
+        let newPattern = StrumPattern(label: "Verse", pattern: "D-D-D-D")
+        strumPatterns.append(newPattern)
+    }
+
+    private func removeStrumPattern(_ pattern: StrumPattern) {
+        strumPatterns.removeAll { $0.id == pattern.id }
+    }
+
+    private func binding(for pattern: StrumPattern) -> Binding<StrumPattern> {
+        guard let index = strumPatterns.firstIndex(where: { $0.id == pattern.id }) else {
+            fatalError("Pattern not found")
+        }
+        return $strumPatterns[index]
+    }
+
     private func saveSong() {
         isSaving = true
 
@@ -869,6 +976,7 @@ struct AddSongView: View {
             song.chords = parsedChords
             song.capoPosition = capoPosition
             song.tuning = tuningValue(for: selectedTuningOption)
+            song.strumPatterns = strumPatterns
             song.dateAdded = dateAdded
             song.spotifyUrl = spotifyUrl.isEmpty ? nil : spotifyUrl
             song.tabUrl = tabUrl.isEmpty ? nil : tabUrl
@@ -884,6 +992,7 @@ struct AddSongView: View {
                 chords: parsedChords,
                 capoPosition: capoPosition,
                 tuning: tuningValue(for: selectedTuningOption),
+                strumPatterns: strumPatterns,
                 dateAdded: dateAdded,
                 spotifyUrl: spotifyUrl.isEmpty ? nil : spotifyUrl,
                 tabUrl: tabUrl.isEmpty ? nil : tabUrl,
@@ -1153,6 +1262,7 @@ extension View {
 struct ChordPillInput: View {
     @Binding var chords: String
     var allowReordering: Bool = true
+    var focusOnAppear: Bool = false
     @State private var inputText: String = ""
     @State private var validatedChords: [ValidatedChord] = []
     @FocusState private var isInputFocused: Bool
@@ -1300,9 +1410,11 @@ struct ChordPillInput: View {
         }
         .onAppear {
             loadExistingChords()
-            // Auto-focus the input field
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                isInputFocused = true
+            // Auto-focus the input field only if requested
+            if focusOnAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    isInputFocused = true
+                }
             }
         }
     }
@@ -1433,6 +1545,120 @@ struct ChordDropDelegate: DropDelegate {
             chords.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
         }
         onDrop()
+    }
+}
+
+// MARK: - Strum Pattern Row
+
+struct StrumPatternRow: View {
+    @Binding var pattern: StrumPattern
+    let onDelete: () -> Void
+
+    @State private var selectedLabelOption = "Verse"
+    @State private var customLabel = ""
+    @State private var selectedPatternOption = "D-D-D-D"
+    @State private var customPattern = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                // Label picker
+                Picker("Label", selection: $selectedLabelOption) {
+                    ForEach(StrumPattern.commonLabels, id: \.self) { label in
+                        Text(label).tag(label)
+                    }
+                    Text("Custom...").tag("Custom")
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(Color(.systemBackground))
+                .cornerRadius(6)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: selectedLabelOption) { _, newValue in
+                    if newValue != "Custom" {
+                        pattern.label = newValue
+                    }
+                }
+
+                // Pattern picker
+                Picker("Pattern", selection: $selectedPatternOption) {
+                    ForEach(StrumPattern.commonPatterns, id: \.pattern) { preset in
+                        Text(preset.pattern).tag(preset.pattern)
+                    }
+                    Text("Custom...").tag("Custom")
+                }
+                .pickerStyle(.menu)
+                .labelsHidden()
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 6)
+                .background(Color(.systemBackground))
+                .cornerRadius(6)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .fixedSize(horizontal: false, vertical: true)
+                .onChange(of: selectedPatternOption) { _, newValue in
+                    if newValue != "Custom" {
+                        pattern.pattern = newValue
+                    }
+                }
+
+                // Delete button
+                Button(action: onDelete) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title3)
+                        .foregroundColor(.red)
+                }
+            }
+
+            // Custom label field
+            if selectedLabelOption == "Custom" {
+                TextField("Enter custom label", text: $customLabel)
+                    .padding(8)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(6)
+                    .onChange(of: customLabel) { _, newValue in
+                        pattern.label = newValue
+                    }
+            }
+
+            // Custom pattern field
+            if selectedPatternOption == "Custom" {
+                TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customPattern)
+                    .padding(8)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(6)
+                    .textInputAutocapitalization(.characters)
+                    .autocorrectionDisabled()
+                    .onChange(of: customPattern) { _, newValue in
+                        pattern.pattern = newValue.uppercased()
+                    }
+            }
+        }
+        .padding(12)
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+        .onAppear {
+            // Set initial values from pattern
+            if StrumPattern.commonLabels.contains(pattern.label) {
+                selectedLabelOption = pattern.label
+            } else {
+                selectedLabelOption = "Custom"
+                customLabel = pattern.label
+            }
+
+            if StrumPattern.commonPatterns.contains(where: { $0.pattern == pattern.pattern }) {
+                selectedPatternOption = pattern.pattern
+            } else {
+                selectedPatternOption = "Custom"
+                customPattern = pattern.pattern
+            }
+        }
     }
 }
 

@@ -172,7 +172,7 @@ struct FilterControlsView: View {
                             } label: {
                                 Text("Clear")
                                     .font(.subheadline)
-                                    .foregroundColor(.appAccentText)
+                                    .foregroundColor(.appAccent)
                             }
                         }
                     }
@@ -257,7 +257,7 @@ struct FilterPill: View {
             
             if let value = value {
                 Text(value)
-                    .foregroundColor(.appAccentText)
+                    .foregroundColor(.appAccent)
                     .fontWeight(.medium)
             } else {
                 Text("All")
@@ -301,7 +301,7 @@ struct ActiveFilterChip: View {
                     .fontWeight(.semibold)
             }
         }
-        .foregroundColor(.appAccentText)
+        .foregroundColor(.appAccent)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(Color.appAccent.opacity(0.12))

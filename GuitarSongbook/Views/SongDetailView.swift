@@ -19,7 +19,17 @@ struct SongDetailView: View {
     @State private var showingTabSaveAlert = false
     @State private var showingSpotifyLink = false
     @State private var quickChordInput = ""
-    
+    @State private var displayMode: DisplayMode = .chords
+    @State private var quickStrumLabel = "Verse"
+    @State private var quickStrumPattern = "D-D-D-D"
+    @State private var customStrumLabel = ""
+    @State private var customStrumPattern = ""
+    @State private var tempStrumPatterns: [StrumPattern] = []
+
+    enum DisplayMode {
+        case chords, tuning, strumming
+    }
+
     // Get the live version of the song from the store
     private var liveSong: Song {
         songStore.songs.first { $0.id == song.id } ?? song
@@ -36,22 +46,32 @@ struct SongDetailView: View {
                     VStack(alignment: .leading, spacing: 24) {
                         // Title Section
                         titleSection
-                        
-                        // Properties - Notion style
-                        propertiesSection
-                        
+
+                        // Chord Diagrams, Tuning & Strum Patterns
+                        VStack(spacing: 12) {
+                            // Toggle between chords, tuning, and strumming
+                            Picker("Display Mode", selection: $displayMode) {
+                                Text("Chords").tag(DisplayMode.chords)
+                                Text("Tuning").tag(DisplayMode.tuning)
+                                Text("Strumming").tag(DisplayMode.strumming)
+                            }
+                            .pickerStyle(.segmented)
+
+                            if displayMode == .tuning || !liveSong.chords.isEmpty || !liveSong.strumPatterns.isEmpty {
+                                chordSection
+                            } else {
+                                emptyChordSection
+                            }
+                        }
+
                         // Divider
                         Rectangle()
                             .fill(Color(.systemGray5))
                             .frame(height: 1)
-                        
-                        // Chord Diagrams
-                        if !liveSong.chords.isEmpty {
-                            chordSection
-                        } else {
-                            emptyChordSection
-                        }
-                        
+
+                        // Properties - Notion style
+                        propertiesSection
+
                         // Notes
                         if let notes = liveSong.notes, !notes.isEmpty {
                             notesSection(notes)
@@ -78,15 +98,17 @@ struct SongDetailView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
-                        // Favorite button
-                        Button {
-                            songStore.toggleFavorite(liveSong)
-                        } label: {
-                            Image(systemName: liveSong.isFavorite ? "star.fill" : "star")
-                                .font(.body.weight(.medium))
-                                .foregroundColor(liveSong.isFavorite ? .appAccent : .secondary)
+                        // Spotify play button
+                        if let spotifyUrl = liveSong.spotifyUrl, let url = URL(string: spotifyUrl) {
+                            Button {
+                                UIApplication.shared.open(url)
+                            } label: {
+                                Image(systemName: "play.circle.fill")
+                                    .font(.body.weight(.medium))
+                                    .foregroundColor(.green)
+                            }
                         }
-                        
+
                         Button {
                             showingEditSheet = true
                         } label: {
@@ -146,13 +168,17 @@ struct SongDetailView: View {
                 Text(liveSong.title)
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                
-                if liveSong.isFavorite {
-                    Image(systemName: "star.fill")
-                        .foregroundColor(.appAccent)
+
+                Button {
+                    songStore.toggleFavorite(liveSong)
+                } label: {
+                    Image(systemName: liveSong.isFavorite ? "star.fill" : "star")
+                        .font(.title2)
+                        .foregroundColor(liveSong.isFavorite ? .appAccent : Color(.tertiaryLabel))
                 }
+                .buttonStyle(.plain)
             }
-            
+
             Text(liveSong.artist)
                 .font(.title3)
                 .foregroundColor(.secondary)
@@ -168,39 +194,7 @@ struct SongDetailView: View {
                 Text(liveSong.formattedDate)
                     .foregroundColor(.primary)
             }
-            
-            // Capo
-            PropertyRow(label: "Capo", icon: "guitars") {
-                Text(liveSong.capoDisplayText)
-                    .foregroundColor(.primary)
-            }
 
-            // Tuning
-            PropertyRow(label: "Tuning", icon: "tuningfork") {
-                Text(liveSong.tuning)
-                    .foregroundColor(.primary)
-            }
-
-            // Chords
-            if !liveSong.chords.isEmpty {
-                PropertyRow(label: "Chords", icon: "music.note.list") {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 6) {
-                            ForEach(liveSong.chords, id: \.self) { chord in
-                                Text(chord)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                    .foregroundColor(.primary)
-                                    .padding(.horizontal, 10)
-                                    .padding(.vertical, 4)
-                                    .background(Color(.systemGray5))
-                                    .cornerRadius(6)
-                            }
-                        }
-                    }
-                }
-            }
-            
             // Categories
             PropertyRow(label: "Lists", icon: "folder") {
                 HStack(spacing: 6) {
@@ -240,40 +234,7 @@ struct SongDetailView: View {
                     }
                 }
             }
-            
-            // Spotify Link
-            PropertyRow(label: "Spotify", icon: "play.circle.fill") {
-                if let spotifyUrl = liveSong.spotifyUrl, let url = URL(string: spotifyUrl) {
-                    Link(destination: url) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "play.fill")
-                                .font(.caption)
-                                .foregroundColor(.green)
-                            Text("Linked")
-                                .foregroundColor(.green)
-                        }
-                    }
-                } else {
-                    Button {
-                        showingSpotifyLink = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "link")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                            Text("Link to Spotify")
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            .sheet(isPresented: $showingSpotifyLink) {
-                SpotifyLinkSheet(song: liveSong)
-                    .environmentObject(songStore)
-                    .environmentObject(spotifyService)
-            }
-            
+
             // Tabs
             PropertyRow(label: "Tabs", icon: "doc.text") {
                 if let tabUrl = liveSong.tabUrl, let url = URL(string: tabUrl) {
@@ -282,11 +243,12 @@ struct SongDetailView: View {
                             HStack(spacing: 8) {
                                 Image(systemName: "arrow.up.right")
                                     .font(.caption)
-                                    .foregroundColor(.appAccentText)
+                                    .foregroundColor(.appAccent)
                                 Text("Saved")
-                                    .foregroundColor(.appAccentText)
+                                    .foregroundColor(.appAccent)
                             }
                         }
+                        .tint(.appAccent)
                         
                         // Remove tab link button
                         Button {
@@ -307,9 +269,9 @@ struct SongDetailView: View {
                         HStack(spacing: 8) {
                             Image(systemName: "magnifyingglass")
                                 .font(.caption)
-                                .foregroundColor(.appAccentText)
+                                .foregroundColor(.appAccent)
                             Text("Search & copy URL to save")
-                                .foregroundColor(.appAccentText)
+                                .foregroundColor(.appAccent)
                         }
                     }
                     .buttonStyle(.plain)
@@ -342,14 +304,207 @@ struct SongDetailView: View {
     private var chordSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Image(systemName: "hand.raised")
+                Image(systemName: displayMode == .chords ? "hand.raised" : displayMode == .tuning ? "tuningfork" : "waveform")
                     .foregroundColor(.secondary)
-                Text("Chord Diagrams")
+                Text(displayMode == .chords ? "Chord Diagrams" : displayMode == .tuning ? "Tuning Info" : "Strumming Patterns")
                     .font(.headline)
                     .fontWeight(.semibold)
             }
 
-            ChordDiagramsGrid(chords: liveSong.chords)
+            // Content based on display mode
+            if displayMode == .chords {
+                if !liveSong.chords.isEmpty {
+                    ChordDiagramsGrid(chords: liveSong.chords)
+                } else {
+                    VStack(spacing: 12) {
+                        Text("No chords added yet")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        ChordPillInput(chords: $quickChordInput)
+
+                        Button {
+                            saveChords()
+                        } label: {
+                            Text("Save Chords")
+                                .fontWeight(.medium)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.appAccent)
+                        .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+            } else if displayMode == .tuning {
+                // Tuning section
+                VStack(alignment: .leading, spacing: 12) {
+                    // Capo
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("Capo")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .frame(width: 100, alignment: .leading)
+
+                        Text(liveSong.capoDisplayText)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
+
+                    // Tuning
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("Tuning")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary)
+                            .frame(width: 100, alignment: .leading)
+
+                        Text(liveSong.tuning)
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        Spacer()
+                    }
+                    .padding(12)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
+                }
+            } else {
+                if !liveSong.strumPatterns.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ForEach(liveSong.strumPatterns) { pattern in
+                            HStack(alignment: .top, spacing: 12) {
+                                Text(pattern.label)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                                    .foregroundColor(.primary)
+                                    .frame(width: 100, alignment: .leading)
+
+                                Text(pattern.pattern)
+                                    .font(.system(.subheadline, design: .monospaced))
+                                    .foregroundColor(.secondary)
+
+                                Spacer()
+                            }
+                            .padding(12)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(8)
+                        }
+                    }
+                } else {
+                    VStack(spacing: 12) {
+                        if !tempStrumPatterns.isEmpty {
+                            VStack(alignment: .leading, spacing: 8) {
+                                ForEach(tempStrumPatterns) { pattern in
+                                    HStack(alignment: .top, spacing: 12) {
+                                        Text(pattern.label)
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.primary)
+                                            .frame(width: 100, alignment: .leading)
+
+                                        Text(pattern.pattern)
+                                            .font(.system(.subheadline, design: .monospaced))
+                                            .foregroundColor(.secondary)
+
+                                        Spacer()
+
+                                        Button {
+                                            removeTempPattern(pattern)
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.red)
+                                        }
+                                    }
+                                    .padding(12)
+                                    .background(Color(.systemBackground))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+
+                        HStack(spacing: 8) {
+                            // Label picker
+                            Picker("Label", selection: $quickStrumLabel) {
+                                ForEach(StrumPattern.commonLabels, id: \.self) { label in
+                                    Text(label).tag(label)
+                                }
+                                Text("Custom...").tag("Custom")
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(6)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                            // Pattern picker
+                            Picker("Pattern", selection: $quickStrumPattern) {
+                                ForEach(StrumPattern.commonPatterns, id: \.pattern) { preset in
+                                    Text(preset.pattern).tag(preset.pattern)
+                                }
+                                Text("Custom...").tag("Custom")
+                            }
+                            .pickerStyle(.menu)
+                            .labelsHidden()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color(.systemBackground))
+                            .cornerRadius(6)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        // Custom label field
+                        if quickStrumLabel == "Custom" {
+                            TextField("Enter custom label", text: $customStrumLabel)
+                                .textFieldStyle(.roundedBorder)
+                        }
+
+                        // Custom pattern field
+                        if quickStrumPattern == "Custom" {
+                            TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
+                                .textFieldStyle(.roundedBorder)
+                                .textInputAutocapitalization(.characters)
+                                .autocorrectionDisabled()
+                        }
+
+                        Button {
+                            addTempPattern()
+                        } label: {
+                            Text("Add Pattern")
+                                .fontWeight(.medium)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.bordered)
+                        .tint(.appAccent)
+                        .disabled(!isValidStrumPattern)
+
+                        if !tempStrumPatterns.isEmpty {
+                            Button {
+                                saveAllStrumPatterns()
+                            } label: {
+                                Text("Save All Patterns")
+                                    .fontWeight(.medium)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.appAccent)
+                        }
+                    }
+                }
+            }
         }
         .padding(20)
         .background(Color(.systemGray6).opacity(0.5))
@@ -359,30 +514,136 @@ struct SongDetailView: View {
     private var emptyChordSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Image(systemName: "hand.raised")
+                Image(systemName: displayMode == .chords ? "hand.raised" : "waveform")
                     .foregroundColor(.secondary)
-                Text("Chord Diagrams")
+                Text(displayMode == .chords ? "Chord Diagrams" : "Strumming Patterns")
                     .font(.headline)
                     .fontWeight(.semibold)
             }
 
-            VStack(spacing: 12) {
-                Text("No chords added yet")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
+            // Content based on display mode
+            if displayMode == .chords {
+                VStack(spacing: 12) {
+                    ChordPillInput(chords: $quickChordInput)
 
-                ChordPillInput(chords: $quickChordInput)
-
-                Button {
-                    saveChords()
-                } label: {
-                    Text("Save Chords")
-                        .fontWeight(.medium)
-                        .frame(maxWidth: .infinity)
+                    Button {
+                        saveChords()
+                    } label: {
+                        Text("Save Chords")
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.appAccent)
+                    .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.appAccent)
-                .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
+            } else {
+                VStack(spacing: 12) {
+                    if !tempStrumPatterns.isEmpty {
+                        VStack(alignment: .leading, spacing: 8) {
+                            ForEach(tempStrumPatterns) { pattern in
+                                HStack(alignment: .top, spacing: 12) {
+                                    Text(pattern.label)
+                                        .font(.subheadline)
+                                        .fontWeight(.semibold)
+                                        .foregroundColor(.primary)
+                                        .frame(width: 100, alignment: .leading)
+
+                                    Text(pattern.pattern)
+                                        .font(.system(.subheadline, design: .monospaced))
+                                        .foregroundColor(.secondary)
+
+                                    Spacer()
+
+                                    Button {
+                                        removeTempPattern(pattern)
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundColor(.red)
+                                    }
+                                }
+                                .padding(12)
+                                .background(Color(.systemBackground))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+
+                    HStack(spacing: 8) {
+                        // Label picker
+                        Picker("Label", selection: $quickStrumLabel) {
+                            ForEach(StrumPattern.commonLabels, id: \.self) { label in
+                                Text(label).tag(label)
+                            }
+                            Text("Custom...").tag("Custom")
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(6)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                        // Pattern picker
+                        Picker("Pattern", selection: $quickStrumPattern) {
+                            ForEach(StrumPattern.commonPatterns, id: \.pattern) { preset in
+                                Text(preset.pattern).tag(preset.pattern)
+                            }
+                            Text("Custom...").tag("Custom")
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 6)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(6)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
+                    }
+
+                    // Custom label field
+                    if quickStrumLabel == "Custom" {
+                        TextField("Enter custom label", text: $customStrumLabel)
+                            .textFieldStyle(.roundedBorder)
+                    }
+
+                    // Custom pattern field
+                    if quickStrumPattern == "Custom" {
+                        TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
+                            .textFieldStyle(.roundedBorder)
+                            .textInputAutocapitalization(.characters)
+                            .autocorrectionDisabled()
+                    }
+
+                    Button {
+                        addTempPattern()
+                    } label: {
+                        Text("Add Pattern")
+                            .fontWeight(.medium)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.appAccent)
+                    .disabled(!isValidStrumPattern)
+
+                    if !tempStrumPatterns.isEmpty {
+                        Button {
+                            saveAllStrumPatterns()
+                        } label: {
+                            Text("Save All Patterns")
+                                .fontWeight(.medium)
+                                .frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.appAccent)
+                    }
+                }
             }
         }
         .padding(20)
@@ -454,6 +715,48 @@ struct SongDetailView: View {
 
         // Clear input
         quickChordInput = ""
+    }
+
+    private var isValidStrumPattern: Bool {
+        let label = quickStrumLabel == "Custom" ? customStrumLabel : quickStrumLabel
+        let pattern = quickStrumPattern == "Custom" ? customStrumPattern : quickStrumPattern
+
+        return !label.trimmingCharacters(in: .whitespaces).isEmpty &&
+               !pattern.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func addTempPattern() {
+        let label = quickStrumLabel == "Custom" ? customStrumLabel : quickStrumLabel
+        let pattern = quickStrumPattern == "Custom" ? customStrumPattern.uppercased() : quickStrumPattern
+
+        guard !label.trimmingCharacters(in: .whitespaces).isEmpty,
+              !pattern.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+
+        // Create new strum pattern and add to temp list
+        let newPattern = StrumPattern(label: label, pattern: pattern)
+        tempStrumPatterns.append(newPattern)
+
+        // Reset to defaults for next pattern
+        quickStrumLabel = "Verse"
+        quickStrumPattern = "D-D-D-D"
+        customStrumLabel = ""
+        customStrumPattern = ""
+    }
+
+    private func removeTempPattern(_ pattern: StrumPattern) {
+        tempStrumPatterns.removeAll { $0.id == pattern.id }
+    }
+
+    private func saveAllStrumPatterns() {
+        guard !tempStrumPatterns.isEmpty else { return }
+
+        // Update song with all temp patterns
+        var updatedSong = liveSong
+        updatedSong.strumPatterns = tempStrumPatterns
+        songStore.updateSong(updatedSong)
+
+        // Clear temp patterns
+        tempStrumPatterns = []
     }
 }
 

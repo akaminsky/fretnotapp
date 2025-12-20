@@ -194,6 +194,7 @@ struct SettingsView: View {
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .tint(.appAccent)
                 } header: {
                     Text("Feedback")
                 } footer: {
@@ -207,20 +208,21 @@ struct SettingsView: View {
                             Image(systemName: "globe")
                                 .foregroundColor(.appAccent)
                                 .frame(width: 28)
-                            
+
                             Text("Website")
                                 .foregroundColor(.primary)
-                            
+
                             Spacer()
-                            
+
                             Text("fretnot.app")
                                 .foregroundColor(.secondary)
-                            
+
                             Image(systemName: "arrow.up.right")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .tint(.appAccent)
                     
                     HStack {
                         Image(systemName: "info.circle")
@@ -231,7 +233,7 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Text("1.1.0")
+                        Text("1.3.0")
                             .foregroundColor(.secondary)
                     }
                     
@@ -240,17 +242,18 @@ struct SettingsView: View {
                             Image(systemName: "heart.fill")
                                 .foregroundColor(.appAccent)
                                 .frame(width: 28)
-                            
+
                             Text("Built by Alexa Kaminsky")
                                 .foregroundColor(.primary)
-                            
+
                             Spacer()
-                            
+
                             Image(systemName: "arrow.up.right")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
                     }
+                    .tint(.appAccent)
                 } header: {
                     Text("About")
                 }

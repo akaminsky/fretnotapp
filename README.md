@@ -43,6 +43,39 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ## Recent Updates
 
+### Version 1.3.0 (December 2024)
+
+#### UI/UX Improvements
+- **Song Detail Page Reorganization**
+  - Added Tuning tab (positioned between Chords and Strumming) for cleaner guitar info organization
+  - Moved guitar information (Chords/Tuning/Strumming) above metadata for better prioritization
+  - Removed redundant chord, capo, and tuning displays from properties section
+  - Moved Spotify play button to top toolbar for easier access
+  - Added always-visible favorite toggle next to song title for quick access
+  - Favorite star shows filled (orange) when favorited, outline (gray) when not
+
+- **Song List Enhancements**
+  - Replaced ellipsis menu button with dedicated "View Details" button using chevron icon
+  - Streamlined card actions for clearer navigation
+  - Context menu still accessible via long-press for Edit, Play on Spotify, and Delete actions
+
+- **Add/Edit Song Flow**
+  - Smart focus management: title field auto-focuses for manual entry, chords field for Spotify imports
+  - Song Details section now hidden when adding from Spotify (cleaner interface)
+  - When editing Spotify-linked songs: Song Details and album art hidden until unlinked
+  - Album art automatically removed when unlinking from Spotify
+  - Removed independent album art deletion (tied to Spotify link status)
+
+- **Visual Consistency**
+  - Unified all text links and clickable elements to use primary orange accent color
+  - Updated all SwiftUI Link components to use brand color instead of system blue
+  - Consistent color scheme throughout app for better brand identity
+
+#### Strumming Patterns
+- Added "Classic Acoustic" pattern (D-DU-UDU)
+- Added "Simple Strum" pattern (D-DU)
+- Expanded preset library for more versatile song coverage
+
 ### Tuning Features (December 2024)
 - Added tuning field to song details (Standard, Drop D, Drop C, Half Step Down, Open D, Open G, or custom)
 - Enhanced tuner with multiple tuning support
@@ -145,7 +178,7 @@ Available on the [App Store](https://apps.apple.com/us/app/fret-not/id6756530936
 Email: fretnotapp@gmail.com
 
 ## Version
-1.1.0 (Build 2)
+1.3.0 (Build 4)
 
 ## Author
 Built by Alexa Kaminsky

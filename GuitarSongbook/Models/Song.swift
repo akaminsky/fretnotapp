@@ -14,6 +14,7 @@ struct Song: Identifiable, Codable, Equatable {
     var chords: [String]
     var capoPosition: Int
     var tuning: String
+    var strumPatterns: [StrumPattern]
     var dateAdded: Date
     var spotifyUrl: String?
     var tabUrl: String?
@@ -30,6 +31,7 @@ struct Song: Identifiable, Codable, Equatable {
         chords: [String] = [],
         capoPosition: Int = 0,
         tuning: String = "EADGBE",
+        strumPatterns: [StrumPattern] = [],
         dateAdded: Date = Date(),
         spotifyUrl: String? = nil,
         tabUrl: String? = nil,
@@ -45,6 +47,7 @@ struct Song: Identifiable, Codable, Equatable {
         self.chords = chords
         self.capoPosition = capoPosition
         self.tuning = tuning
+        self.strumPatterns = strumPatterns
         self.dateAdded = dateAdded
         self.spotifyUrl = spotifyUrl
         self.tabUrl = tabUrl
@@ -59,7 +62,7 @@ struct Song: Identifiable, Codable, Equatable {
     // Handles old data that might be missing newer fields
     
     enum CodingKeys: String, CodingKey {
-        case id, title, artist, chords, capoPosition, tuning, dateAdded
+        case id, title, artist, chords, capoPosition, tuning, strumPatterns, dateAdded
         case spotifyUrl, tabUrl, albumCoverUrl, notes, createdAt
         case isFavorite, categories
     }
@@ -76,6 +79,7 @@ struct Song: Identifiable, Codable, Equatable {
         chords = try container.decodeIfPresent([String].self, forKey: .chords) ?? []
         capoPosition = try container.decodeIfPresent(Int.self, forKey: .capoPosition) ?? 0
         tuning = try container.decodeIfPresent(String.self, forKey: .tuning) ?? "EADGBE"
+        strumPatterns = try container.decodeIfPresent([StrumPattern].self, forKey: .strumPatterns) ?? []
         dateAdded = try container.decodeIfPresent(Date.self, forKey: .dateAdded) ?? Date()
         
         // Optional fields
@@ -89,7 +93,26 @@ struct Song: Identifiable, Codable, Equatable {
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         categories = try container.decodeIfPresent([String].self, forKey: .categories) ?? []
     }
-    
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(title, forKey: .title)
+        try container.encode(artist, forKey: .artist)
+        try container.encode(chords, forKey: .chords)
+        try container.encode(capoPosition, forKey: .capoPosition)
+        try container.encode(tuning, forKey: .tuning)
+        try container.encode(strumPatterns, forKey: .strumPatterns)
+        try container.encode(dateAdded, forKey: .dateAdded)
+        try container.encodeIfPresent(spotifyUrl, forKey: .spotifyUrl)
+        try container.encodeIfPresent(tabUrl, forKey: .tabUrl)
+        try container.encodeIfPresent(albumCoverUrl, forKey: .albumCoverUrl)
+        try container.encodeIfPresent(notes, forKey: .notes)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(isFavorite, forKey: .isFavorite)
+        try container.encode(categories, forKey: .categories)
+    }
+
     var capoDisplayText: String {
         if capoPosition == 0 {
             return "No Capo"

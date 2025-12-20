@@ -448,20 +448,27 @@ struct SongCard: View {
             }
             .buttonStyle(.plain)
             
-            // Context Menu
-            Menu {
-                Button {
-                    onTap()
-                } label: {
-                    Label("View Details", systemImage: "eye")
+            // View Details Button
+            Button(action: onTap) {
+                HStack(spacing: 4) {
+                    Text("View")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
                 }
-                
+                .foregroundColor(.appAccent)
+            }
+            .buttonStyle(.plain)
+
+            // Context Menu (accessible via long-press on card)
+            .contextMenu {
                 Button {
                     onEdit()
                 } label: {
                     Label("Edit", systemImage: "pencil")
                 }
-                
+
                 if let spotifyUrl = song.spotifyUrl,
                    let url = URL(string: spotifyUrl) {
                     Button {
@@ -470,22 +477,14 @@ struct SongCard: View {
                         Label("Play on Spotify", systemImage: "play.fill")
                     }
                 }
-                
+
                 Divider()
-                
+
                 Button(role: .destructive) {
                     onDelete()
                 } label: {
                     Label("Delete", systemImage: "trash")
                 }
-                .buttonStyle(.plain)
-                .tint(.red)
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.body)
-                    .foregroundColor(Color(.tertiaryLabel))
-                    .frame(width: 28, height: 28)
-                    .contentShape(Rectangle())
             }
         }
         .padding(14)
