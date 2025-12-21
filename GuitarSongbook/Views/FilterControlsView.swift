@@ -10,7 +10,8 @@ import SwiftUI
 struct FilterControlsView: View {
     @EnvironmentObject var songStore: SongStore
     @State private var showFilters = false
-    
+    @FocusState private var searchFieldFocused: Bool
+
     var body: some View {
         VStack(spacing: 10) {
             // Search Bar with Filter Icon - Notion style
@@ -23,6 +24,7 @@ struct FilterControlsView: View {
                     
                     TextField("Search...", text: $songStore.searchText)
                         .font(.subheadline)
+                        .focused($searchFieldFocused)
                     
                     if !songStore.searchText.isEmpty {
                         Button {
@@ -36,13 +38,14 @@ struct FilterControlsView: View {
                 }
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
+                .frame(height: 40)
                 .background(Color(.systemBackground))
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color(.systemGray4), lineWidth: 1)
                 )
-                
+
                 // Filter Button - Notion style
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
@@ -66,6 +69,7 @@ struct FilterControlsView: View {
                     .foregroundColor(songStore.hasActiveFilters ? .appAccent : .secondary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
+                    .frame(height: 40)
                     .background(Color(.systemBackground))
                     .cornerRadius(8)
                     .overlay(
@@ -73,7 +77,7 @@ struct FilterControlsView: View {
                             .stroke(songStore.hasActiveFilters ? Color.appAccent : Color(.systemGray4), lineWidth: 1)
                     )
                 }
-                
+
                 // Sort Button
                 Menu {
                     ForEach(SortColumn.allCases, id: \.self) { column in
@@ -103,6 +107,7 @@ struct FilterControlsView: View {
                     .foregroundColor(.secondary)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 10)
+                    .frame(height: 40)
                     .background(Color(.systemBackground))
                     .cornerRadius(8)
                     .overlay(

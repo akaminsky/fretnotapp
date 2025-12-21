@@ -13,13 +13,9 @@ struct TunerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient
-                LinearGradient(
-                    colors: [Color(.systemBackground), Color(.systemGray6)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .ignoresSafeArea()
+                // Background
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
                     if !pitchDetector.hasPermission {
@@ -265,11 +261,9 @@ struct TunerView: View {
             }
             .pickerStyle(.menu)
             .padding(12)
-            .frame(maxWidth: .infinity)
             .background(Color(.systemBackground))
             .cornerRadius(12)
         }
-        .padding(.horizontal)
     }
 
     // MARK: - String Selector

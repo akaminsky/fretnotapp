@@ -21,7 +21,12 @@ struct ContentView: View {
                 // Background
                 Color(.systemGroupedBackground)
                     .ignoresSafeArea()
-                
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Dismiss keyboard when tapping navigation area
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+
                 VStack(spacing: 0) {
                     // Category Pills
                     categoryPills
@@ -250,6 +255,14 @@ struct ContentView: View {
             }
             .listStyle(.plain)
             .scrollContentBackground(.hidden)
+            .scrollDismissesKeyboard(.interactively)
+            .simultaneousGesture(
+                TapGesture()
+                    .onEnded { _ in
+                        // Dismiss keyboard when tapping on list
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+            )
             .animation(nil, value: songStore.filterChord)
             .animation(nil, value: songStore.filterCapo)
             .animation(nil, value: songStore.filterCategory)

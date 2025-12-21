@@ -11,6 +11,7 @@ struct ChordLogView: View {
     @EnvironmentObject var songStore: SongStore
     @State private var searchText = ""
     @State private var showingIdentifier = false
+    @FocusState private var searchFieldFocused: Bool
 
     var filteredChords: [String] {
         let allChords = songStore.allUniqueChords
@@ -22,15 +23,55 @@ struct ChordLogView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
-                if songStore.allUniqueChords.isEmpty {
-                    emptyState
-                } else {
-                    chordGrid
+            ZStack {
+                Color(.systemGroupedBackground)
+                    .ignoresSafeArea()
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        // Dismiss keyboard when tapping navigation area
+                        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                    }
+
+                VStack(spacing: 0) {
+                    // Custom search bar
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+
+                        TextField("Search chords", text: $searchText)
+                            .font(.subheadline)
+                            .focused($searchFieldFocused)
+
+                        if !searchText.isEmpty {
+                            Button {
+                                searchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.subheadline)
+                                    .foregroundColor(Color(.tertiaryLabel))
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 10)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color(.systemGray4), lineWidth: 1)
+                    )
+                    .padding()
+
+                    // Content
+                    if songStore.allUniqueChords.isEmpty {
+                        emptyState
+                    } else {
+                        chordGrid
+                    }
                 }
             }
             .navigationTitle("Chords")
-            .searchable(text: $searchText, prompt: "Search chords")
             .sheet(isPresented: $showingIdentifier) {
                 NavigationStack {
                     ChordIdentifierView()
@@ -156,8 +197,16 @@ struct ChordLogView: View {
             }
             .padding()
         }
+        .scrollDismissesKeyboard(.interactively)
+        .simultaneousGesture(
+            TapGesture()
+                .onEnded { _ in
+                    // Dismiss keyboard when tapping on scroll view
+                    UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+                }
+        )
     }
-    
+
     private func songsWithChord(_ chord: String) -> Int {
         songStore.songs.filter { $0.chords.contains(chord) }.count
     }
