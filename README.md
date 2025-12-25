@@ -16,11 +16,19 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ### 🎸 Chord Features
 - **Chord Library** - 200+ guitar chords with diagrams
+- **Custom Chords** - Create and save your own chord variations
+  - Add custom diagrams for any chord name
+  - Interactive fretboard to place finger positions
+  - Real-time matching shows known chords that match your fingering
+  - Edit and update existing custom chords
+  - Rename chords across all songs
+  - iCloud sync keeps custom chords across devices
 - **Chord Validation** - Real-time validation as you type
 - **Smart Input** - Auto-capitalize chord names, pill-based UI with drag-to-reorder
 - **Chord Autocomplete** - Suggestions as you type
 - **Chord Identifier** - Interactive fretboard to identify unknown chords, add directly to songs
 - **Chord Log** - View all unique chords you've learned across songs
+- **Chord Details** - Tap any chord to see all songs using it and create variations
 
 ### 🎚️ Tuner
 - **Built-in Tuner** - Real-time pitch detection with auto-detection
@@ -44,6 +52,31 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 ## Recent Updates
 
 ### Version 1.3.0 (December 2024)
+
+#### Custom Chord System
+- **Create Custom Chord Diagrams** - Add diagrams for any chord, even those not in the standard library
+  - Click "Add Diagram" on any chord without a diagram
+  - Interactive fretboard to place finger positions
+  - Real-time matching shows if your fingering matches known chords
+  - Supports chords with spaces in names
+- **Edit Custom Chords** - Update finger positions and chord names
+  - Long-press any custom chord diagram to edit
+  - Edit from chord detail page
+  - Automatic barre detection
+- **Smart Chord Renaming** - Rename chords and update all songs automatically
+  - Edit chord name when creating or updating
+  - All songs using the chord update to the new name
+  - Returns to chord list after renaming for easy navigation
+- **Chord Detail Pages** - New dedicated page for each chord
+  - View large chord diagram
+  - See all songs using the chord
+  - Create variations from detail page
+  - Edit or delete custom chords
+- **Custom Chord Management** - Manage all custom chords from Settings
+  - View all custom chords with creation dates
+  - Delete custom chords (with usage warnings)
+  - See chord usage across songs
+- **iCloud Sync** - Custom chords sync automatically across all your devices
 
 #### UI/UX Improvements
 - **Song Detail Page Reorganization**
@@ -121,7 +154,8 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ### Key Components
 - `SongStore` - Central state management for songs
-- `ChordLibrary` - Chord data and fingering positions
+- `ChordLibrary` - Standard chord library with 200+ chords and fingering positions
+- `CustomChordLibrary` - User-created custom chord management with iCloud sync
 - `AudioPitchDetector` - Real-time tuner functionality
 - `SpotifyService` - Spotify API integration
 - `HapticManager` - Centralized haptic feedback
@@ -158,6 +192,18 @@ struct ChordData {
     let fingers: [Int]  // Fret positions for each string
     let name: String
     let barre: Int?     // Barre fret if applicable
+}
+```
+
+### CustomChordData
+```swift
+struct CustomChordData {
+    let id: UUID
+    let fingers: [Int]      // Fret positions: -1 = muted, 0 = open, 1-15 = fret
+    let name: String        // Base chord name (e.g., "G")
+    let displayName: String // Full name shown to users (e.g., "G (Sweet Home)")
+    let barre: Int?         // Barre fret if applicable
+    let dateCreated: Date
 }
 ```
 
