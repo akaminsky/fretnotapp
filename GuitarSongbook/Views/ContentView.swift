@@ -152,18 +152,27 @@ struct ContentView: View {
                     Text("No Songs in \(songStore.filterCategory)")
                         .font(.title2)
                         .fontWeight(.semibold)
-                    
+
                     Text("Add songs to this category from\nthe song details.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
+                } else if !songStore.searchText.isEmpty {
+                    Text("No songs match \"\(songStore.searchText)\"")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .multilineTextAlignment(.center)
+
+                    Text("Try a different search term")
+                        .font(.body)
+                        .foregroundColor(.secondary)
                 } else {
                     Text("Fret Not")
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    Text("The songs you'll never forget.\nStart building your collection.")
+                    Text("Never forget a song again.\nStart building your collection.")
                         .font(.body)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -386,12 +395,9 @@ struct SongCard: View {
                 }
             }
         }
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.04), radius: 8, y: 2)
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
     
     // MARK: - Main Card Content

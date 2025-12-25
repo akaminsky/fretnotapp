@@ -38,10 +38,9 @@ struct ChordDetailPageView: View {
                 // Large chord diagram
                 VStack(spacing: 12) {
                     ChordDiagramView(chordName: chordName)
-                        .frame(height: 200)
                         .padding()
                         .background(Color(.systemBackground))
-                        .cornerRadius(16)
+                        .cornerRadius(8)
                         .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
                 }
                 .id(customChordLibrary.customChords.count)
@@ -111,7 +110,8 @@ struct ChordDetailPageView: View {
                                     }
                                     .padding()
                                     .background(Color(.systemBackground))
-                                    .cornerRadius(12)
+                                    .cornerRadius(8)
+                                    .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -242,12 +242,8 @@ struct AddVariationSheet: View {
                 VStack(spacing: 24) {
                     // Current chord preview
                     VStack(spacing: 12) {
-                        Text("Based on: \(chordName)")
-                            .font(.headline)
-
                         if let chordData = ChordLibrary.shared.findChord(chordName) {
                             ChordDiagramView(chordName: chordName)
-                                .frame(height: 140)
                         }
                     }
                     .padding()

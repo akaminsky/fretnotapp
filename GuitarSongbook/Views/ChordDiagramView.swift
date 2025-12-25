@@ -25,24 +25,10 @@ struct ChordDiagramView: View {
                 .lineLimit(1)
 
             if let chordData = chordLibrary.findChord(chordName) {
-                Text(chordData.name)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-
+                let range = chordData.fretRange
+                let dynamicHeight: CGFloat = 30 + CGFloat(range.numFrets) * 18
                 ChordDiagramCanvas(chordData: chordData, strings: strings)
-                    .frame(width: 90, height: 110)
-
-                // Custom chord indicator
-                if chordLibrary.isCustomChord(chordName) {
-                    Text("CUSTOM")
-                        .font(.system(size: 9, weight: .bold))
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(Color.appAccent)
-                        .cornerRadius(4)
-                }
+                    .frame(width: 90, height: dynamicHeight)
             } else {
                 VStack(spacing: 8) {
                     Text("Diagram not available")
@@ -69,8 +55,8 @@ struct ChordDiagramView: View {
                 .frame(width: 90, height: 110)
             }
         }
-        .padding(.vertical, 12)
-        .padding(.horizontal, 8)
+        .padding(.vertical, 6)
+        .padding(.horizontal, 4)
         .if(onEditRequest == nil) { view in
             // Only enable long press and content shape when NOT in a grid/list context
             view
@@ -92,35 +78,59 @@ struct ChordDiagramCanvas: View {
     let chordData: ChordData
     let strings: [String]
     
-    private let stringSpacing: CGFloat = 14
+    private let stringSpacing: CGFloat = 12
     private let fretSpacing: CGFloat = 18
-    private let startX: CGFloat = 15
+    private let startX: CGFloat = 25  // Increased to make room for fret labels
     private let startY: CGFloat = 20
     
     var body: some View {
         Canvas { context, size in
+            // Calculate dynamic fret range
+            let range = chordData.fretRange
+            let startFret = range.startFret
+            let numFrets = range.numFrets
+
             // Draw strings (vertical lines)
             for i in 0..<6 {
                 let x = startX + CGFloat(i) * stringSpacing
                 var path = Path()
                 path.move(to: CGPoint(x: x, y: startY))
-                path.addLine(to: CGPoint(x: x, y: startY + 5 * fretSpacing))
+                path.addLine(to: CGPoint(x: x, y: startY + CGFloat(numFrets) * fretSpacing))
                 context.stroke(path, with: .color(.primary), lineWidth: 1)
             }
-            
-            // Draw frets (horizontal lines) - 6 frets now
-            for i in 0..<6 {
+
+            // Draw frets (horizontal lines)
+            for i in 0...numFrets {
                 let y = startY + CGFloat(i) * fretSpacing
                 var path = Path()
                 path.move(to: CGPoint(x: startX, y: y))
                 path.addLine(to: CGPoint(x: startX + 5 * stringSpacing, y: y))
-                context.stroke(path, with: .color(.primary), lineWidth: i == 0 ? 3 : 1)
+                // Thick nut line only when starting at fret 0
+                let isNut = (i == 0 && startFret == 0)
+                context.stroke(path, with: .color(.primary), lineWidth: isNut ? 3 : 1)
             }
-            
+
+            // Draw fret number labels on the left (one per fret space)
+            for fretSpace in 1...numFrets {
+                // When startFret = 0, fret space 1 = fret 1
+                // When startFret > 0, fret space 1 = fret startFret (not startFret + 1)
+                let fretNumber = (startFret == 0) ? fretSpace : (startFret + fretSpace - 1)
+                let labelY = startY + (CGFloat(fretSpace) - 0.5) * fretSpacing
+                let text = Text("\(fretNumber)")
+                    .font(.system(size: 9))
+                    .foregroundColor(.secondary)
+                context.draw(text, at: CGPoint(x: 10, y: labelY))
+            }
+
             // Draw barre if present
             if let barre = chordData.barre {
-                // Position barre in the space between frets (e.g., fret 1 is between line 0 and line 1)
-                let y = startY + (CGFloat(barre) - 1) * fretSpacing + fretSpacing/2
+                // Convert absolute fret to relative position
+                let relativeBarre = barre - startFret
+                guard relativeBarre >= 0 && relativeBarre < numFrets else { return }
+
+                // Calculate which fret space the barre goes in (same logic as finger positions)
+                let fretSpaceIndex = (startFret == 0) ? relativeBarre : (relativeBarre + 1)
+                let y = startY + (CGFloat(fretSpaceIndex) - 0.5) * fretSpacing
                 let rect = CGRect(x: startX - 3, y: y - 2, width: 5 * stringSpacing + 6, height: 4)
                 context.fill(Path(roundedRect: rect, cornerRadius: 2), with: .color(.primary))
             }
@@ -141,9 +151,16 @@ struct ChordDiagramCanvas: View {
                     circle.addArc(center: CGPoint(x: x, y: 10), radius: 4, startAngle: .zero, endAngle: .degrees(360), clockwise: true)
                     context.stroke(circle, with: .color(.green), lineWidth: 2)
                 } else {
-                    // Finger position - place in the space between frets
-                    // Fret 1 is between line 0 and line 1, fret 2 is between line 1 and line 2, etc.
-                    let y = startY + (CGFloat(fret) - 1) * fretSpacing + fretSpacing/2
+                    // Finger position - convert to relative position
+                    let relativeFret = fret - startFret
+                    guard relativeFret >= 0 && relativeFret < numFrets else { continue }
+
+                    // Calculate which fret space this finger goes in
+                    // When startFret = 0: fret 1 goes in space 1
+                    // When startFret > 0: fret startFret goes in space 1
+                    let fretSpaceIndex = (startFret == 0) ? relativeFret : (relativeFret + 1)
+                    let y = startY + (CGFloat(fretSpaceIndex) - 0.5) * fretSpacing
+
                     var circle = Path()
                     circle.addArc(center: CGPoint(x: x, y: y), radius: 5, startAngle: .zero, endAngle: .degrees(360), clockwise: true)
                     context.fill(circle, with: .color(.primary))
@@ -176,6 +193,7 @@ struct ChordDiagramsGrid: View {
                 })
                 .background(Color(.systemBackground))
                 .cornerRadius(8)
+                .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
             }
         }
         .sheet(item: $chordToEdit) { editableChord in

@@ -219,38 +219,47 @@ class ChordLibrary {
 
         "A7b9": ChordData(fingers: [-1, 0, 2, 0, 2, 1], name: "A7 Flat 9"),
         "E7b9": ChordData(fingers: [0, 2, 0, 1, 3, 1], name: "E7 Flat 9"),
+
+        // Slash Chords (chord with alternate bass note)
+        "C/G": ChordData(fingers: [3, 3, 2, 0, 1, 0], name: "C/G"),
+        "C/B": ChordData(fingers: [-1, 2, 2, 0, 1, 0], name: "C/B"),
+        "C/E": ChordData(fingers: [0, 3, 2, 0, 1, 0], name: "C/E"),
+        "D/F#": ChordData(fingers: [2, -1, 0, 2, 3, 2], name: "D/F#"),
+        "D/A": ChordData(fingers: [-1, 0, 0, 2, 3, 2], name: "D/A"),
+        "G/B": ChordData(fingers: [-1, 2, 0, 0, 0, 3], name: "G/B"),
+        "G/D": ChordData(fingers: [-1, -1, 0, 0, 0, 3], name: "G/D"),
+        "Am/G": ChordData(fingers: [3, 0, 2, 2, 1, 0], name: "Am/G"),
+        "Am/F#": ChordData(fingers: [2, 0, 2, 2, 1, 0], name: "Am/F#"),
+        "Am/E": ChordData(fingers: [0, 0, 2, 2, 1, 0], name: "Am/E"),
+        "Em/D": ChordData(fingers: [-1, -1, 0, 0, 0, 0], name: "Em/D"),
+        "Em/B": ChordData(fingers: [-1, 2, 2, 0, 0, 0], name: "Em/B"),
+        "F/C": ChordData(fingers: [-1, 3, 3, 2, 1, 1], name: "F/C"),
+        "F/G": ChordData(fingers: [3, 3, 3, 2, 1, 1], name: "F/G", barre: 1),
     ]
     
     func findChord(_ name: String) -> ChordData? {
         let normalized = name.trimmingCharacters(in: .whitespaces)
 
-        // 1. Check custom chords first (higher priority)
+        // Parse for transposition notation (e.g., "Am@7")
+        let (baseChordName, transposition) = parseChordNotation(normalized)
+
+        // 1. Check custom chords first with full name (literal @ names have priority)
+        // This allows custom chords like "Bm@7" to override transposition
         if let customChord = CustomChordLibrary.shared.findCustomChord(byDisplayName: normalized) {
             return customChord.asChordData
         }
 
-        // 2. Direct match in standard library
-        if let chord = chords[normalized] {
-            return chord
+        // 2. Find base chord
+        guard let baseChord = findBaseChord(baseChordName) else {
+            return nil
         }
 
-        // 3. Try common variations
-        let variations = [
-            normalized,
-            normalized.replacingOccurrences(of: "min", with: "m"),
-            normalized.replacingOccurrences(of: "maj", with: ""),
-            normalized.replacingOccurrences(of: "M", with: ""),
-            normalized.replacingOccurrences(of: "minor", with: "m"),
-            normalized.replacingOccurrences(of: "major", with: "")
-        ]
-
-        for variation in variations {
-            if let chord = chords[variation] {
-                return chord
-            }
+        // 3. Apply transposition if specified
+        if let targetFret = transposition {
+            return transposeChord(baseChord, toFret: targetFret)
         }
 
-        return nil
+        return baseChord
     }
     
     var allChordNames: [String] {
@@ -318,5 +327,184 @@ class ChordLibrary {
             return true
         }
     }
+
+    // MARK: - Chord Transposition
+
+    /// Parse chord name with optional transposition notation (e.g., "Am@7")
+    /// Returns (baseChordName, transpositionFret) or (chordName, nil) if no transposition
+    func parseChordNotation(_ name: String) -> (baseChord: String, transposition: Int?) {
+        let trimmed = name.trimmingCharacters(in: .whitespaces)
+
+        // Check for @ notation
+        let components = trimmed.split(separator: "@", maxSplits: 1)
+
+        if components.count == 2 {
+            let baseChord = String(components[0]).trimmingCharacters(in: .whitespaces)
+            let transpositionStr = String(components[1]).trimmingCharacters(in: .whitespaces)
+
+            if let transposition = Int(transpositionStr) {
+                return (baseChord, transposition)
+            }
+        }
+
+        // No transposition notation
+        return (trimmed, nil)
+    }
+
+    /// Transpose a chord to a specific fret position
+    /// Returns nil if transposition is invalid (open strings, out of range, etc.)
+    func transposeChord(_ chordData: ChordData, toFret targetFret: Int) -> ChordData? {
+        // Validate target fret
+        guard targetFret >= 1 && targetFret <= 15 else {
+            return nil
+        }
+
+        // Cannot transpose chords with open strings
+        if chordData.fingers.contains(0) {
+            return nil
+        }
+
+        // Find the minimum fretted position (for relative transposition)
+        let frettedPositions = chordData.fingers.filter { $0 > 0 }
+        guard let minFret = frettedPositions.min() else {
+            return nil  // No fretted notes
+        }
+
+        // Calculate transposition amount
+        let transposition = targetFret - minFret
+
+        // Apply transposition
+        let transposedFingers = chordData.fingers.map { fret in
+            if fret == -1 {
+                return -1  // Muted strings stay muted
+            } else if fret > 0 {
+                let newFret = fret + transposition
+                if newFret < 1 || newFret > 15 {
+                    return -2  // Invalid marker
+                }
+                return newFret
+            } else {
+                return -2  // Open strings cannot be transposed
+            }
+        }
+
+        // Check validity
+        if transposedFingers.contains(-2) {
+            return nil
+        }
+
+        // Transpose barre if present
+        let transposedBarre = chordData.barre.map { $0 + transposition }
+        if let barre = transposedBarre, (barre < 1 || barre > 15) {
+            return nil
+        }
+
+        return ChordData(
+            fingers: transposedFingers,
+            name: chordData.name,
+            barre: transposedBarre
+        )
+    }
+
+    /// Check if a chord can be transposed (no open strings)
+    func canTranspose(_ chordData: ChordData) -> Bool {
+        return !chordData.fingers.contains(0)
+    }
+
+    /// Validate chord name with helpful error messages
+    func validateChordName(_ name: String) -> (isValid: Bool, errorMessage: String?) {
+        let (baseChordName, transposition) = parseChordNotation(name)
+
+        // Find base chord
+        guard let baseChord = findBaseChord(baseChordName) else {
+            return (false, "Chord '\(baseChordName)' not found")
+        }
+
+        // If no transposition, it's valid
+        guard let targetFret = transposition else {
+            return (true, nil)
+        }
+
+        // Validate transposition
+        if targetFret < 1 || targetFret > 15 {
+            return (false, "Fret position must be between 1 and 15")
+        }
+
+        if baseChord.fingers.contains(0) {
+            return (false, "Cannot transpose '\(baseChordName)' - it has open strings. Try a barre chord version.")
+        }
+
+        if transposeChord(baseChord, toFret: targetFret) == nil {
+            return (false, "Transposition to fret \(targetFret) is out of range")
+        }
+
+        return (true, nil)
+    }
+
+    /// Find base chord without transposition
+    private func findBaseChord(_ name: String) -> ChordData? {
+        // Check custom
+        if let custom = CustomChordLibrary.shared.findCustomChord(byDisplayName: name) {
+            return custom.asChordData
+        }
+
+        // Check standard
+        if let standard = chords[name] {
+            return standard
+        }
+
+        // Try variations
+        let variations = [
+            name.replacingOccurrences(of: "min", with: "m"),
+            name.replacingOccurrences(of: "maj", with: ""),
+            name.replacingOccurrences(of: "M", with: ""),
+            name.replacingOccurrences(of: "minor", with: "m"),
+            name.replacingOccurrences(of: "major", with: "")
+        ]
+
+        for variation in variations {
+            if let chord = chords[variation] {
+                return chord
+            }
+        }
+
+        return nil
+    }
 }
 
+// MARK: - ChordData Extensions
+
+extension ChordData {
+    /// Calculate optimal fret range for displaying this chord
+    var fretRange: (startFret: Int, numFrets: Int) {
+        let playedFrets = fingers.filter { $0 > 0 && $0 <= 15 }
+
+        guard !playedFrets.isEmpty else {
+            return (startFret: 0, numFrets: 5)
+        }
+
+        let minFret = playedFrets.min()!
+        let maxFret = playedFrets.max()!
+
+        // For chords with open strings and low frets, or very low frets in general,
+        // always show from the nut
+        let hasOpenStrings = fingers.contains(0)
+        let shouldStartFromNut = minFret <= 3 || (hasOpenStrings && minFret <= 4)
+
+        let startFret = shouldStartFromNut ? 0 : minFret
+
+        // Calculate how many frets we need to show to include all fretted positions
+        let span = maxFret - startFret + 1
+
+        // Always show exactly 5 frets (or more if needed to show all positions)
+        let numFrets = max(5, span)
+
+        return (startFret: startFret, numFrets: numFrets)
+    }
+
+    /// Position marker text (e.g., "7fr" or nil if starting at fret 0)
+    var positionMarker: String? {
+        let range = fretRange
+        return range.startFret > 0 ? "\(range.startFret)fr" : nil
+    }
+}

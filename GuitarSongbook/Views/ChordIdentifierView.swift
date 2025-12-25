@@ -74,14 +74,15 @@ struct TappableFretboard: View {
             Divider()
                 .padding(.bottom, 8)
 
-            // Fretboard grid - explicit rows to avoid ForEach closure issues
-            VStack(spacing: 2) {
-                fretRow(fret: 1)
-                fretRow(fret: 2)
-                fretRow(fret: 3)
-                fretRow(fret: 4)
-                fretRow(fret: 5)
+            // Scrollable fretboard grid - supports up to fret 12
+            ScrollView {
+                VStack(spacing: 2) {
+                    ForEach(1...12, id: \.self) { fret in
+                        fretRow(fret: fret)
+                    }
+                }
             }
+            .frame(maxHeight: 400)
         }
     }
 

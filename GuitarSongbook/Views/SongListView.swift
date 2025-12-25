@@ -14,7 +14,7 @@ struct SongListView: View {
     
     var body: some View {
         ScrollView {
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 12) {
                 ForEach(songStore.filteredAndSortedSongs) { song in
                     SongRowView(song: song)
                         .contentShape(Rectangle())
@@ -27,7 +27,7 @@ struct SongListView: View {
                             } label: {
                                 Label("Edit", systemImage: "pencil")
                             }
-                            
+
                             if let spotifyUrl = song.spotifyUrl,
                                let url = URL(string: spotifyUrl) {
                                 Button {
@@ -36,9 +36,9 @@ struct SongListView: View {
                                     Label("Play on Spotify", systemImage: "play.fill")
                                 }
                             }
-                            
+
                             Divider()
-                            
+
                             Button(role: .destructive) {
                                 songStore.deleteSong(song)
                             } label: {
@@ -46,11 +46,10 @@ struct SongListView: View {
                                     .foregroundColor(.red)
                             }
                         }
-                    
-                    Divider()
-                        .padding(.leading, 74)
                 }
             }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
     }
 }
@@ -129,15 +128,23 @@ struct SongRowView: View {
             if !song.chords.isEmpty {
                 VStack(spacing: 0) {
                     Divider()
-                    
+
                     ChordDiagramsGrid(chords: song.chords)
                         .padding(.vertical, 12)
                 }
                 .frame(maxHeight: showChords ? nil : 0, alignment: .top)
-                .clipped()
                 .opacity(showChords ? 1 : 0)
             }
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(Color(.systemBackground))
+        .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.red, lineWidth: 3)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
         .animation(.easeInOut(duration: 0.3), value: showChords)
     }
 }

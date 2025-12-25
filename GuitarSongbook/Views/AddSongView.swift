@@ -145,7 +145,7 @@ struct AddSongView: View {
                     .font(.title2)
                     .fontWeight(.semibold)
                 
-                Text("Find a song you'll never forget")
+                Text("Add a song so you'll never forget it again")
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
@@ -1318,6 +1318,13 @@ struct ChordPillInput: View {
             .padding(12)
             .background(Color(.systemGray6))
             .cornerRadius(8)
+
+            // Helper text
+            Text("Tip: Use @ to transpose chords (e.g., Bm@7 for Bm at fret 7)")
+                .font(.caption)
+                .foregroundColor(.secondary)
+                .padding(.horizontal, 4)
+                .padding(.top, 4)
 
             // Autocomplete suggestions
             if !chordSuggestions.isEmpty {

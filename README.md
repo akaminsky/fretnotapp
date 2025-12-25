@@ -53,6 +53,38 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ### Version 1.3.0 (December 2024)
 
+#### Chord Diagram Rendering Improvements
+- **Dynamic Diagram Sizing** - Chord diagrams now automatically adjust height based on fret range
+  - Displays exactly 5 frets for optimal readability
+  - Starts at the first fretted note for compact display
+  - Low-position chords (frets 1-4) display from the nut
+- **Fret Number Labels** - Added fret numbers on the left side of diagrams for easy reference
+  - Clear labeling of each fret space
+  - Helps identify chord positions at a glance
+- **Chord Transposition Support** - Use @ notation to transpose chords (e.g., `Bm@7` for Bm at fret 7)
+  - Automatically transposes finger positions
+  - Validation prevents transposing chords with open strings
+  - Smart error messages guide correct usage
+  - Works seamlessly with existing chord library
+- **Slash Chord Support** - Added 14 common slash chords (C/G, D/F#, Am/G, etc.)
+- **Chord Diagram Bug Fixes**
+  - Fixed off-by-one error causing chords at fret 9+ to appear blank
+  - Corrected finger position alignment in all fret ranges
+  - Fixed barre line positioning for accurate chord display
+  - Resolved positioning issues for chords with open strings
+
+#### UI/UX Polish
+- **Consistent Card Styling** - Unified visual design across the app
+  - All cards (songs, chords) now have consistent corner radius (8pt)
+  - Matching subtle drop shadows for depth
+  - Improved spacing between cards for better readability
+- **Optimized Chord Spacing** - Adjusted padding and diagram width for better grid layout
+  - More white space between chord cards
+  - Cleaner visual hierarchy in chord overview
+- **Removed Redundant Elements**
+  - Removed "CUSTOM" badge from chord diagrams (visible via edit menu)
+  - Removed position markers (e.g., "5fr") since fret labels provide context
+
 #### Custom Chord System
 - **Create Custom Chord Diagrams** - Add diagrams for any chord, even those not in the standard library
   - Click "Add Diagram" on any chord without a diagram
