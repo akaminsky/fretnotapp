@@ -10,7 +10,8 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
-    
+    @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
+
     @State private var showingAddSong = false
     @State private var selectedSong: Song?
     @State private var songToEdit: Song?

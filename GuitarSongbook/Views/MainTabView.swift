@@ -55,6 +55,7 @@ struct SettingsView: View {
     @EnvironmentObject var spotifyService: SpotifyService
     @State private var showingCategoryManager = false
     @State private var showingBulkImport = false
+    @State private var showingCustomChordManager = false
     
     var body: some View {
         NavigationStack {
@@ -90,12 +91,34 @@ struct SettingsView: View {
                             Image(systemName: "square.and.arrow.down")
                                 .foregroundColor(.appAccent)
                                 .frame(width: 28)
-                            
+
                             Text("Import Playlist")
                                 .foregroundColor(.primary)
-                            
+
                             Spacer()
-                            
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption)
+                                .foregroundColor(Color(.tertiaryLabel))
+                        }
+                    }
+
+                    Button {
+                        showingCustomChordManager = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "star.circle")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+
+                            Text("Custom Chords")
+                                .foregroundColor(.primary)
+
+                            Spacer()
+
+                            Text("\(CustomChordLibrary.shared.customChords.count)")
+                                .foregroundColor(.secondary)
+
                             Image(systemName: "chevron.right")
                                 .font(.caption)
                                 .foregroundColor(Color(.tertiaryLabel))
@@ -267,6 +290,12 @@ struct SettingsView: View {
                 BulkImportView()
                     .environmentObject(songStore)
                     .environmentObject(spotifyService)
+            }
+            .sheet(isPresented: $showingCustomChordManager) {
+                NavigationStack {
+                    CustomChordManagerView()
+                        .environmentObject(songStore)
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ChordLogView: View {
     @EnvironmentObject var songStore: SongStore
+    @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
     @State private var searchText = ""
     @State private var showingIdentifier = false
     @FocusState private var searchFieldFocused: Bool
@@ -70,12 +71,21 @@ struct ChordLogView: View {
                         chordGrid
                     }
                 }
+
+                // Floating Identify Button
+                VStack {
+                    Spacer()
+                    HStack {
+                        Spacer()
+                        identifyButton
+                    }
+                }
             }
             .navigationTitle("Chords")
             .sheet(isPresented: $showingIdentifier) {
                 NavigationStack {
                     ChordIdentifierView()
-                        .navigationTitle("Identify Chord")
+                        .navigationTitle("Identify and add a chord")
                         .navigationBarTitleDisplayMode(.inline)
                         .toolbar {
                             ToolbarItem(placement: .topBarTrailing) {
@@ -139,39 +149,15 @@ struct ChordLogView: View {
     private var chordGrid: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                // Stats header
-                HStack(alignment: .lastTextBaseline, spacing: 12) {
-                    Text("\(songStore.allUniqueChords.count)")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.appAccent)
-
-                    Text("chords learned")
+                // Simple chord count header (matching songs page style)
+                HStack {
+                    Text(chordCountText)
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-
                     Spacer()
-
-                    Button {
-                        showingIdentifier = true
-                    } label: {
-                        Text("Identify a Chord")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
-                    .foregroundColor(.appAccent)
                 }
-                .padding(20)
-                .background(
-                    RoundedRectangle(cornerRadius: 16)
-                        .fill(Color(.systemBackground))
-                        .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(Color(.systemGray6), lineWidth: 0.5)
-                )
-                
+                .padding(.horizontal, 4)
+
                 // Chord cards
                 if filteredChords.isEmpty {
                     VStack(spacing: 12) {
@@ -190,7 +176,10 @@ struct ChordLogView: View {
                         GridItem(.flexible(), spacing: 28)
                     ], spacing: 28) {
                         ForEach(filteredChords, id: \.self) { chord in
-                            ChordCard(chord: chord, songCount: songsWithChord(chord))
+                            NavigationLink(destination: ChordDetailPageView(chordName: chord).environmentObject(songStore)) {
+                                ChordCard(chord: chord, songCount: songsWithChord(chord))
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -205,6 +194,28 @@ struct ChordLogView: View {
                     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                 }
         )
+    }
+
+    private var chordCountText: String {
+        let count = filteredChords.count
+        return count == 1 ? "1 chord" : "\(count) chords"
+    }
+
+    private var identifyButton: some View {
+        Button {
+            showingIdentifier = true
+        } label: {
+            Image(systemName: "plus")
+                .font(.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+                .frame(width: 56, height: 56)
+                .background(Color.appAccent)
+                .clipShape(Circle())
+                .shadow(color: Color.black.opacity(0.2), radius: 8, y: 4)
+        }
+        .padding(.trailing, 16)
+        .padding(.bottom, 16)
     }
 
     private func songsWithChord(_ chord: String) -> Int {

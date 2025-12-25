@@ -12,7 +12,8 @@ struct SongDetailView: View {
     @EnvironmentObject var spotifyService: SpotifyService
     @EnvironmentObject var tabURLDetector: TabURLDetector
     @Environment(\.dismiss) var dismiss
-    
+    @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
+
     let song: Song
     @State private var showingEditSheet = false
     @State private var showingCategoryPicker = false

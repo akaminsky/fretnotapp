@@ -12,7 +12,12 @@ struct GuitarSongbookApp: App {
     @StateObject private var songStore = SongStore()
     @StateObject private var spotifyService = SpotifyService()
     @StateObject private var tabURLDetector = TabURLDetector()
-    
+
+    init() {
+        // Initialize custom chord library on app launch
+        _ = CustomChordLibrary.shared
+    }
+
     var body: some Scene {
         WindowGroup {
             MainTabView()

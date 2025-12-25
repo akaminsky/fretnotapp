@@ -207,6 +207,7 @@ struct ChordResultsView: View {
 
     @State private var selectedChordForAdding: IdentifiableString?
     @State private var selectedChordIndex: Int?
+    @State private var showingSaveCustomChord = false
 
     private var hasFingers: Bool {
         selectedFingers.contains { $0 >= 0 }
@@ -232,6 +233,14 @@ struct ChordResultsView: View {
             SongSelectorSheet(chordName: identifiableChord.value)
                 .environmentObject(songStore)
         }
+        .sheet(isPresented: $showingSaveCustomChord) {
+            SaveCustomChordSheet(
+                fingers: selectedFingers,
+                onSave: { name in
+                    saveCustomChord(name: name)
+                }
+            )
+        }
     }
 
     private var emptyResultView: some View {
@@ -242,14 +251,63 @@ struct ChordResultsView: View {
             Text("No matching chord found")
                 .font(.headline)
                 .foregroundColor(.secondary)
-            Text("Try adjusting finger positions")
+            Text("Try adjusting finger positions or save as custom")
                 .font(.subheadline)
                 .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+
+            Button {
+                showingSaveCustomChord = true
+            } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: "plus.circle.fill")
+                    Text("Save Custom Chord")
+                        .fontWeight(.medium)
+                }
+                .font(.subheadline)
+                .foregroundColor(.white)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 10)
+                .background(Color.appAccent)
+                .cornerRadius(8)
+            }
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(Color(.systemGray6))
         .cornerRadius(12)
+    }
+
+    private func saveCustomChord(name: String) {
+        let customChord = CustomChordData(
+            id: UUID(),
+            fingers: selectedFingers,
+            name: extractBaseChordName(name),
+            displayName: name,
+            barre: detectBarre(selectedFingers),
+            dateCreated: Date()
+        )
+
+        CustomChordLibrary.shared.addCustomChord(customChord)
+
+        selectedChordForAdding = IdentifiableString(value: name)
+    }
+
+    private func extractBaseChordName(_ displayName: String) -> String {
+        if let parenIndex = displayName.firstIndex(of: "(") {
+            return String(displayName[..<parenIndex]).trimmingCharacters(in: .whitespaces)
+        }
+        return displayName
+    }
+
+    private func detectBarre(_ fingers: [Int]) -> Int? {
+        let playedFrets = fingers.filter { $0 > 0 }
+        guard playedFrets.count >= 3 else { return nil }
+
+        let minFret = playedFrets.min() ?? 0
+        let sameFretCount = playedFrets.filter { $0 == minFret }.count
+
+        return sameFretCount >= 3 ? minFret : nil
     }
 
     private var matchedChordsView: some View {
@@ -478,6 +536,107 @@ struct SongSelectorSheet: View {
             // Small delay to ensure updates propagate before dismissing
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                 self.dismiss()
+            }
+        }
+    }
+}
+
+// MARK: - Save Custom Chord Sheet
+
+struct SaveCustomChordSheet: View {
+    @Environment(\.dismiss) var dismiss
+    let fingers: [Int]
+    let onSave: (String) -> Void
+
+    @State private var chordName = ""
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    VStack {
+                        Text("Your Custom Chord")
+                            .font(.headline)
+                            .padding(.top, 8)
+
+                        MiniChordDiagramPreview(fingers: fingers)
+                            .frame(height: 80)
+                            .padding(.vertical, 8)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .listRowBackground(Color.clear)
+                }
+
+                Section {
+                    TextField("Chord name (e.g., G (Sweet Home))", text: $chordName)
+                        .autocapitalization(.words)
+                        .autocorrectionDisabled()
+                } header: {
+                    Text("Chord Name")
+                } footer: {
+                    Text("Give your chord a unique name. Include variations in parentheses (e.g., 'G (alt)', 'C (Sweet Home)').")
+                }
+
+                Section {
+                    Button("G (variation)") { chordName = "G (variation)" }
+                    Button("C (alt)") { chordName = "C (alt)" }
+                    Button("D (custom)") { chordName = "D (custom)" }
+                } header: {
+                    Text("Quick Templates")
+                }
+            }
+            .navigationTitle("Save Custom Chord")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        onSave(chordName)
+                        dismiss()
+                    }
+                    .disabled(chordName.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Mini Chord Diagram Preview
+
+struct MiniChordDiagramPreview: View {
+    let fingers: [Int]
+    private let strings = ["E", "A", "D", "G", "B", "e"]
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ForEach(0..<6, id: \.self) { stringIndex in
+                VStack(spacing: 4) {
+                    Text(strings[stringIndex])
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+
+                    if fingers[stringIndex] == -1 {
+                        Text("×")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                            .frame(width: 24, height: 24)
+                    } else if fingers[stringIndex] == 0 {
+                        Circle()
+                            .stroke(Color.green, lineWidth: 2)
+                            .frame(width: 20, height: 20)
+                    } else {
+                        Text("\(fingers[stringIndex])")
+                            .font(.caption)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .frame(width: 24, height: 24)
+                            .background(Color.blue)
+                            .clipShape(Circle())
+                    }
+                }
             }
         }
     }

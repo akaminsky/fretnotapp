@@ -223,13 +223,18 @@ class ChordLibrary {
     
     func findChord(_ name: String) -> ChordData? {
         let normalized = name.trimmingCharacters(in: .whitespaces)
-        
-        // Direct match
+
+        // 1. Check custom chords first (higher priority)
+        if let customChord = CustomChordLibrary.shared.findCustomChord(byDisplayName: normalized) {
+            return customChord.asChordData
+        }
+
+        // 2. Direct match in standard library
         if let chord = chords[normalized] {
             return chord
         }
-        
-        // Try common variations
+
+        // 3. Try common variations
         let variations = [
             normalized,
             normalized.replacingOccurrences(of: "min", with: "m"),
@@ -238,18 +243,30 @@ class ChordLibrary {
             normalized.replacingOccurrences(of: "minor", with: "m"),
             normalized.replacingOccurrences(of: "major", with: "")
         ]
-        
+
         for variation in variations {
             if let chord = chords[variation] {
                 return chord
             }
         }
-        
+
         return nil
     }
     
     var allChordNames: [String] {
         Array(chords.keys).sorted()
+    }
+
+    // Check if a chord name is custom
+    func isCustomChord(_ name: String) -> Bool {
+        CustomChordLibrary.shared.isCustomChordName(name)
+    }
+
+    // Get all chord names (library + custom)
+    var allChordNamesIncludingCustom: [String] {
+        let libraryChords = Array(chords.keys)
+        let customChordNames = CustomChordLibrary.shared.customChords.map { $0.displayName }
+        return (libraryChords + customChordNames).sorted()
     }
     
     // Find chords that match given finger positions
