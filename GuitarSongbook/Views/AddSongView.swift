@@ -733,6 +733,16 @@ struct AddSongView: View {
                                         }
                                     }
                                     .pickerStyle(.segmented)
+                                    .onChange(of: capoPosition) { oldValue, newValue in
+                                        // Re-fetch chord suggestions when capo changes
+                                        if let track = selectedTrack, let service = chordSuggestionService {
+                                            Task {
+                                                print("🎸 Capo changed to \(newValue), updating suggestions...")
+                                                await service.suggestChords(for: track, capoPosition: newValue)
+                                                suggestedChordNames = service.suggestedChords
+                                            }
+                                        }
+                                    }
                                 }
 
                                 VStack(alignment: .leading, spacing: 6) {
@@ -981,10 +991,14 @@ struct AddSongView: View {
             }
 
             print("🎵 Fetching chord suggestions for: \(track.name)")
-            await service.suggestChords(for: track)
+            print("🎸 Capo position: \(capoPosition)")
+            await service.suggestChords(for: track, capoPosition: capoPosition)
 
             print("🎸 Suggested chords: \(service.suggestedChords)")
             print("🎸 Suggestion source: \(service.suggestionSource)")
+            if capoPosition > 0 {
+                print("🎸 Transposed for Capo \(capoPosition)")
+            }
 
             // Store suggestions for display (don't auto-populate)
             if !service.suggestedChords.isEmpty {

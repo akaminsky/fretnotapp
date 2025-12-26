@@ -39,12 +39,12 @@ class ChordSuggestionService: ObservableObject {
 
     // MARK: - Main Suggestion Method
 
-    func suggestChords(for track: SpotifyTrack) async {
+    func suggestChords(for track: SpotifyTrack, capoPosition: Int = 0) async {
         isSuggesting = true
         defer { isSuggesting = false }
 
         // For MVP: Only Tier 1 (Spotify audio analysis)
-        if let analysisChords = await generateChordsFromAudioAnalysis(trackId: track.id) {
+        if let analysisChords = await generateChordsFromAudioAnalysis(trackId: track.id, capoPosition: capoPosition) {
             suggestedChords = analysisChords
             suggestionSource = .spotify
             return
@@ -57,10 +57,15 @@ class ChordSuggestionService: ObservableObject {
 
     // MARK: - Tier 1: Spotify Audio Analysis
 
-    private func generateChordsFromAudioAnalysis(trackId: String) async -> [String]? {
+    private func generateChordsFromAudioAnalysis(trackId: String, capoPosition: Int) async -> [String]? {
         do {
             let features = try await spotifyService.fetchAudioFeatures(trackId: trackId)
-            return generateChordsFromKey(key: features.key, mode: features.mode)
+
+            // Transpose key DOWN by capo position to get easier chords
+            // Example: Song in F# (key=6) with Capo 2 → E (key=4)
+            let adjustedKey = (features.key - capoPosition + 12) % 12
+
+            return generateChordsFromKey(key: adjustedKey, mode: features.mode)
         } catch {
             self.error = "Failed to fetch audio features: \(error.localizedDescription)"
             return nil
