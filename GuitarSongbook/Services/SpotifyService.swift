@@ -7,6 +7,12 @@
 
 import Foundation
 
+enum SpotifyError: Error {
+    case invalidURL
+    case networkError
+    case decodingError
+}
+
 @MainActor
 class SpotifyService: ObservableObject {
     @Published var isConnected = false
@@ -206,7 +212,7 @@ class SpotifyService: ObservableObject {
         if urlString.hasPrefix("spotify:playlist:") {
             return String(urlString.dropFirst(17))
         }
-        
+
         // Handle https://open.spotify.com/playlist/{id}
         if let url = URL(string: urlString),
            url.host?.contains("spotify.com") == true {
@@ -218,15 +224,55 @@ class SpotifyService: ObservableObject {
                 return idWithParams.components(separatedBy: "?").first
             }
         }
-        
+
         // If it's just an ID
         if !urlString.contains("/") && !urlString.contains(":") {
             return urlString
         }
-        
+
         return nil
     }
-    
+
+    // MARK: - Audio Features
+
+    func fetchAudioFeatures(trackId: String) async throws -> SpotifyAudioFeatures {
+        if useNetlify {
+            guard let url = URL(string: "\(netlifyBaseURL)/.netlify/functions/spotify-audio-features?trackId=\(trackId)") else {
+                throw SpotifyError.invalidURL
+            }
+
+            var request = URLRequest(url: url)
+            request.httpMethod = "GET"
+
+            do {
+                let (data, response) = try await URLSession.shared.data(for: request)
+
+                guard let httpResponse = response as? HTTPURLResponse,
+                      httpResponse.statusCode == 200 else {
+                    throw SpotifyError.networkError
+                }
+
+                let decoder = JSONDecoder()
+                return try decoder.decode(SpotifyAudioFeatures.self, from: data)
+            } catch {
+                print("Error fetching audio features: \(error)")
+                throw SpotifyError.decodingError
+            }
+        } else {
+            // Demo mode: Return default audio features (C major, moderate tempo)
+            print("⚠️ Spotify: Using demo audio features (Netlify not configured)")
+            return SpotifyAudioFeatures(
+                key: 0,          // C
+                mode: 1,         // Major
+                tempo: 120.0,    // 120 BPM
+                timeSignature: 4, // 4/4
+                danceability: 0.5,
+                energy: 0.5,
+                valence: 0.5
+            )
+        }
+    }
+
     // MARK: - Demo Data
     
     static let demoTracks: [SpotifyTrack] = [

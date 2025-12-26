@@ -49,6 +49,8 @@ struct AddSongView: View {
     @State private var isSaving = false
     @State private var guitarSection: GuitarSection = .chords
     @FocusState private var focusedField: FocusField?
+    @State private var chordSuggestionService: ChordSuggestionService?
+    @State private var suggestedChordNames: [String] = []
 
     enum GuitarSection {
         case chords, strumPatterns, tuning
@@ -620,8 +622,68 @@ struct AddSongView: View {
 
                     // Conditional content based on selected section
                     if guitarSection == .chords {
-                        VStack(alignment: .leading, spacing: 6) {
-                            ChordPillInput(chords: $chords, focusOnAppear: selectedTrack?.id != "manual" && !isEditing)
+                        VStack(alignment: .leading, spacing: 12) {
+                            // Loading indicator for chord suggestions
+                            if let service = chordSuggestionService, service.isSuggesting {
+                                HStack(spacing: 8) {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle())
+                                        .scaleEffect(0.8)
+                                    Text("Suggesting chords from \(service.suggestionSource.description)...")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.vertical, 8)
+                            }
+
+                            // Suggested chords section
+                            if !suggestedChordNames.isEmpty {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Text("Suggested Chords")
+                                            .font(.subheadline)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.secondary)
+
+                                        if let service = chordSuggestionService,
+                                           service.suggestionSource != .none,
+                                           service.suggestionSource != .fallback {
+                                            Text("from \(service.suggestionSource.description)")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                        }
+
+                                        Spacer()
+
+                                        Button("Add All") {
+                                            addAllSuggestedChords()
+                                        }
+                                        .font(.caption)
+                                        .foregroundColor(.appAccent)
+                                    }
+
+                                    FlowLayout(spacing: 8) {
+                                        ForEach(suggestedChordNames, id: \.self) { chord in
+                                            SuggestedChordPill(
+                                                chord: chord,
+                                                isAdded: isChordAdded(chord),
+                                                onTap: {
+                                                    addSuggestedChord(chord)
+                                                }
+                                            )
+                                        }
+                                    }
+                                }
+                                .padding(12)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                            }
+
+                            ChordPillInput(
+                                chords: $chords,
+                                suggestedChordNames: suggestedChordNames,
+                                focusOnAppear: selectedTrack?.id != "manual" && !isEditing
+                            )
                         }
                     } else if guitarSection == .strumPatterns {
                         VStack(alignment: .leading, spacing: 12) {
@@ -873,6 +935,9 @@ struct AddSongView: View {
     }
     
     private func setupInitialValues() {
+        // Initialize chord suggestion service
+        chordSuggestionService = ChordSuggestionService(spotifyService: spotifyService)
+
         if let song = editingSong {
             title = song.title
             artist = song.artist
@@ -907,8 +972,56 @@ struct AddSongView: View {
         albumCoverUrl = track.albumCoverUrl
         spotifyService.clearResults()
         searchQuery = ""
+
+        // Fetch chord suggestions
+        Task {
+            guard let service = chordSuggestionService else {
+                print("⚠️ ChordSuggestionService not initialized")
+                return
+            }
+
+            print("🎵 Fetching chord suggestions for: \(track.name)")
+            await service.suggestChords(for: track)
+
+            print("🎸 Suggested chords: \(service.suggestedChords)")
+            print("🎸 Suggestion source: \(service.suggestionSource)")
+
+            // Store suggestions for display (don't auto-populate)
+            if !service.suggestedChords.isEmpty {
+                suggestedChordNames = service.suggestedChords
+                print("✅ \(service.suggestedChords.count) chord suggestions available")
+            } else {
+                print("❌ No chord suggestions returned")
+            }
+        }
     }
     
+    private func isChordAdded(_ chord: String) -> Bool {
+        let existingChords = chords
+            .split(separator: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+
+        return existingChords.contains(chord)
+    }
+
+    private func addSuggestedChord(_ chord: String) {
+        // Add chord to the chords string if not already present
+        if !isChordAdded(chord) {
+            if chords.isEmpty {
+                chords = chord
+            } else {
+                chords += ", \(chord)"
+            }
+        }
+    }
+
+    private func addAllSuggestedChords() {
+        for chord in suggestedChordNames {
+            addSuggestedChord(chord)
+        }
+    }
+
     private func ordinalSuffix(_ number: Int) -> String {
         switch number {
         case 1: return "st"
@@ -1261,6 +1374,7 @@ extension View {
 
 struct ChordPillInput: View {
     @Binding var chords: String
+    var suggestedChordNames: [String] = []
     var allowReordering: Bool = true
     var focusOnAppear: Bool = false
     @State private var inputText: String = ""
@@ -1275,6 +1389,7 @@ struct ChordPillInput: View {
         let id = UUID()
         let name: String
         let isValid: Bool
+        var isSuggested: Bool = false
 
         static func == (lhs: ValidatedChord, rhs: ValidatedChord) -> Bool {
             lhs.id == rhs.id
@@ -1370,6 +1485,7 @@ struct ChordPillInput: View {
                         ChordPill(
                             name: chord.name,
                             isValid: chord.isValid,
+                            isSuggested: chord.isSuggested,
                             showDragHandle: allowReordering,
                             onRemove: {
                                 removeChord(chord)
@@ -1424,6 +1540,14 @@ struct ChordPillInput: View {
                 }
             }
         }
+        .onChange(of: chords) { oldValue, newValue in
+            // Reload chords when the binding changes (e.g., from chord suggestions)
+            if oldValue != newValue {
+                // Clear and reload to pick up new chords
+                validatedChords.removeAll()
+                loadExistingChords()
+            }
+        }
     }
 
     private func loadExistingChords() {
@@ -1437,7 +1561,8 @@ struct ChordPillInput: View {
         validatedChords = existingChords.map { chordName in
             ValidatedChord(
                 name: chordName,
-                isValid: chordLibrary.findChord(chordName) != nil
+                isValid: chordLibrary.findChord(chordName) != nil,
+                isSuggested: false  // Don't mark as suggested since we show suggestions separately
             )
         }
 
@@ -1487,6 +1612,7 @@ struct ChordPillInput: View {
 struct ChordPill: View {
     let name: String
     let isValid: Bool
+    var isSuggested: Bool = false
     var showDragHandle: Bool = false
     let onRemove: () -> Void
 
@@ -1507,6 +1633,17 @@ struct ChordPill: View {
             Text(name)
                 .font(.subheadline)
                 .fontWeight(.medium)
+
+            // Show [SUGGESTED] badge
+            if isSuggested {
+                Text("SUGGESTED")
+                    .font(.system(size: 8))
+                    .foregroundColor(.orange)
+                    .padding(.horizontal, 4)
+                    .padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.2))
+                    .cornerRadius(3)
+            }
 
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
@@ -1666,6 +1803,46 @@ struct StrumPatternRow: View {
                 customPattern = pattern.pattern
             }
         }
+    }
+}
+
+// MARK: - Suggested Chord Pill
+
+struct SuggestedChordPill: View {
+    let chord: String
+    let isAdded: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 6) {
+                Text(chord)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(isAdded ? .secondary : .primary)
+
+                if isAdded {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption)
+                        .foregroundColor(.green)
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(isAdded ? Color(.systemGray5) : Color.appAccent.opacity(0.15))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(
+                        isAdded ? Color(.systemGray4) : Color.appAccent.opacity(0.3),
+                        lineWidth: 1
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+        .opacity(isAdded ? 0.6 : 1.0)
     }
 }
 

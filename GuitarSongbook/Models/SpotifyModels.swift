@@ -92,3 +92,21 @@ struct SpotifyPlaylistInfo: Codable {
     let description: String?
 }
 
+// MARK: - Audio Features Models
+
+struct SpotifyAudioFeatures: Codable {
+    let key: Int           // 0-11 (C, C#, D, ..., B)
+    let mode: Int          // 0 = minor, 1 = major
+    let tempo: Double      // BPM
+    let timeSignature: Int // e.g., 4 for 4/4
+    let danceability: Double?
+    let energy: Double?
+    let valence: Double?   // "happiness" of song
+
+    enum CodingKeys: String, CodingKey {
+        case key, mode, tempo
+        case timeSignature = "time_signature"
+        case danceability, energy, valence
+    }
+}
+
