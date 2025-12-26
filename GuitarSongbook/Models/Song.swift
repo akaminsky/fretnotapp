@@ -23,7 +23,10 @@ struct Song: Identifiable, Codable, Equatable {
     var createdAt: Date
     var isFavorite: Bool
     var categories: [String]
-    
+    var key: Int?           // 0-11 (C, C#, D, ..., B)
+    var mode: Int?          // 0 = minor, 1 = major
+    var tempo: Double?      // BPM
+
     init(
         id: UUID = UUID(),
         title: String,
@@ -39,7 +42,10 @@ struct Song: Identifiable, Codable, Equatable {
         notes: String? = nil,
         createdAt: Date = Date(),
         isFavorite: Bool = false,
-        categories: [String] = []
+        categories: [String] = [],
+        key: Int? = nil,
+        mode: Int? = nil,
+        tempo: Double? = nil
     ) {
         self.id = id
         self.title = title
@@ -56,6 +62,9 @@ struct Song: Identifiable, Codable, Equatable {
         self.createdAt = createdAt
         self.isFavorite = isFavorite
         self.categories = categories
+        self.key = key
+        self.mode = mode
+        self.tempo = tempo
     }
     
     // MARK: - Custom Decoding for Data Migration
@@ -65,6 +74,7 @@ struct Song: Identifiable, Codable, Equatable {
         case id, title, artist, chords, capoPosition, tuning, strumPatterns, dateAdded
         case spotifyUrl, tabUrl, albumCoverUrl, notes, createdAt
         case isFavorite, categories
+        case key, mode, tempo
     }
     
     init(from decoder: Decoder) throws {
@@ -92,6 +102,11 @@ struct Song: Identifiable, Codable, Equatable {
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? dateAdded
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
         categories = try container.decodeIfPresent([String].self, forKey: .categories) ?? []
+
+        // Audio features
+        key = try container.decodeIfPresent(Int.self, forKey: .key)
+        mode = try container.decodeIfPresent(Int.self, forKey: .mode)
+        tempo = try container.decodeIfPresent(Double.self, forKey: .tempo)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -111,6 +126,9 @@ struct Song: Identifiable, Codable, Equatable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(isFavorite, forKey: .isFavorite)
         try container.encode(categories, forKey: .categories)
+        try container.encodeIfPresent(key, forKey: .key)
+        try container.encodeIfPresent(mode, forKey: .mode)
+        try container.encodeIfPresent(tempo, forKey: .tempo)
     }
 
     var capoDisplayText: String {
@@ -132,5 +150,18 @@ struct Song: Identifiable, Codable, Equatable {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter.string(from: dateAdded)
+    }
+
+    var keyDisplayText: String? {
+        guard let key = key, let mode = mode else { return nil }
+        let notes = ["C", "C♯", "D", "D♯", "E", "F", "F♯", "G", "G♯", "A", "A♯", "B"]
+        guard key >= 0 && key < notes.count else { return nil }
+        let modeText = mode == 1 ? "Major" : "Minor"
+        return "\(notes[key]) \(modeText)"
+    }
+
+    var tempoDisplayText: String? {
+        guard let tempo = tempo else { return nil }
+        return "\(Int(tempo)) BPM"
     }
 }

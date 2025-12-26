@@ -13,6 +13,9 @@ class ChordSuggestionService: ObservableObject {
     @Published var suggestedChords: [String] = []
     @Published var suggestionSource: SuggestionSource = .none
     @Published var error: String?
+    @Published var audioFeaturesKey: Int?
+    @Published var audioFeaturesMode: Int?
+    @Published var audioFeaturesTempo: Double?
 
     private let spotifyService: SpotifyService
     private let chordLibrary = ChordLibrary.shared
@@ -40,19 +43,27 @@ class ChordSuggestionService: ObservableObject {
     // MARK: - Main Suggestion Method
 
     func suggestChords(for track: SpotifyTrack, capoPosition: Int = 0) async {
+        let startTime = Date()
         isSuggesting = true
-        defer { isSuggesting = false }
 
         // For MVP: Only Tier 1 (Spotify audio analysis)
         if let analysisChords = await generateChordsFromAudioAnalysis(trackId: track.id, capoPosition: capoPosition) {
             suggestedChords = analysisChords
             suggestionSource = .spotify
-            return
+        } else {
+            // Tier 3: Default suggestions based on common progressions
+            suggestedChords = getDefaultChords()
+            suggestionSource = .fallback
         }
 
-        // Tier 3: Default suggestions based on common progressions
-        suggestedChords = getDefaultChords()
-        suggestionSource = .fallback
+        // Ensure loading state is visible for at least 250ms
+        let elapsed = Date().timeIntervalSince(startTime)
+        let minimumDisplayTime: TimeInterval = 0.25
+        if elapsed < minimumDisplayTime {
+            try? await Task.sleep(nanoseconds: UInt64((minimumDisplayTime - elapsed) * 1_000_000_000))
+        }
+
+        isSuggesting = false
     }
 
     // MARK: - Tier 1: Spotify Audio Analysis
@@ -60,6 +71,11 @@ class ChordSuggestionService: ObservableObject {
     private func generateChordsFromAudioAnalysis(trackId: String, capoPosition: Int) async -> [String]? {
         do {
             let features = try await spotifyService.fetchAudioFeatures(trackId: trackId)
+
+            // Store original audio features (not transposed)
+            audioFeaturesKey = features.key
+            audioFeaturesMode = features.mode
+            audioFeaturesTempo = features.tempo
 
             // Transpose key DOWN by capo position to get easier chords
             // Example: Song in F# (key=6) with Capo 2 → E (key=4)

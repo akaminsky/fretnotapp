@@ -70,13 +70,13 @@ struct SongDetailView: View {
                             .fill(Color(.systemGray5))
                             .frame(height: 1)
 
-                        // Properties - Notion style
-                        propertiesSection
-
                         // Notes
                         if let notes = liveSong.notes, !notes.isEmpty {
                             notesSection(notes)
                         }
+
+                        // Properties - Notion style (includes Key & BPM)
+                        propertiesSection
                     }
                     .padding(20)
                 }
@@ -297,9 +297,25 @@ struct SongDetailView: View {
                     Text("Found a tab URL in your clipboard. Save it to this song?")
                 }
             }
+
+            // Key
+            if let keyText = liveSong.keyDisplayText {
+                PropertyRow(label: "Key", icon: "music.note") {
+                    Text(keyText)
+                        .foregroundColor(.primary)
+                }
+            }
+
+            // Tempo
+            if let tempoText = liveSong.tempoDisplayText {
+                PropertyRow(label: "Tempo", icon: "metronome") {
+                    Text(tempoText)
+                        .foregroundColor(.primary)
+                }
+            }
         }
     }
-    
+
     // MARK: - Chord Section
 
     private var chordSection: some View {
@@ -653,7 +669,7 @@ struct SongDetailView: View {
     }
 
     // MARK: - Notes Section
-    
+
     private func notesSection(_ notes: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
@@ -666,7 +682,7 @@ struct SongDetailView: View {
             
             Text(notes)
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(.primary)
                 .lineSpacing(6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)

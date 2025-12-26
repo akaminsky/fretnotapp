@@ -51,6 +51,9 @@ struct AddSongView: View {
     @FocusState private var focusedField: FocusField?
     @State private var chordSuggestionService: ChordSuggestionService?
     @State private var suggestedChordNames: [String] = []
+    @State private var audioFeaturesKey: Int?
+    @State private var audioFeaturesMode: Int?
+    @State private var audioFeaturesTempo: Double?
 
     enum GuitarSection {
         case chords, strumPatterns, tuning
@@ -108,7 +111,7 @@ struct AddSongView: View {
                         saveSong()
                     }
                     .fontWeight(.semibold)
-                    .disabled(title.isEmpty)
+                    .disabled(title.isEmpty || (chordSuggestionService?.isSuggesting ?? false))
                 }
             }
         }
@@ -623,21 +626,35 @@ struct AddSongView: View {
                     // Conditional content based on selected section
                     if guitarSection == .chords {
                         VStack(alignment: .leading, spacing: 12) {
-                            // Loading indicator for chord suggestions
-                            if let service = chordSuggestionService, service.isSuggesting {
-                                HStack(spacing: 8) {
-                                    ProgressView()
-                                        .progressViewStyle(CircularProgressViewStyle())
-                                        .scaleEffect(0.8)
-                                    Text("Suggesting chords from \(service.suggestionSource.description)...")
-                                        .font(.caption)
-                                        .foregroundColor(.secondary)
+                            // Capo Position
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text("Capo Position")
+                                    .font(.caption)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.secondary)
+                                    .textCase(.uppercase)
+
+                                Picker("Capo", selection: $capoPosition) {
+                                    Text("No Capo").tag(0)
+                                    ForEach(1...7, id: \.self) { fret in
+                                        Text("\(fret)\(ordinalSuffix(fret)) Fret").tag(fret)
+                                    }
                                 }
-                                .padding(.vertical, 8)
+                                .pickerStyle(.segmented)
+                                .onChange(of: capoPosition) { oldValue, newValue in
+                                    // Re-fetch chord suggestions when capo changes
+                                    if let track = selectedTrack, let service = chordSuggestionService {
+                                        Task {
+                                            print("🎸 Capo changed to \(newValue), updating suggestions...")
+                                            await service.suggestChords(for: track, capoPosition: newValue)
+                                            suggestedChordNames = service.suggestedChords
+                                        }
+                                    }
+                                }
                             }
 
-                            // Suggested chords section
-                            if !suggestedChordNames.isEmpty {
+                            // Suggested chords section (always visible when Spotify track selected)
+                            if selectedTrack != nil || !suggestedChordNames.isEmpty {
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
                                         Text("Suggested Chords")
@@ -645,32 +662,52 @@ struct AddSongView: View {
                                             .fontWeight(.semibold)
                                             .foregroundColor(.secondary)
 
-                                        if let service = chordSuggestionService,
-                                           service.suggestionSource != .none,
-                                           service.suggestionSource != .fallback {
-                                            Text("from \(service.suggestionSource.description)")
-                                                .font(.caption)
-                                                .foregroundColor(.secondary)
-                                        }
-
                                         Spacer()
 
-                                        Button("Add All") {
-                                            addAllSuggestedChords()
+                                        if !suggestedChordNames.isEmpty {
+                                            Button("Add All") {
+                                                addAllSuggestedChords()
+                                            }
+                                            .font(.caption)
+                                            .foregroundColor(.appAccent)
                                         }
-                                        .font(.caption)
-                                        .foregroundColor(.appAccent)
                                     }
 
-                                    FlowLayout(spacing: 8) {
-                                        ForEach(suggestedChordNames, id: \.self) { chord in
-                                            SuggestedChordPill(
-                                                chord: chord,
-                                                isAdded: isChordAdded(chord),
-                                                onTap: {
-                                                    addSuggestedChord(chord)
-                                                }
-                                            )
+                                    // Loading state or chord pills
+                                    if let service = chordSuggestionService, service.isSuggesting {
+                                        HStack(spacing: 12) {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle())
+                                                .tint(.appAccent)
+                                            Text("Analyzing song from Spotify...")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 8)
+                                    } else if suggestedChordNames.isEmpty {
+                                        // Show empty state while waiting
+                                        HStack(spacing: 12) {
+                                            ProgressView()
+                                                .progressViewStyle(CircularProgressViewStyle())
+                                                .tint(.appAccent)
+                                            Text("Loading...")
+                                                .font(.subheadline)
+                                                .foregroundColor(.secondary)
+                                            Spacer()
+                                        }
+                                        .padding(.vertical, 8)
+                                    } else {
+                                        FlowLayout(spacing: 8) {
+                                            ForEach(suggestedChordNames, id: \.self) { chord in
+                                                SuggestedChordPill(
+                                                    chord: chord,
+                                                    isAdded: isChordAdded(chord),
+                                                    onTap: {
+                                                        addSuggestedChord(chord)
+                                                    }
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -720,32 +757,6 @@ struct AddSongView: View {
                         VStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 12) {
                                 VStack(alignment: .leading, spacing: 6) {
-                                    Text("Capo Position")
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(.secondary)
-                                        .textCase(.uppercase)
-
-                                    Picker("Capo", selection: $capoPosition) {
-                                        Text("No Capo").tag(0)
-                                        ForEach(1...7, id: \.self) { fret in
-                                            Text("\(fret)\(ordinalSuffix(fret)) Fret").tag(fret)
-                                        }
-                                    }
-                                    .pickerStyle(.segmented)
-                                    .onChange(of: capoPosition) { oldValue, newValue in
-                                        // Re-fetch chord suggestions when capo changes
-                                        if let track = selectedTrack, let service = chordSuggestionService {
-                                            Task {
-                                                print("🎸 Capo changed to \(newValue), updating suggestions...")
-                                                await service.suggestChords(for: track, capoPosition: newValue)
-                                                suggestedChordNames = service.suggestedChords
-                                            }
-                                        }
-                                    }
-                                }
-
-                                VStack(alignment: .leading, spacing: 6) {
                                     Text("Tuning")
                                         .font(.caption)
                                         .fontWeight(.medium)
@@ -786,6 +797,15 @@ struct AddSongView: View {
                         }
                     }
                 }
+            }
+
+            // Notes
+            FormSection(title: "Notes") {
+                TextField("Add notes on chord order, technique, or playing tips...", text: $notes, axis: .vertical)
+                    .lineLimit(3...6)
+                    .padding(12)
+                    .background(Color(.systemBackground))
+                    .cornerRadius(8)
             }
 
             // Categories
@@ -905,16 +925,7 @@ struct AddSongView: View {
                     .cornerRadius(8)
                 }
             }
-            
-            // Notes
-            FormSection(title: "Notes") {
-                TextField("Any notes about this song...", text: $notes, axis: .vertical)
-                    .lineLimit(3...6)
-                    .padding(12)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(8)
-            }
-            
+
             // Delete button for editing
             if isEditing {
                 Button(role: .destructive) {
@@ -963,6 +974,16 @@ struct AddSongView: View {
             albumCoverUrl = song.albumCoverUrl
             isFavorite = song.isFavorite
             selectedCategories = Set(song.categories)
+            audioFeaturesKey = song.key
+            audioFeaturesMode = song.mode
+            audioFeaturesTempo = song.tempo
+
+            // Fetch chord suggestions if this is a Spotify song
+            if let url = song.spotifyUrl, !url.isEmpty, let trackId = extractSpotifyTrackId(from: url) {
+                Task {
+                    await fetchChordSuggestionsForEdit(trackId: trackId)
+                }
+            }
         } else if !prefilledTitle.isEmpty {
             title = prefilledTitle
             artist = prefilledArtist
@@ -983,30 +1004,24 @@ struct AddSongView: View {
         spotifyService.clearResults()
         searchQuery = ""
 
+        // Clear previous suggestions to show loading state
+        suggestedChordNames = []
+
         // Fetch chord suggestions
         Task {
-            guard let service = chordSuggestionService else {
-                print("⚠️ ChordSuggestionService not initialized")
-                return
-            }
+            guard let service = chordSuggestionService else { return }
 
-            print("🎵 Fetching chord suggestions for: \(track.name)")
-            print("🎸 Capo position: \(capoPosition)")
             await service.suggestChords(for: track, capoPosition: capoPosition)
 
-            print("🎸 Suggested chords: \(service.suggestedChords)")
-            print("🎸 Suggestion source: \(service.suggestionSource)")
-            if capoPosition > 0 {
-                print("🎸 Transposed for Capo \(capoPosition)")
-            }
-
-            // Store suggestions for display (don't auto-populate)
+            // Store suggestions for display
             if !service.suggestedChords.isEmpty {
                 suggestedChordNames = service.suggestedChords
-                print("✅ \(service.suggestedChords.count) chord suggestions available")
-            } else {
-                print("❌ No chord suggestions returned")
             }
+
+            // Store audio features for saving with the song
+            audioFeaturesKey = service.audioFeaturesKey
+            audioFeaturesMode = service.audioFeaturesMode
+            audioFeaturesTempo = service.audioFeaturesTempo
         }
     }
     
@@ -1111,6 +1126,9 @@ struct AddSongView: View {
             song.albumCoverUrl = albumCoverUrl
             song.isFavorite = isFavorite
             song.categories = Array(selectedCategories)
+            song.key = audioFeaturesKey
+            song.mode = audioFeaturesMode
+            song.tempo = audioFeaturesTempo
             songStore.updateSong(song)
         } else {
             let song = Song(
@@ -1126,7 +1144,10 @@ struct AddSongView: View {
                 albumCoverUrl: albumCoverUrl,
                 notes: notes.isEmpty ? nil : notes,
                 isFavorite: isFavorite,
-                categories: Array(selectedCategories)
+                categories: Array(selectedCategories),
+                key: audioFeaturesKey,
+                mode: audioFeaturesMode,
+                tempo: audioFeaturesTempo
             )
             songStore.addSong(song)
         }
@@ -1135,6 +1156,54 @@ struct AddSongView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isSaving = false
             dismiss()
+        }
+    }
+
+    private func extractSpotifyTrackId(from url: String) -> String? {
+        // Handle spotify:track: format
+        if url.hasPrefix("spotify:track:") {
+            return String(url.dropFirst(14))
+        }
+
+        // Handle https://open.spotify.com/track/{id}
+        if let urlObj = URL(string: url),
+           urlObj.host?.contains("spotify.com") == true {
+            let pathComponents = urlObj.pathComponents
+            if let trackIndex = pathComponents.firstIndex(of: "track"),
+               trackIndex + 1 < pathComponents.count {
+                // Get the ID and remove query parameters
+                let idWithParams = pathComponents[trackIndex + 1]
+                return idWithParams.components(separatedBy: "?").first
+            }
+        }
+
+        return nil
+    }
+
+    private func fetchChordSuggestionsForEdit(trackId: String) async {
+        guard let service = chordSuggestionService else { return }
+
+        // Create a minimal SpotifyTrack just for fetching suggestions
+        let track = SpotifyTrack(
+            id: trackId,
+            name: title,
+            artists: [SpotifyArtist(name: artist)],
+            album: SpotifyAlbum(name: "", images: []),
+            externalUrls: SpotifyExternalUrls(spotify: spotifyUrl)
+        )
+
+        await service.suggestChords(for: track, capoPosition: capoPosition)
+
+        // Store suggestions for display
+        if !service.suggestedChords.isEmpty {
+            suggestedChordNames = service.suggestedChords
+        }
+
+        // Store audio features if they weren't already saved
+        if audioFeaturesKey == nil {
+            audioFeaturesKey = service.audioFeaturesKey
+            audioFeaturesMode = service.audioFeaturesMode
+            audioFeaturesTempo = service.audioFeaturesTempo
         }
     }
 }
@@ -1537,13 +1606,6 @@ struct ChordPillInput: View {
                 }
                 .foregroundColor(.red)
             }
-
-            // Helper text
-            if validatedChords.isEmpty {
-                Text("Press the add button or hit return to add")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-            }
         }
         .onAppear {
             loadExistingChords()
@@ -1857,6 +1919,40 @@ struct SuggestedChordPill: View {
         }
         .buttonStyle(.plain)
         .opacity(isAdded ? 0.6 : 1.0)
+    }
+}
+
+struct SkeletonChordPill: View {
+    let delay: Double
+    @State private var isAnimating = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text("C#m")
+                .font(.subheadline)
+                .fontWeight(.medium)
+                .foregroundColor(.clear)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemGray5))
+                .opacity(isAnimating ? 0.3 : 0.6)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color(.systemGray4), lineWidth: 1)
+        )
+        .onAppear {
+            withAnimation(
+                Animation.easeInOut(duration: 0.8)
+                    .repeatForever(autoreverses: true)
+                    .delay(delay)
+            ) {
+                isAnimating = true
+            }
+        }
     }
 }
 

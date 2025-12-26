@@ -185,7 +185,9 @@ struct ChordDiagramsGrid: View {
 
     var body: some View {
         LazyVGrid(columns: [
-            GridItem(.adaptive(minimum: 100), spacing: 12)
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+            GridItem(.flexible())
         ], spacing: 12) {
             ForEach(chords, id: \.self) { chord in
                 ChordDiagramView(chordName: chord, onEditRequest: {

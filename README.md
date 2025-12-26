@@ -7,8 +7,14 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 ### 🎵 Song Management
 - **Add Songs Manually** - Quick entry with title (required), artist, chords, capo position, tuning, and notes
 - **Spotify Integration** - Search and import songs directly from Spotify
+- **Intelligent Chord Suggestions** - Automatic chord recommendations based on song analysis
+  - Analyzes song key and mode using Spotify audio features
+  - Generates chord progressions based on music theory
+  - Capo-aware transposition for easier chord shapes
+  - Interactive tap-to-add interface
 - **Bulk Import** - Import entire Spotify playlists at once
 - **Auto-fill** - Automatically populate song details from Spotify (editable)
+- **Song Metadata** - Automatically capture key signature and tempo from Spotify
 - **Tuning Support** - Track tuning for each song (Standard, Drop D, Drop C, Half Step Down, Open D, Open G, or custom)
 - **Custom Lists** - Organize songs into custom categories
 - **Favorites** - Mark songs as favorites for quick access
@@ -35,6 +41,12 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - **Multiple Tunings** - Support for Standard, Drop D, Drop C, Half Step Down, Open D, and Open G tunings
 - **Manual & Auto String Selection** - Select specific strings or let auto-detection find them
 
+### 🎼 Strumming Patterns
+- **Strumming Pattern Library** - Preset patterns for different playing styles
+- **Multiple Patterns Per Song** - Attach multiple strumming patterns to each song
+- **Visual Pattern Display** - Clear notation showing down/up strums (D-DU-UDU)
+- **Common Presets** - Classic Acoustic, Simple Strum, and more
+
 ### ☁️ Sync & Storage
 - **iCloud Sync** - Automatic sync across iPhone, iPad, and Mac
 - **Local Storage** - Works offline, syncs when connected
@@ -52,6 +64,26 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 ## Recent Updates
 
 ### Version 1.3.0 (December 2024)
+
+#### Intelligent Chord Suggestions
+- **Automatic Chord Suggestions** - Suggest chords when importing from Spotify
+  - Analyzes song key, mode, and tempo using Spotify audio features
+  - Generates chord progressions based on music theory
+  - Capo-aware: suggestions transpose automatically based on capo position
+  - Works in both add and edit modes
+- **Interactive Suggestions** - Tap suggested chord pills to add them to your song
+  - Visual feedback shows which chords are already added
+  - "Add All" button to quickly add entire progression
+  - Suggestions update when you change capo position
+- **Loading States** - Clear feedback while fetching suggestions
+  - Animated loading indicator with message
+  - Minimum 250ms display time for smooth UX
+  - Save button disabled until suggestions load
+- **Song Metadata** - Automatically captures and displays song information
+  - Key signature (e.g., "C♯ Major", "A Minor")
+  - Tempo in BPM (e.g., "120 BPM")
+  - Displayed in properties section on song detail page
+  - Syncs across devices with iCloud
 
 #### Chord Diagram Rendering Improvements
 - **Dynamic Diagram Sizing** - Chord diagrams now automatically adjust height based on fret range
@@ -112,6 +144,9 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 #### UI/UX Improvements
 - **Song Detail Page Reorganization**
+  - 3-column chord diagram layout for better use of screen space
+  - Notes section now appears above metadata for better hierarchy
+  - Key and Tempo integrated into properties section (no separate section)
   - Added Tuning tab (positioned between Chords and Strumming) for cleaner guitar info organization
   - Moved guitar information (Chords/Tuning/Strumming) above metadata for better prioritization
   - Removed redundant chord, capo, and tuning displays from properties section
@@ -137,9 +172,12 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
   - Consistent color scheme throughout app for better brand identity
 
 #### Strumming Patterns
-- Added "Classic Acoustic" pattern (D-DU-UDU)
-- Added "Simple Strum" pattern (D-DU)
-- Expanded preset library for more versatile song coverage
+- **New Strumming Pattern System** - Track and practice strumming patterns for each song
+  - Preset library with common patterns (Classic Acoustic, Simple Strum, and more)
+  - Visual strumming pattern display in song details
+  - Attach multiple patterns to songs for versatile coverage
+  - "Classic Acoustic" pattern (D-DU-UDU)
+  - "Simple Strum" pattern (D-DU)
 
 ### Tuning Features (December 2024)
 - Added tuning field to song details (Standard, Drop D, Drop C, Half Step Down, Open D, Open G, or custom)
@@ -190,11 +228,13 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - `CustomChordLibrary` - User-created custom chord management with iCloud sync
 - `AudioPitchDetector` - Real-time tuner functionality
 - `SpotifyService` - Spotify API integration
+- `ChordSuggestionService` - Intelligent chord suggestions based on audio analysis
 - `HapticManager` - Centralized haptic feedback
 
 ### Services
 - **HapticManager** - Provides light, medium, heavy, success, and error haptics
 - **SpotifyService** - Handles authentication and API calls
+- **ChordSuggestionService** - Generates chord suggestions using audio analysis and music theory
 - **TabURLDetector** - Detects Ultimate Guitar tab URLs
 
 ## Data Model
@@ -215,6 +255,9 @@ struct Song {
     var notes: String?
     var isFavorite: Bool
     var categories: [String]
+    var key: Int?           // 0-11 (C, C#, D, ..., B)
+    var mode: Int?          // 0 = minor, 1 = major
+    var tempo: Double?      // BPM
 }
 ```
 
