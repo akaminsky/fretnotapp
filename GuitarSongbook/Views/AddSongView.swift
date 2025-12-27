@@ -1183,6 +1183,9 @@ struct AddSongView: View {
     private func fetchChordSuggestionsForEdit(trackId: String) async {
         guard let service = chordSuggestionService else { return }
 
+        // Clear previous suggestions to show loading state
+        suggestedChordNames = []
+
         // Create a minimal SpotifyTrack just for fetching suggestions
         let track = SpotifyTrack(
             id: trackId,
