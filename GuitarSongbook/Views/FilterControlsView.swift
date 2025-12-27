@@ -10,6 +10,8 @@ import SwiftUI
 struct FilterControlsView: View {
     @EnvironmentObject var songStore: SongStore
     @State private var showFilters = false
+    @State private var showingChordFilter = false
+    @State private var showingCapoFilter = false
     @FocusState private var searchFieldFocused: Bool
 
     var body: some View {
@@ -48,9 +50,7 @@ struct FilterControlsView: View {
 
                 // Filter Button - Notion style
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        showFilters.toggle()
-                    }
+                    showFilters.toggle()
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "slider.horizontal.3")
@@ -122,11 +122,19 @@ struct FilterControlsView: View {
                 VStack(spacing: 12) {
                     HStack(spacing: 12) {
                         // Chord Filter
-                        Menu {
+                        Button {
+                            showingChordFilter = true
+                        } label: {
+                            FilterPill(
+                                label: "Chord",
+                                value: songStore.filterChord.isEmpty ? nil : getChordFilterDisplayValue(songStore.filterChord)
+                            )
+                        }
+                        .buttonStyle(.plain)
+                        .confirmationDialog("Select Chord Filter", isPresented: $showingChordFilter, titleVisibility: .visible) {
                             Button("All Chords") {
                                 songStore.filterChord = ""
                             }
-                            Divider()
                             Button("Has Chords") {
                                 songStore.filterChord = "__HAS_CHORDS__"
                             }
@@ -134,26 +142,29 @@ struct FilterControlsView: View {
                                 songStore.filterChord = "__NO_CHORDS__"
                             }
                             if !songStore.allUniqueChords.isEmpty {
-                                Divider()
                                 ForEach(songStore.allUniqueChords, id: \.self) { chord in
                                     Button(chord) {
                                         songStore.filterChord = chord
                                     }
                                 }
                             }
+                        }
+                        .tint(.primary)
+
+                        // Capo Filter
+                        Button {
+                            showingCapoFilter = true
                         } label: {
                             FilterPill(
-                                label: "Chord",
-                                value: songStore.filterChord.isEmpty ? nil : getChordFilterDisplayValue(songStore.filterChord)
+                                label: "Capo",
+                                value: songStore.filterCapo.isEmpty ? nil : formatCapo(songStore.filterCapo)
                             )
                         }
-                        
-                        // Capo Filter
-                        Menu {
+                        .buttonStyle(.plain)
+                        .confirmationDialog("Select Capo Position", isPresented: $showingCapoFilter, titleVisibility: .visible) {
                             Button("All") {
                                 songStore.filterCapo = ""
                             }
-                            Divider()
                             Button("No Capo") {
                                 songStore.filterCapo = "0"
                             }
@@ -162,12 +173,8 @@ struct FilterControlsView: View {
                                     songStore.filterCapo = String(fret)
                                 }
                             }
-                        } label: {
-                            FilterPill(
-                                label: "Capo",
-                                value: songStore.filterCapo.isEmpty ? nil : formatCapo(songStore.filterCapo)
-                            )
                         }
+                        .tint(.primary)
                         
                         Spacer()
                         
@@ -175,9 +182,12 @@ struct FilterControlsView: View {
                             Button {
                                 songStore.clearFilters()
                             } label: {
-                                Text("Clear")
+                                Image(systemName: "xmark.circle.fill")
                                     .font(.subheadline)
-                                    .foregroundColor(.appAccent)
+                                    .foregroundColor(.white)
+                                    .padding(8)
+                                    .background(Color.appAccent)
+                                    .clipShape(Circle())
                             }
                         }
                     }
@@ -221,9 +231,9 @@ struct FilterControlsView: View {
     }
     
     private func formatCapo(_ value: String) -> String {
-        if value == "0" { return "No Capo" }
+        if value == "0" { return "None" }
         if let num = Int(value) {
-            return "Capo \(num)"
+            return "\(num)"
         }
         return value
     }
@@ -254,33 +264,29 @@ struct FilterControlsView: View {
 struct FilterPill: View {
     let label: String
     let value: String?
-    
+
     var body: some View {
         HStack(spacing: 6) {
             Text(label)
                 .foregroundColor(.secondary)
-            
-            if let value = value {
-                Text(value)
-                    .foregroundColor(.appAccent)
-                    .fontWeight(.medium)
-            } else {
-                Text("All")
-                    .foregroundColor(.primary)
-            }
-            
+
+            Text(value ?? "All")
+                .foregroundColor(.primary)
+                .fontWeight(value != nil ? .medium : .regular)
+
             Image(systemName: "chevron.down")
                 .font(.caption2)
                 .foregroundColor(.secondary)
         }
+        .fixedSize()
         .font(.subheadline)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(value != nil ? Color.appAccent.opacity(0.1) : Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(8)
         .overlay(
             RoundedRectangle(cornerRadius: 8)
-                .stroke(value != nil ? Color.appAccent.opacity(0.3) : Color(.systemGray4), lineWidth: 1)
+                .stroke(value != nil ? Color.appAccent : Color(.systemGray4), lineWidth: 1)
         )
     }
 }

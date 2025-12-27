@@ -36,6 +36,8 @@ struct ContentView: View {
                     FilterControlsView()
                         .padding(.horizontal)
                         .padding(.top, 4)
+                        .animation(nil, value: songStore.filterChord)
+                        .animation(nil, value: songStore.filterCapo)
                     
                     // Song List or Empty State
                     if songStore.filteredAndSortedSongs.isEmpty {
