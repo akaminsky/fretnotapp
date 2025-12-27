@@ -653,8 +653,8 @@ struct AddSongView: View {
                                 }
                             }
 
-                            // Suggested chords section (always visible when Spotify track selected)
-                            if selectedTrack != nil || !suggestedChordNames.isEmpty {
+                            // Suggested chords section (visible when Spotify track selected or editing Spotify song)
+                            if selectedTrack != nil || !suggestedChordNames.isEmpty || (isEditing && !spotifyUrl.isEmpty) {
                                 VStack(alignment: .leading, spacing: 8) {
                                     HStack {
                                         Text("Suggested Chords")
