@@ -29,13 +29,11 @@ class CommunityDataService: ObservableObject {
         let shouldShare = UserDefaults.standard.object(forKey: "shareAnonymouslyEnabled") == nil ? true : shareAnonymously
 
         guard shouldShare else {
-            print("📊 Anonymous sharing disabled by user")
             return
         }
 
         // Don't submit if no chords
         guard !chords.isEmpty else {
-            print("📊 Skipping contribution: no chords")
             return
         }
 
@@ -61,18 +59,9 @@ class CommunityDataService: ObservableObject {
             request.httpBody = try JSONSerialization.data(withJSONObject: contribution)
 
             // Submit asynchronously without awaiting response
-            let (_, response) = try await URLSession.shared.data(for: request)
-
-            if let httpResponse = response as? HTTPURLResponse {
-                if httpResponse.statusCode == 200 {
-                    print("📊 Anonymous contribution submitted successfully")
-                } else {
-                    print("📊 Contribution failed with status: \(httpResponse.statusCode)")
-                }
-            }
+            let _ = try await URLSession.shared.data(for: request)
         } catch {
             // Fail silently - don't block user flow
-            print("📊 Anonymous contribution error: \(error.localizedDescription)")
         }
     }
 

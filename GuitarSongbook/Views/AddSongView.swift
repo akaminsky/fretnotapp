@@ -646,9 +646,13 @@ struct AddSongView: View {
                                     // Re-fetch chord suggestions when capo changes
                                     if let track = selectedTrack, let service = chordSuggestionService {
                                         Task {
-                                            print("🎸 Capo changed to \(newValue), updating suggestions...")
                                             await service.suggestChords(for: track, capoPosition: newValue)
                                             suggestedChordNames = service.suggestedChords
+                                        }
+                                    } else if isEditing && !spotifyUrl.isEmpty, let trackId = extractSpotifyTrackId(from: spotifyUrl) {
+                                        // Re-fetch suggestions in edit mode
+                                        Task {
+                                            await fetchChordSuggestionsForEdit(trackId: trackId)
                                         }
                                     }
                                 }
