@@ -56,6 +56,7 @@ struct SettingsView: View {
     @State private var showingCategoryManager = false
     @State private var showingBulkImport = false
     @State private var showingCustomChordManager = false
+    @AppStorage("shareAnonymouslyEnabled") private var shareAnonymouslyEnabled = true
     
     var body: some View {
         NavigationStack {
@@ -198,7 +199,25 @@ struct SettingsView: View {
                         Text("Sign in to iCloud in Settings to sync your songs across devices.")
                     }
                 }
-                
+
+                // Community Section
+                Section {
+                    Toggle(isOn: $shareAnonymouslyEnabled) {
+                        HStack {
+                            Image(systemName: "person.3.fill")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+
+                            Text("Share Songs Anonymously")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                } header: {
+                    Text("Community")
+                } footer: {
+                    Text("Help other guitarists by anonymously sharing your chord data when you add Spotify songs. No personal information is shared - only chords, capo position, and tuning. Your notes stay private. You can opt out anytime.")
+                }
+
                 // Feedback Section
                 Section {
                     Link(destination: URL(string: "mailto:fretnotapp@gmail.com")!) {

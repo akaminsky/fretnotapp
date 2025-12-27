@@ -50,6 +50,7 @@ struct AddSongView: View {
     @State private var guitarSection: GuitarSection = .chords
     @FocusState private var focusedField: FocusField?
     @State private var chordSuggestionService: ChordSuggestionService?
+    @State private var communityDataService: CommunityDataService?
     @State private var suggestedChordNames: [String] = []
     @State private var audioFeaturesKey: Int?
     @State private var audioFeaturesMode: Int?
@@ -956,8 +957,9 @@ struct AddSongView: View {
     }
     
     private func setupInitialValues() {
-        // Initialize chord suggestion service
+        // Initialize services
         chordSuggestionService = ChordSuggestionService(spotifyService: spotifyService)
+        communityDataService = CommunityDataService()
 
         if let song = editingSong {
             title = song.title
@@ -1152,10 +1154,48 @@ struct AddSongView: View {
             songStore.addSong(song)
         }
 
+        // Submit anonymous contribution (v1.3 data collection)
+        submitAnonymousContribution(
+            spotifyUrl: spotifyUrl,
+            title: title,
+            artist: artist,
+            chords: parsedChords,
+            capo: capoPosition,
+            tuning: tuningValue(for: selectedTuningOption)
+        )
+
         // Small delay to show feedback, then dismiss
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             isSaving = false
             dismiss()
+        }
+    }
+
+    private func submitAnonymousContribution(
+        spotifyUrl: String,
+        title: String,
+        artist: String,
+        chords: [String],
+        capo: Int,
+        tuning: String
+    ) {
+        // Only submit if there's a Spotify URL and service is initialized
+        guard !spotifyUrl.isEmpty,
+              let service = communityDataService,
+              let trackId = extractSpotifyTrackId(from: spotifyUrl) else {
+            return
+        }
+
+        // Submit asynchronously in background (don't block UI)
+        Task {
+            await service.submitAnonymousContribution(
+                spotifyTrackId: trackId,
+                songTitle: title,
+                artist: artist,
+                chords: chords,
+                capo: capo,
+                tuning: tuning
+            )
         }
     }
 
