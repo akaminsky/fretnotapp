@@ -345,6 +345,11 @@ struct AddVariationSheet: View {
                 dateCreated: Date()
             )
             CustomChordLibrary.shared.addCustomChord(customChord)
+
+            // Track custom chord creation
+            Task {
+                await AnalyticsService.track(event: .customChordCreated(chordName: trimmedName))
+            }
         }
 
         savedChordName = trimmedName

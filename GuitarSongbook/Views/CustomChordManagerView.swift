@@ -84,7 +84,7 @@ struct CustomChordManagerView: View {
     }
 
     private func deleteCustomChord(_ chord: CustomChordData) {
-        CustomChordLibrary.shared.deleteCustomChord(chord.id)
+        _ = CustomChordLibrary.shared.deleteCustomChord(chord.id)
         chordToDelete = nil
         songsUsingChord = []
     }

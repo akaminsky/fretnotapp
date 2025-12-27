@@ -1052,8 +1052,18 @@ struct AddSongView: View {
     }
 
     private func addAllSuggestedChords() {
+        let chordsBeforeCount = chords.split(separator: ",").count
         for chord in suggestedChordNames {
             addSuggestedChord(chord)
+        }
+        let chordsAfterCount = chords.split(separator: ",").count
+        let addedCount = chordsAfterCount - chordsBeforeCount
+
+        // Track chord suggestion usage
+        if addedCount > 0 {
+            Task {
+                await AnalyticsService.track(event: .chordSuggestionApplied(count: addedCount))
+            }
         }
     }
 
@@ -1097,6 +1107,11 @@ struct AddSongView: View {
     private func addStrumPattern() {
         let newPattern = StrumPattern(label: "Verse", pattern: "D-D-D-D")
         strumPatterns.append(newPattern)
+
+        // Track strumming pattern usage
+        Task {
+            await AnalyticsService.track(event: .strummingPatternAdded(patternName: "Verse"))
+        }
     }
 
     private func removeStrumPattern(_ pattern: StrumPattern) {
@@ -1156,6 +1171,17 @@ struct AddSongView: View {
                 tempo: audioFeaturesTempo
             )
             songStore.addSong(song)
+
+            // Track song addition (only for new songs, not edits)
+            let source = spotifyUrl.isEmpty ? "manual" : "spotify"
+            Task {
+                await AnalyticsService.track(event: .songAdded(source: source))
+
+                // Track if user added notes
+                if !notes.isEmpty {
+                    await AnalyticsService.track(event: .notesAdded())
+                }
+            }
         }
 
         // Submit anonymous contribution (v1.3 data collection)
