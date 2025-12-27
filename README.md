@@ -214,6 +214,30 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - Fixed chord card spacing in grid view
 - Added "Identify a Chord" button to empty state
 
+### Data & Analytics (December 2024)
+- **Anonymous Community Contributions** - Optionally share chord data to help other guitarists
+  - Anonymous chord progressions, capo positions, and tuning information
+  - No personal information collected - only musical data
+  - Can be disabled in Settings → "Share my songs anonymously"
+  - Building dataset for future community chord suggestion features
+- **Anonymous Usage Analytics** - Help improve the app through anonymous feature usage tracking
+  - Tracks how songs are added (manual vs Spotify)
+  - Tracks custom chord creation
+  - Tracks chord suggestion usage
+  - Tracks strumming pattern and notes usage
+  - No personal information, song titles, or identifying details collected
+
+### Filter Improvements (December 2024)
+- **Smooth Filter Animations** - Replaced janky Menu animations with instant confirmationDialog updates
+  - Filter pills now update instantly with no animation
+  - Chord and Capo filters use native iOS bottom sheet selection
+  - Improved readability with white backgrounds and black text
+- **Enhanced Filter UI**
+  - Clear button replaced with easy-to-tap orange circular icon
+  - White filter pill backgrounds with orange borders when active
+  - Fixed "Capo Capo 3" display bug (now shows "Capo: 3")
+  - Better contrast for filter text visibility
+
 ## Technical Details
 
 ### Architecture
@@ -230,12 +254,26 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - `SpotifyService` - Spotify API integration
 - `ChordSuggestionService` - Intelligent chord suggestions based on audio analysis
 - `HapticManager` - Centralized haptic feedback
+- `CommunityDataService` - Anonymous data contribution and analytics
+- `AnalyticsService` - Anonymous usage tracking
 
 ### Services
 - **HapticManager** - Provides light, medium, heavy, success, and error haptics
 - **SpotifyService** - Handles authentication and API calls
 - **ChordSuggestionService** - Generates chord suggestions using audio analysis and music theory
+- **CommunityDataService** - Manages anonymous community contributions (optional)
+- **AnalyticsService** - Tracks anonymous feature usage to improve the app
 - **TabURLDetector** - Detects Ultimate Guitar tab URLs
+
+### Backend Services
+- **Netlify Functions** - Serverless functions for Spotify integration and data collection
+  - `spotify-search.js` - Search Spotify catalog
+  - `spotify-playlist.js` - Import Spotify playlists
+  - `community-contribute.js` - Store anonymous community contributions
+  - `analytics-track.js` - Store anonymous usage analytics
+- **Supabase** - Secure cloud database for anonymous community data and analytics
+  - PostgreSQL database with Row-Level Security (RLS)
+  - Encrypted data storage and transmission
 
 ## Data Model
 
@@ -288,9 +326,30 @@ struct CustomChordData {
 - iCloud account (optional, for sync)
 
 ## Privacy
-- **No data collection** - All data stays on your device or in your iCloud
-- **Microphone permission** - Required for tuner functionality only
-- **iCloud permission** - Optional, for syncing across devices
+
+### What Stays on Your Device
+- **Your Personal Song Library** - All songs, notes, and practice data stay private on your device
+- **Custom Chords** - Your custom chord diagrams (synced via your personal iCloud)
+- **Settings and Preferences** - Your app configuration
+
+### Optional Anonymous Data Collection
+- **Community Contributions** - Anonymous chord data to help other guitarists (opt-out available)
+  - Chord progressions, capo positions, tuning information
+  - No personal information, song titles, or identifying details
+  - Can be disabled in Settings → "Share my songs anonymously"
+- **Usage Analytics** - Anonymous feature usage to improve the app
+  - Tracks which features are used (no personal data or song titles)
+  - Helps prioritize development and improvements
+
+### Permissions
+- **Microphone** - Required for tuner functionality only (audio never recorded or transmitted)
+- **iCloud** - Optional, for syncing your personal data across devices
+
+### GDPR Compliance
+- Right to access anonymous data
+- Right to delete anonymous contributions
+- Right to opt-out at any time
+- Full privacy policy: [https://fretnot.app/privacy.html](https://fretnot.app/privacy.html)
 
 ## App Store
 Available on the [App Store](https://apps.apple.com/us/app/fret-not/id6756530936)
