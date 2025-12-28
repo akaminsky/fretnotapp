@@ -16,6 +16,11 @@ struct GuitarSongbookApp: App {
     init() {
         // Initialize custom chord library on app launch
         _ = CustomChordLibrary.shared
+
+        // Request notification permission on app launch
+        Task {
+            await NotificationManager.shared.requestPermission()
+        }
     }
 
     var body: some Scene {

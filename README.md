@@ -63,6 +63,29 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ## Recent Updates
 
+### Version 1.3.1 (December 2024)
+
+#### Local Notification Reminders
+- **Practice Reminders** - Get reminded to practice your songs regularly
+  - Toggle on/off in Settings
+  - Frequency options: Daily, Every Other Day, or Weekly
+  - Customizable time (default: 7:00 PM)
+  - Enabled by default (Every Other Day)
+  - Random motivational messages
+- **Add Song Reminders** - Get reminded to grow your songbook
+  - Separate toggle and settings from practice reminders
+  - Frequency options: Daily, Every Other Day, or Weekly
+  - Customizable time (default: 7:00 PM)
+  - Enabled by default (Weekly)
+  - Encourages continuous learning
+- **Device-Only Notifications** - All notifications scheduled locally on your device
+  - No server required
+  - Complete privacy
+  - Works offline
+- **Independent Controls** - Each reminder type can be enabled/disabled separately
+  - Practice without being reminded to add songs
+  - Vice versa, or both at once
+
 ### Version 1.3.0 (December 2024)
 
 #### Intelligent Chord Suggestions
@@ -343,6 +366,7 @@ struct CustomChordData {
 
 ### Permissions
 - **Microphone** - Required for tuner functionality only (audio never recorded or transmitted)
+- **Notifications** - Optional, for practice and songbook growth reminders (scheduled locally on device)
 - **iCloud** - Optional, for syncing your personal data across devices
 
 ### GDPR Compliance
@@ -358,7 +382,7 @@ Available on the [App Store](https://apps.apple.com/us/app/fret-not/id6756530936
 Email: fretnotapp@gmail.com
 
 ## Version
-1.3.0 (Build 4)
+1.3.1 (Build 5)
 
 ## Author
 Built by Alexa Kaminsky

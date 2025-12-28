@@ -38,6 +38,7 @@
 		1107F14F2EFEFB420076A235 /* ChordSuggestionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F14E2EFEFB420076A235 /* ChordSuggestionService.swift */; };
 		1107F1512F00390C0076A235 /* CommunityDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F1502F00390C0076A235 /* CommunityDataService.swift */; };
 		11A5CF2B2F0048ED00E1351A /* AnalyticsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */; };
+		11A5CF2D2F019BC400E1351A /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A5CF2C2F019BC400E1351A /* NotificationManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -73,6 +74,7 @@
 		1107F1502F00390C0076A235 /* CommunityDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommunityDataService.swift; sourceTree = "<group>"; };
 		112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GuitarSongbook.entitlements; sourceTree = "<group>"; };
 		11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
+		11A5CF2C2F019BC400E1351A /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -131,6 +133,7 @@
 		4005 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				11A5CF2C2F019BC400E1351A /* NotificationManager.swift */,
 				11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */,
 				1107F1502F00390C0076A235 /* CommunityDataService.swift */,
 				1107F14E2EFEFB420076A235 /* ChordSuggestionService.swift */,
@@ -257,6 +260,7 @@
 				0017 /* AudioPitchDetector.swift in Sources */,
 				0018 /* TabURLDetector.swift in Sources */,
 				1107F14C2EFCBFDD0076A235 /* StrumPattern.swift in Sources */,
+				11A5CF2D2F019BC400E1351A /* NotificationManager.swift in Sources */,
 				1107F14D2EFCBFDD0076A235 /* CustomChordLibrary.swift in Sources */,
 				0019 /* MainTabView.swift in Sources */,
 				0020 /* ChordLogView.swift in Sources */,

@@ -57,6 +57,16 @@ struct SettingsView: View {
     @State private var showingBulkImport = false
     @State private var showingCustomChordManager = false
     @AppStorage("shareAnonymouslyEnabled") private var shareAnonymouslyEnabled = true
+
+    // Practice Reminders
+    @AppStorage("practiceRemindersEnabled") private var practiceRemindersEnabled = true
+    @State private var practiceReminderTime: Date = Calendar.current.date(from: DateComponents(hour: 19, minute: 0)) ?? Date()
+    @State private var practiceReminderFrequency: ReminderFrequency = .everyOtherDay
+
+    // Add Song Reminders
+    @AppStorage("addSongRemindersEnabled") private var addSongRemindersEnabled = true
+    @State private var addSongReminderTime: Date = Calendar.current.date(from: DateComponents(hour: 19, minute: 0)) ?? Date()
+    @State private var addSongReminderFrequency: ReminderFrequency = .weekly
     
     var body: some View {
         NavigationStack {
@@ -218,6 +228,92 @@ struct SettingsView: View {
                     Text("Help other guitarists by anonymously sharing your chord data when you add Spotify songs. No personal information is shared - only chords, capo position, and tuning. Your notes stay private. You can opt out anytime.")
                 }
 
+                // Practice Reminders Section
+                Section {
+                    Toggle(isOn: $practiceRemindersEnabled) {
+                        HStack {
+                            Image(systemName: "guitars")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+
+                            Text("Remind me to practice")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .onChange(of: practiceRemindersEnabled) { _, newValue in
+                        if newValue {
+                            NotificationManager.shared.rescheduleIfNeeded()
+                        } else {
+                            NotificationManager.shared.cancelPracticeReminders()
+                        }
+                    }
+
+                    if practiceRemindersEnabled {
+                        Picker("Frequency", selection: $practiceReminderFrequency) {
+                            ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
+                                Text(frequency.rawValue).tag(frequency)
+                            }
+                        }
+                        .onChange(of: practiceReminderFrequency) { _, newValue in
+                            UserDefaults.standard.set(newValue.rawValue, forKey: "practiceReminderFrequency")
+                            NotificationManager.shared.rescheduleIfNeeded()
+                        }
+
+                        DatePicker("Time", selection: $practiceReminderTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: practiceReminderTime) { _, newValue in
+                                UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "practiceReminderTime")
+                                NotificationManager.shared.rescheduleIfNeeded()
+                            }
+                    }
+                } header: {
+                    Text("Practice Reminders")
+                } footer: {
+                    Text("Get reminded to practice your songs regularly.")
+                }
+
+                // Add Song Reminders Section
+                Section {
+                    Toggle(isOn: $addSongRemindersEnabled) {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+
+                            Text("Remind me to add songs")
+                                .foregroundColor(.primary)
+                        }
+                    }
+                    .onChange(of: addSongRemindersEnabled) { _, newValue in
+                        if newValue {
+                            NotificationManager.shared.rescheduleIfNeeded()
+                        } else {
+                            NotificationManager.shared.cancelAddSongReminders()
+                        }
+                    }
+
+                    if addSongRemindersEnabled {
+                        Picker("Frequency", selection: $addSongReminderFrequency) {
+                            ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
+                                Text(frequency.rawValue).tag(frequency)
+                            }
+                        }
+                        .onChange(of: addSongReminderFrequency) { _, newValue in
+                            UserDefaults.standard.set(newValue.rawValue, forKey: "addSongReminderFrequency")
+                            NotificationManager.shared.rescheduleIfNeeded()
+                        }
+
+                        DatePicker("Time", selection: $addSongReminderTime, displayedComponents: .hourAndMinute)
+                            .onChange(of: addSongReminderTime) { _, newValue in
+                                UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "addSongReminderTime")
+                                NotificationManager.shared.rescheduleIfNeeded()
+                            }
+                    }
+                } header: {
+                    Text("Add Song Reminders")
+                } footer: {
+                    Text("Get reminded to keep growing your songbook.")
+                }
+
                 // Feedback Section
                 Section {
                     Link(destination: URL(string: "mailto:fretnotapp@gmail.com")!) {
@@ -275,7 +371,7 @@ struct SettingsView: View {
 
                         Spacer()
 
-                        Text("1.3.0")
+                        Text("1.3.1")
                             .foregroundColor(.secondary)
                     }
                     
@@ -301,6 +397,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .onAppear {
+                loadNotificationSettings()
+            }
             .sheet(isPresented: $showingCategoryManager) {
                 CategoryManagerView()
                     .environmentObject(songStore)
@@ -316,6 +415,26 @@ struct SettingsView: View {
                         .environmentObject(songStore)
                 }
             }
+        }
+    }
+
+    private func loadNotificationSettings() {
+        // Load practice reminder settings
+        if let practiceTimeInterval = UserDefaults.standard.object(forKey: "practiceReminderTime") as? TimeInterval {
+            practiceReminderTime = Date(timeIntervalSince1970: practiceTimeInterval)
+        }
+        if let practiceFreqRaw = UserDefaults.standard.string(forKey: "practiceReminderFrequency"),
+           let practiceFreq = ReminderFrequency(rawValue: practiceFreqRaw) {
+            practiceReminderFrequency = practiceFreq
+        }
+
+        // Load add song reminder settings
+        if let addSongTimeInterval = UserDefaults.standard.object(forKey: "addSongReminderTime") as? TimeInterval {
+            addSongReminderTime = Date(timeIntervalSince1970: addSongTimeInterval)
+        }
+        if let addSongFreqRaw = UserDefaults.standard.string(forKey: "addSongReminderFrequency"),
+           let addSongFreq = ReminderFrequency(rawValue: addSongFreqRaw) {
+            addSongReminderFrequency = addSongFreq
         }
     }
 }
