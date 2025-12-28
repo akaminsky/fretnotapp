@@ -23,7 +23,7 @@ class AudioPitchDetector: ObservableObject {
     private var actualSampleRate: Float = 44100 // Will be set from actual audio format
     private let bufferSize: AVAudioFrameCount = 8192 // Increased for better frequency resolution
     private var frequencyHistory: [Float] = [] // For smoothing
-    private let historySize = 5
+    private let historySize = 8 // Increased for more stable readings
 
     // Computed property for guitar strings based on selected tuning
     var guitarStrings: [GuitarString] {
@@ -203,9 +203,9 @@ class AudioPitchDetector: ObservableObject {
         // Check if there's enough signal (lowered threshold for sensitivity)
         var rms: Float = 0
         vDSP_rmsqv(processedData, 1, &rms, vDSP_Length(frameLength))
-        
-        // Lower threshold to pick up quieter strings
-        guard rms > 0.003 else {
+
+        // Lower threshold to pick up quieter strings (0.002 = more sensitive)
+        guard rms > 0.002 else {
             DispatchQueue.main.async {
                 if self.currentFrequency > 0 {
                     // Don't immediately clear, allow some persistence
@@ -221,8 +221,9 @@ class AudioPitchDetector: ObservableObject {
         
         // Detect pitch using improved autocorrelation
         let rawFrequency = detectPitchImproved(data: processedData, count: frameLength)
-        
-        guard rawFrequency > 50 && rawFrequency < 1000 else {
+
+        // Accept frequencies in guitar range (60 Hz for drop tunings, up to 1200 Hz for harmonics)
+        guard rawFrequency > 60 && rawFrequency < 1200 else {
             DispatchQueue.main.async {
                 self.frequencyHistory = []
             }
@@ -296,7 +297,8 @@ class AudioPitchDetector: ObservableObject {
         }
         
         // Require a minimum correlation threshold (lowered for better sensitivity)
-        guard maxCorrelation > 0.15 else { return 0 }
+        // 0.10 allows detection of quieter strings while filtering noise
+        guard maxCorrelation > 0.10 else { return 0 }
         
         // Refine the period estimate using parabolic interpolation
         if bestPeriod > minPeriod && bestPeriod < maxPeriod - 1 {

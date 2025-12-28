@@ -65,11 +65,17 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ### Version 1.3.1 (December 2024)
 
-#### Tuner String Order Fix
+#### Tuner Improvements
 - **Corrected String Display** - Tuner now displays strings in correct EADGBE order (low to high)
   - Standard tuning: E A D G B E (left to right)
   - All tunings now follow natural guitar layout
   - String numbers still show correctly (6 5 4 3 2 1)
+- **Improved Pitch Detection** - Enhanced sensitivity and accuracy
+  - More sensitive to quieter guitar strings
+  - Better noise filtering (60-1200 Hz range)
+  - More stable readings with increased smoothing (8 samples)
+  - Lower detection thresholds for picking up softer notes
+  - Works better with acoustic guitars and lighter picking
 
 #### Expanded Chord Library
 - **50+ New Chord Variations** - Added commonly used alternative voicings
