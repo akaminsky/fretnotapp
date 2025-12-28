@@ -242,6 +242,17 @@ class ChordLibrary {
         "G (no high e)": ChordData(fingers: [3, 2, 0, 0, 0, -1], name: "G (no high e)"),
         "G (open high e)": ChordData(fingers: [3, 2, 0, 0, 0, 0], name: "G (open high e)"),
         "G (no low E)": ChordData(fingers: [-1, 2, 0, 0, 0, 3], name: "G (no low E)"),
+        "G (high e 3rd)": ChordData(fingers: [3, 2, 0, 0, 3, 3], name: "G (high e 3rd)"),
+
+        // Common "Pinky on High E" Variations
+        "C (high e 3rd)": ChordData(fingers: [-1, 3, 2, 0, 1, 3], name: "C (high e 3rd)"),
+        "D (high e 3rd)": ChordData(fingers: [-1, -1, 0, 2, 3, 5], name: "D (high e 3rd)"),
+        "Am (high e 3rd)": ChordData(fingers: [-1, 0, 2, 2, 1, 3], name: "Am (high e 3rd)"),
+        "Em (high e 3rd)": ChordData(fingers: [0, 2, 2, 0, 0, 3], name: "Em (high e 3rd)"),
+        "A (high e 5th)": ChordData(fingers: [-1, 0, 2, 2, 2, 5], name: "A (high e 5th)"),
+
+        // Simplified F (easier for beginners)
+        "F (simple)": ChordData(fingers: [-1, -1, 3, 2, 1, 1], name: "F (simple)", barre: 1),
 
         // C Barre Variations (E-shape)
         "C (barre 3)": ChordData(fingers: [-1, 3, 5, 5, 5, 3], name: "C (barre 3)", barre: 3),
