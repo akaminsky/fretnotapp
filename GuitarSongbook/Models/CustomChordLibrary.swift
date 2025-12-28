@@ -64,9 +64,17 @@ class CustomChordLibrary: ObservableObject {
 
     // MARK: - CRUD Operations
 
-    func addCustomChord(_ chord: CustomChordData) {
+    func addCustomChord(_ chord: CustomChordData) async {
         customChords.append(chord)
         saveCustomChords()
+
+        // Track analytics
+        let fingerPattern = chord.fingers.map { $0 == -1 ? "X" : "\($0)" }.joined()
+        await AnalyticsService.track(event: .customChordCreated(
+            chordName: chord.displayName,
+            baseName: chord.name,
+            fingerPattern: fingerPattern
+        ))
     }
 
     func deleteCustomChord(_ id: UUID) -> CustomChordData? {

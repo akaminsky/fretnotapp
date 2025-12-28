@@ -344,11 +344,8 @@ struct AddVariationSheet: View {
                 barre: detectBarre(selectedFingers),
                 dateCreated: Date()
             )
-            CustomChordLibrary.shared.addCustomChord(customChord)
-
-            // Track custom chord creation
             Task {
-                await AnalyticsService.track(event: .customChordCreated(chordName: trimmedName))
+                await CustomChordLibrary.shared.addCustomChord(customChord)
             }
         }
 

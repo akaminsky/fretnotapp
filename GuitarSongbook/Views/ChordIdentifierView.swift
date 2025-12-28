@@ -289,11 +289,8 @@ struct ChordResultsView: View {
             dateCreated: Date()
         )
 
-        CustomChordLibrary.shared.addCustomChord(customChord)
-
-        // Track custom chord creation
         Task {
-            await AnalyticsService.track(event: .customChordCreated(chordName: name))
+            await CustomChordLibrary.shared.addCustomChord(customChord)
         }
 
         selectedChordForAdding = IdentifiableString(value: name)

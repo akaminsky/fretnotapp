@@ -506,7 +506,9 @@ struct EditChordSheet: View {
                 barre: detectBarre(selectedFingers),
                 dateCreated: Date()
             )
-            CustomChordLibrary.shared.addCustomChord(customChord)
+            Task {
+                await CustomChordLibrary.shared.addCustomChord(customChord)
+            }
         }
 
         // If the name changed from the original, update all songs

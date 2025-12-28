@@ -88,8 +88,12 @@ struct AnalyticsEvent {
         AnalyticsEvent(type: .songAdded, metadata: ["source": source])
     }
 
-    static func customChordCreated(chordName: String) -> AnalyticsEvent {
-        AnalyticsEvent(type: .customChordCreated, metadata: ["chord_name": chordName])
+    static func customChordCreated(chordName: String, baseName: String, fingerPattern: String) -> AnalyticsEvent {
+        AnalyticsEvent(type: .customChordCreated, metadata: [
+            "chord_name": chordName,
+            "base_name": baseName,
+            "finger_pattern": fingerPattern
+        ])
     }
 
     static func chordSuggestionApplied(count: Int) -> AnalyticsEvent {
