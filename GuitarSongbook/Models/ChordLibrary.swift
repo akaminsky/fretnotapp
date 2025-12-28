@@ -275,8 +275,6 @@ class ChordLibrary {
         // 9th Chord Variations
         "C9 (alt)": ChordData(fingers: [-1, 3, 2, 3, 3, -1], name: "C9 (alt)"),
         "D9 (alt)": ChordData(fingers: [-1, 5, 4, 5, 5, 0], name: "D9 (alt)"),
-        "E9": ChordData(fingers: [0, 2, 0, 1, 0, 2], name: "E9"),
-        "A9": ChordData(fingers: [-1, 0, 2, 4, 2, 3], name: "A9"),
         "B9": ChordData(fingers: [-1, 2, 1, 2, 2, 2], name: "B9", barre: 2),
         "F9": ChordData(fingers: [1, 3, 1, 2, 1, 3], name: "F9", barre: 1),
         "G9 (alt)": ChordData(fingers: [3, -1, 0, 0, 0, 1], name: "G9 (alt)"),
