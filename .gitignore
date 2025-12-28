@@ -1,0 +1,11 @@
+# Firebase
+GoogleService-Info.plist
+
+# Xcode
+*.xcuserstate
+*.xcuserdatad
+.DS_Store
+
+# Build
+build/
+DerivedData/

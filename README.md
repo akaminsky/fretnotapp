@@ -113,6 +113,14 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
   - Practice without being reminded to add songs
   - Vice versa, or both at once
 
+#### Firebase Analytics Integration
+- **Google Analytics 4** - Integrated Firebase Analytics for comprehensive usage insights
+  - Anonymous event tracking for feature usage
+  - Dual tracking to both Firebase (for Google Analytics dashboard) and Supabase (for custom queries)
+  - Tracks song additions, custom chord creation, chord suggestions, transpositions, tuner usage
+  - No personal information collected - only feature usage patterns
+  - Helps prioritize future features based on actual usage data
+
 ### Version 1.3.0 (December 2024)
 
 #### Intelligent Chord Suggestions
@@ -295,24 +303,28 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - **CloudKit** - iCloud sync using CloudKit containers
 - **AVFoundation** - Real-time pitch detection for tuner
 - **Combine** - Reactive state management
+- **Firebase Analytics** - Google Analytics 4 for usage tracking
+- **UserNotifications** - Local notification scheduling
 
 ### Key Components
 - `SongStore` - Central state management for songs
-- `ChordLibrary` - Standard chord library with 200+ chords and fingering positions
+- `ChordLibrary` - Standard chord library with 250+ chords and fingering positions
 - `CustomChordLibrary` - User-created custom chord management with iCloud sync
 - `AudioPitchDetector` - Real-time tuner functionality
 - `SpotifyService` - Spotify API integration
 - `ChordSuggestionService` - Intelligent chord suggestions based on audio analysis
 - `HapticManager` - Centralized haptic feedback
 - `CommunityDataService` - Anonymous data contribution and analytics
-- `AnalyticsService` - Anonymous usage tracking
+- `AnalyticsService` - Firebase Analytics and Supabase tracking
+- `NotificationManager` - Local practice and add song reminder notifications
 
 ### Services
 - **HapticManager** - Provides light, medium, heavy, success, and error haptics
 - **SpotifyService** - Handles authentication and API calls
 - **ChordSuggestionService** - Generates chord suggestions using audio analysis and music theory
 - **CommunityDataService** - Manages anonymous community contributions (optional)
-- **AnalyticsService** - Tracks anonymous feature usage to improve the app
+- **AnalyticsService** - Tracks anonymous feature usage to Firebase Analytics and Supabase
+- **NotificationManager** - Manages local practice and add song reminder notifications
 - **TabURLDetector** - Detects Ultimate Guitar tab URLs
 
 ### Backend Services

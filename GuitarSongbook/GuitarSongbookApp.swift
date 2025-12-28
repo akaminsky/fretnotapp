@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import FirebaseCore
 
 @main
 struct GuitarSongbookApp: App {
@@ -14,6 +15,9 @@ struct GuitarSongbookApp: App {
     @StateObject private var tabURLDetector = TabURLDetector()
 
     init() {
+        // Initialize Firebase
+        FirebaseApp.configure()
+
         // Initialize custom chord library on app launch
         _ = CustomChordLibrary.shared
 

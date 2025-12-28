@@ -7,12 +7,44 @@
 //
 
 import Foundation
+import FirebaseAnalytics
 
 struct AnalyticsService {
     private static let netlifyBaseURL = "https://fretnot.netlify.app"
 
     /// Track an analytics event (fails silently)
     static func track(event: AnalyticsEvent) async {
+        // Track to Firebase Analytics
+        trackToFirebase(event: event)
+
+        // Track to Supabase (existing analytics)
+        await trackToSupabase(event: event)
+    }
+
+    /// Track event to Firebase Analytics
+    private static func trackToFirebase(event: AnalyticsEvent) {
+        // Convert metadata to Firebase-compatible format
+        var parameters: [String: Any] = [:]
+
+        for (key, value) in event.metadata {
+            // Firebase Analytics parameters must be String, Int, or Double
+            if let stringValue = value as? String {
+                parameters[key] = stringValue
+            } else if let intValue = value as? Int {
+                parameters[key] = intValue
+            } else if let doubleValue = value as? Double {
+                parameters[key] = doubleValue
+            } else {
+                parameters[key] = String(describing: value)
+            }
+        }
+
+        // Log event to Firebase
+        Analytics.logEvent(event.type.rawValue, parameters: parameters)
+    }
+
+    /// Track event to Supabase (existing analytics backend)
+    private static func trackToSupabase(event: AnalyticsEvent) async {
         guard let url = URL(string: "\(netlifyBaseURL)/.netlify/functions/analytics-track") else {
             return
         }
