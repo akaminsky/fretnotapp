@@ -235,6 +235,71 @@ class ChordLibrary {
         "Em/B": ChordData(fingers: [-1, 2, 2, 0, 0, 0], name: "Em/B"),
         "F/C": ChordData(fingers: [-1, 3, 3, 2, 1, 1], name: "F/C"),
         "F/G": ChordData(fingers: [3, 3, 3, 2, 1, 1], name: "F/G", barre: 1),
+
+        // Common Chord Variations & Alternative Voicings
+
+        // G Variations
+        "G (no high e)": ChordData(fingers: [3, 2, 0, 0, 0, -1], name: "G (no high e)"),
+        "G (open high e)": ChordData(fingers: [3, 2, 0, 0, 0, 0], name: "G (open high e)"),
+        "G (no low E)": ChordData(fingers: [-1, 2, 0, 0, 0, 3], name: "G (no low E)"),
+
+        // C Barre Variations (E-shape)
+        "C (barre 3)": ChordData(fingers: [-1, 3, 5, 5, 5, 3], name: "C (barre 3)", barre: 3),
+        "C (barre alt)": ChordData(fingers: [-1, 3, 5, 5, 5, -1], name: "C (barre alt)", barre: 3),
+
+        // D Barre Variations (E-shape)
+        "D (barre 5)": ChordData(fingers: [-1, 5, 7, 7, 7, 5], name: "D (barre 5)", barre: 5),
+        "D (barre alt)": ChordData(fingers: [-1, 5, 7, 7, 7, -1], name: "D (barre alt)", barre: 5),
+
+        // A Barre Variations (E-shape)
+        "A (barre 5)": ChordData(fingers: [5, 7, 7, 6, 5, 5], name: "A (barre 5)", barre: 5),
+
+        // E Variations
+        "E (no low E)": ChordData(fingers: [-1, 2, 2, 1, 0, 0], name: "E (no low E)"),
+
+        // A Variations
+        "A (no high e)": ChordData(fingers: [-1, 0, 2, 2, 2, -1], name: "A (no high e)"),
+
+        // Minor Barre Variations
+        "Am (barre 5)": ChordData(fingers: [5, 7, 7, 5, 5, 5], name: "Am (barre 5)", barre: 5),
+        "Dm (barre 5)": ChordData(fingers: [-1, 5, 7, 7, 6, 5], name: "Dm (barre 5)", barre: 5),
+        "Em (barre 7)": ChordData(fingers: [7, 9, 9, 7, 7, 7], name: "Em (barre 7)", barre: 7),
+
+        // 7th Chord Variations
+        "C7 (barre 3)": ChordData(fingers: [-1, 3, 5, 3, 5, 3], name: "C7 (barre 3)", barre: 3),
+        "D7 (alt)": ChordData(fingers: [-1, -1, 0, 2, 1, 3], name: "D7 (alt)"),
+        "E7 (alt)": ChordData(fingers: [0, 2, 2, 1, 3, 0], name: "E7 (alt)"),
+        "A7 (barre 5)": ChordData(fingers: [5, 7, 5, 6, 5, 5], name: "A7 (barre 5)", barre: 5),
+        "B7 (alt)": ChordData(fingers: [-1, 2, 4, 2, 4, 2], name: "B7 (alt)", barre: 2),
+
+        // 9th Chord Variations
+        "C9 (alt)": ChordData(fingers: [-1, 3, 2, 3, 3, -1], name: "C9 (alt)"),
+        "D9 (alt)": ChordData(fingers: [-1, 5, 4, 5, 5, 0], name: "D9 (alt)"),
+        "E9": ChordData(fingers: [0, 2, 0, 1, 0, 2], name: "E9"),
+        "A9": ChordData(fingers: [-1, 0, 2, 4, 2, 3], name: "A9"),
+        "B9": ChordData(fingers: [-1, 2, 1, 2, 2, 2], name: "B9", barre: 2),
+        "F9": ChordData(fingers: [1, 3, 1, 2, 1, 3], name: "F9", barre: 1),
+        "G9 (alt)": ChordData(fingers: [3, -1, 0, 0, 0, 1], name: "G9 (alt)"),
+
+        // Major 7th Variations
+        "Cmaj7 (alt)": ChordData(fingers: [-1, 3, 5, 4, 5, 3], name: "Cmaj7 (alt)", barre: 3),
+        "Dmaj7 (alt)": ChordData(fingers: [-1, -1, 0, 6, 7, 5], name: "Dmaj7 (alt)"),
+        "Emaj7 (alt)": ChordData(fingers: [0, 2, 1, 1, 0, -1], name: "Emaj7 (alt)"),
+        "Gmaj7 (alt)": ChordData(fingers: [3, 5, 4, 4, 3, 3], name: "Gmaj7 (alt)", barre: 3),
+        "Amaj7 (alt)": ChordData(fingers: [-1, 0, 2, 1, 2, -1], name: "Amaj7 (alt)"),
+
+        // Minor 7th Variations
+        "Am7 (alt)": ChordData(fingers: [-1, 0, 2, 0, 1, 3], name: "Am7 (alt)"),
+        "Dm7 (alt)": ChordData(fingers: [-1, -1, 0, 2, 1, 1], name: "Dm7 (alt)", barre: 1),
+        "Em7 (alt)": ChordData(fingers: [0, 2, 2, 0, 3, 0], name: "Em7 (alt)"),
+
+        // Power Chord Variations (5th chords at different positions)
+        "C5 (3rd fret)": ChordData(fingers: [-1, 3, 5, 5, -1, -1], name: "C5 (3rd fret)"),
+        "D5 (5th fret)": ChordData(fingers: [-1, 5, 7, 7, -1, -1], name: "D5 (5th fret)"),
+        "E5 (7th fret)": ChordData(fingers: [-1, 7, 9, 9, -1, -1], name: "E5 (7th fret)"),
+        "F5 (8th fret)": ChordData(fingers: [-1, 8, 10, 10, -1, -1], name: "F5 (8th fret)"),
+        "G5 (10th fret)": ChordData(fingers: [-1, 10, 12, 12, -1, -1], name: "G5 (10th fret)"),
+        "A5 (12th fret)": ChordData(fingers: [-1, 12, 14, 14, -1, -1], name: "A5 (12th fret)"),
     ]
     
     func findChord(_ name: String) -> ChordData? {

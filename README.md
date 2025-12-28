@@ -21,7 +21,7 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - **Search & Filter** - Find songs by title, artist, chord, capo, or list
 
 ### 🎸 Chord Features
-- **Chord Library** - 200+ guitar chords with diagrams
+- **Chord Library** - 250+ guitar chords with diagrams and alternative voicings
 - **Custom Chords** - Create and save your own chord variations
   - Add custom diagrams for any chord name
   - Interactive fretboard to place finger positions
@@ -64,6 +64,21 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 ## Recent Updates
 
 ### Version 1.3.1 (December 2024)
+
+#### Expanded Chord Library
+- **50+ New Chord Variations** - Added commonly used alternative voicings
+  - G variations (no high e, open high e, no low E)
+  - Barre chord shapes for C, D, A at different positions
+  - Alternative 7th chord voicings (C7, D7, E7, A7, B7)
+  - More 9th chords (E9, A9, B9, F9, G9 variations)
+  - Major 7th alternatives (Cmaj7, Dmaj7, Emaj7, Gmaj7, Amaj7)
+  - Minor 7th variations (Am7, Dm7, Em7)
+  - Power chords at higher fret positions (3rd, 5th, 7th, 8th, 10th, 12th frets)
+  - Minor barre chords (Am, Dm, Em at different positions)
+- **Improved Chord Recognition** - Chord identifier now recognizes common fingering variations
+  - G with or without high E string
+  - Barre chord shapes (e.g., C at 3rd fret, D at 5th fret)
+  - Alternative voicings for 7th and 9th chords
 
 #### Local Notification Reminders
 - **Practice Reminders** - Get reminded to practice your songs regularly
