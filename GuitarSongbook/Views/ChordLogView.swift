@@ -229,20 +229,27 @@ struct ChordCard: View {
     let chord: String
     let songCount: Int
 
+    private var displayInfo: (name: String, hasVoicing: Bool) {
+        let (baseName, fingerprint) = ChordLibrary.shared.parseVoicingNotation(chord)
+        return (baseName, fingerprint != nil)
+    }
+
     var body: some View {
-        ChordDiagramView(chordName: chord)
-            .frame(maxWidth: .infinity)
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(Color(.systemBackground))
-                    .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
-                    .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(Color(.systemGray5), lineWidth: 0.5)
-            )
+        VStack(spacing: 4) {
+            ChordDiagramView(chordName: chord)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(12)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemBackground))
+                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
+                .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color(.systemGray5), lineWidth: 0.5)
+        )
     }
 }
 

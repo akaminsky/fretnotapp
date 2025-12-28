@@ -17,9 +17,14 @@ struct ChordDiagramView: View {
     private let strings = ["E", "A", "D", "G", "B", "e"]
     private let chordLibrary = ChordLibrary.shared
 
+    private var displayName: String {
+        let (baseName, _) = chordLibrary.parseVoicingNotation(chordName)
+        return baseName
+    }
+
     var body: some View {
         VStack(spacing: 6) {
-            Text(chordName)
+            Text(displayName)
                 .font(.title3)
                 .fontWeight(.bold)
                 .lineLimit(1)
@@ -180,6 +185,7 @@ struct EditableChord: Identifiable {
 struct ChordDiagramsGrid: View {
     let chords: [String]
     @State private var chordToEdit: EditableChord?
+    @State private var selectedChordForVoicingChange: String?
     @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
     @EnvironmentObject var songStore: SongStore
 
@@ -196,6 +202,9 @@ struct ChordDiagramsGrid: View {
                 .background(Color(.systemBackground))
                 .cornerRadius(8)
                 .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                .onTapGesture {
+                    selectedChordForVoicingChange = chord
+                }
             }
         }
         .sheet(item: $chordToEdit) { editableChord in
@@ -206,6 +215,122 @@ struct ChordDiagramsGrid: View {
                     chordToEdit = nil
                 }
         }
+        .sheet(item: Binding(
+            get: { selectedChordForVoicingChange.map { VoicingSelection(originalChord: $0) } },
+            set: { selectedChordForVoicingChange = $0?.originalChord }
+        )) { selection in
+            ChangeVoicingSheet(
+                originalChordName: selection.originalChord,
+                onVoicingSelected: { newVoicing in
+                    updateSongChord(from: selection.originalChord, to: newVoicing)
+                }
+            )
+            .environmentObject(songStore)
+        }
+    }
+
+    private func updateSongChord(from oldName: String, to newName: String) {
+        // Find the song containing this chord and update it
+        if let song = songStore.songs.first(where: { $0.chords.contains(oldName) }) {
+            var updatedSong = song
+            updatedSong.chords = song.chords.map { chord in
+                chord == oldName ? newName : chord
+            }
+            songStore.updateSong(updatedSong)
+        }
+        selectedChordForVoicingChange = nil
+    }
+}
+
+// MARK: - Voicing Selection Helper
+
+struct VoicingSelection: Identifiable {
+    let id = UUID()
+    let originalChord: String
+}
+
+// MARK: - Change Voicing Sheet
+
+struct ChangeVoicingSheet: View {
+    let originalChordName: String
+    let onVoicingSelected: (String) -> Void
+    @Environment(\.dismiss) var dismiss
+
+    private var baseName: String {
+        ChordLibrary.shared.parseVoicingNotation(originalChordName).baseName
+    }
+
+    private var currentFingerprint: String? {
+        ChordLibrary.shared.parseVoicingNotation(originalChordName).fingerprint
+    }
+
+    private var voicings: [ChordData] {
+        ChordLibrary.shared.findAllVoicings(for: baseName)
+    }
+
+    var body: some View {
+        NavigationStack {
+            VStack(spacing: 20) {
+                Text("Change \(baseName) voicing")
+                    .font(.headline)
+
+                ScrollView {
+                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                        ForEach(Array(voicings.enumerated()), id: \.offset) { index, voicing in
+                            let fp = ChordLibrary.shared.fingersToFingerprint(voicing.fingers)
+                            let isCurrent = fp == currentFingerprint || (currentFingerprint == nil && voicing.isDefault)
+
+                            VStack {
+                                ChordDiagramCanvas(
+                                    chordData: voicing,
+                                    strings: ["E","A","D","G","B","e"]
+                                )
+                                .frame(height: 140)
+
+                                if voicing.isDefault {
+                                    Text("Default")
+                                        .font(.caption)
+                                        .foregroundColor(.appAccent)
+                                }
+
+                                if isCurrent {
+                                    Text("Current")
+                                        .font(.caption)
+                                        .foregroundColor(.green)
+                                }
+                            }
+                            .padding()
+                            .background(isCurrent ? Color.green.opacity(0.1) : Color(.systemGray6))
+                            .cornerRadius(12)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .strokeBorder(isCurrent ? Color.green : Color.clear, lineWidth: 2)
+                            )
+                            .onTapGesture {
+                                // Only add fingerprint notation for non-default voicings
+                                let newName: String
+                                if voicing.isDefault {
+                                    newName = baseName
+                                } else {
+                                    newName = "\(baseName)#\(fp)"
+                                }
+                                onVoicingSelected(newName)
+                                dismiss()
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+        .presentationDetents([.medium, .large])
     }
 }
 

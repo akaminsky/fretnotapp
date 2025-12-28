@@ -1537,9 +1537,25 @@ struct ChordPillInput: View {
     @State private var validatedChords: [ValidatedChord] = []
     @FocusState private var isInputFocused: Bool
     @State private var draggingChord: ValidatedChord?
+    @State private var voicingSelection: VoicingPickerData?
+    @State private var chordToReplace: ValidatedChord?
+    @State private var customChordToCreate: CustomChordData?
 
+    @EnvironmentObject var songStore: SongStore
     private let chordLibrary = ChordLibrary.shared
+    @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
     private let haptics = HapticManager.shared
+
+    struct VoicingPickerData: Identifiable {
+        let id = UUID()
+        let chordName: String
+        let voicings: [ChordData]
+    }
+
+    struct CustomChordData: Identifiable {
+        let id = UUID()
+        let chordName: String
+    }
 
     struct ValidatedChord: Identifiable, Equatable {
         let id = UUID()
@@ -1555,8 +1571,12 @@ struct ChordPillInput: View {
     private var chordSuggestions: [String] {
         guard !inputText.isEmpty else { return [] }
 
-        let allChordNames = chordLibrary.allChordNames
         let searchText = inputText.lowercased()
+
+        // Combine library chords and custom chords
+        let libraryChords = chordLibrary.allChordNames
+        let customChords = customChordLibrary.customChords.map { $0.displayName }
+        let allChordNames = libraryChords + customChords
 
         return allChordNames
             .filter { $0.lowercased().starts(with: searchText) }
@@ -1591,14 +1611,14 @@ struct ChordPillInput: View {
             .cornerRadius(8)
 
             // Helper text
-            Text("Tip: Use @ to transpose chords (e.g., Bm@7 for Bm at fret 7)")
+            Text("Tip: Tap a chord pill for alternate fingerings • Use @ to transpose (e.g., Bm@7)")
                 .font(.caption)
                 .foregroundColor(.secondary)
                 .padding(.horizontal, 4)
                 .padding(.top, 4)
 
             // Autocomplete suggestions
-            if !chordSuggestions.isEmpty {
+            if !chordSuggestions.isEmpty || (!inputText.isEmpty && chordSuggestions.isEmpty) {
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(chordSuggestions, id: \.self) { suggestion in
                         Button {
@@ -1625,6 +1645,26 @@ struct ChordPillInput: View {
                                 .padding(.leading, 12)
                         }
                     }
+
+                    // Show "Create custom chord" if no matches
+                    if chordSuggestions.isEmpty && !inputText.isEmpty {
+                        Button {
+                            customChordToCreate = CustomChordData(chordName: inputText)
+                        } label: {
+                            HStack {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.appAccent)
+                                Text("Create custom chord \"\(inputText)\"")
+                                    .font(.subheadline)
+                                    .foregroundColor(.appAccent)
+                                Spacer()
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemBackground))
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
                 .background(Color(.systemBackground))
                 .cornerRadius(8)
@@ -1645,6 +1685,9 @@ struct ChordPillInput: View {
                             showDragHandle: allowReordering,
                             onRemove: {
                                 removeChord(chord)
+                            },
+                            onTap: {
+                                handlePillTap(chord)
                             }
                         )
                         .if(allowReordering) { view in
@@ -1697,13 +1740,118 @@ struct ChordPillInput: View {
                 loadExistingChords()
             }
         }
+        .sheet(item: $voicingSelection) { selection in
+            VStack(spacing: 16) {
+                Text("Choose voicing for \(selection.chordName)")
+                    .font(.headline)
+                    .padding(.top)
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Show all voicings
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            ForEach(Array(selection.voicings.enumerated()), id: \.offset) { index, voicing in
+                                VStack(spacing: 12) {
+                                    // Chord diagram
+                                    ChordDiagramCanvas(
+                                        chordData: voicing,
+                                        strings: ["E","A","D","G","B","e"]
+                                    )
+                                    .frame(height: 140)
+
+                                    // Default badge
+                                    if voicing.isDefault {
+                                        Text("Default")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                            .foregroundColor(.white)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 4)
+                                            .background(Color.appAccent)
+                                            .cornerRadius(12)
+                                    }
+
+                                    // Fingerprint
+                                    Text(voicing.fingers.map { $0 == -1 ? "X" : "\($0)" }.joined())
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                        .monospaced()
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .fill(voicing.isDefault ? Color.appAccent.opacity(0.1) : Color(.systemGray6))
+                                )
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 16)
+                                        .strokeBorder(voicing.isDefault ? Color.appAccent : Color.clear, lineWidth: 2)
+                                )
+                                .onTapGesture {
+                                    selectVoicing(voicing, chordName: selection.chordName)
+                                }
+                            }
+                        }
+
+                        // Create Voicing button
+                        Button {
+                            // Dismiss voicing picker first, then show custom chord sheet
+                            voicingSelection = nil
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                customChordToCreate = CustomChordData(chordName: selection.chordName)
+                            }
+                        } label: {
+                            Label("Create Voicing", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.appAccent)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal)
+                        .padding(.top, 8)
+                    }
+                    .padding()
+                }
+
+                Button("Cancel") {
+                    voicingSelection = nil
+                    chordToReplace = nil
+                    inputText = ""
+                }
+                .padding(.bottom)
+            }
+            .presentationDetents([.medium, .large])
+        }
+        .sheet(item: $customChordToCreate) { customChord in
+            EditChordSheet(chordName: customChord.chordName)
+                .environmentObject(songStore)
+                .onDisappear {
+                    // If we were replacing a chord, check if a new custom chord was created
+                    if let replacingChord = chordToReplace,
+                       let newCustomChord = customChordLibrary.customChords.first(where: {
+                           $0.displayName.lowercased() == customChord.chordName.lowercased() ||
+                           $0.name.lowercased() == customChord.chordName.lowercased()
+                       }),
+                       let index = validatedChords.firstIndex(where: { $0.id == replacingChord.id }) {
+                        // Replace the chord with the new custom chord
+                        validatedChords[index] = ValidatedChord(name: newCustomChord.displayName, isValid: true)
+                        updateBinding()
+                        haptics.light()
+                    }
+
+                    // Clear state
+                    chordToReplace = nil
+                }
+        }
     }
 
     private func loadExistingChords() {
         guard validatedChords.isEmpty else { return }
 
         let existingChords = chords
-            .split(whereSeparator: { $0 == "," || $0.isWhitespace })
+            .split(separator: ",")
             .map { String($0).trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
@@ -1720,10 +1868,11 @@ struct ChordPillInput: View {
 
     private func addChord() {
         let newChords = inputText
-            .split(whereSeparator: { $0 == "," || $0.isWhitespace })
+            .split(separator: ",")
             .map { String($0).trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }
 
+        // Add chords with default voicing
         var addedAny = false
         for chordName in newChords {
             // Check if not already added
@@ -1754,6 +1903,43 @@ struct ChordPillInput: View {
     private func updateBinding() {
         chords = validatedChords.map { $0.name }.joined(separator: ", ")
     }
+
+    private func handlePillTap(_ chord: ValidatedChord) {
+        // Get the base name (strip voicing notation if present)
+        let (baseName, _) = chordLibrary.parseVoicingNotation(chord.name)
+        let voicings = chordLibrary.findAllVoicings(for: baseName)
+
+        // Always show voicing picker (even if only 1 voicing, we'll show empty state)
+        chordToReplace = chord
+        let chordName = voicings.first?.name ?? baseName
+        voicingSelection = VoicingPickerData(chordName: chordName, voicings: voicings)
+    }
+
+    private func selectVoicing(_ voicing: ChordData, chordName: String) {
+        // Only add fingerprint notation for non-default voicings
+        let voicingName: String
+        if voicing.isDefault {
+            voicingName = chordName
+        } else {
+            let fingerprint = chordLibrary.fingersToFingerprint(voicing.fingers)
+            voicingName = "\(chordName)#\(fingerprint)"
+        }
+
+        // If replacing an existing chord, update it
+        if let replacingChord = chordToReplace,
+           let index = validatedChords.firstIndex(where: { $0.id == replacingChord.id }) {
+            validatedChords[index] = ValidatedChord(name: voicingName, isValid: true)
+            chordToReplace = nil
+        } else {
+            // Adding a new chord
+            validatedChords.append(ValidatedChord(name: voicingName, isValid: true))
+            inputText = ""
+        }
+
+        voicingSelection = nil
+        updateBinding()
+        haptics.light()
+    }
 }
 
 // MARK: - Chord Pill
@@ -1764,6 +1950,7 @@ struct ChordPill: View {
     var isSuggested: Bool = false
     var showDragHandle: Bool = false
     let onRemove: () -> Void
+    var onTap: (() -> Void)? = nil
 
     var body: some View {
         HStack(spacing: 6) {
@@ -1810,6 +1997,10 @@ struct ChordPill: View {
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(isValid ? Color.appAccent.opacity(0.3) : Color.red.opacity(0.5), lineWidth: 1)
         )
+        .contentShape(RoundedRectangle(cornerRadius: 16))
+        .onTapGesture {
+            onTap?()
+        }
     }
 }
 

@@ -320,18 +320,27 @@ struct SongDetailView: View {
 
     private var chordSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: displayMode == .chords ? "hand.raised" : displayMode == .tuning ? "tuningfork" : "waveform")
-                    .foregroundColor(.secondary)
-                Text(displayMode == .chords ? "Chord Diagrams" : displayMode == .tuning ? "Tuning Info" : "Strumming Patterns")
-                    .font(.headline)
-                    .fontWeight(.semibold)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Image(systemName: displayMode == .chords ? "hand.raised" : displayMode == .tuning ? "tuningfork" : "waveform")
+                        .foregroundColor(.secondary)
+                    Text(displayMode == .chords ? "Chord Diagrams" : displayMode == .tuning ? "Tuning Info" : "Strumming Patterns")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                }
+
+                if displayMode == .chords && !liveSong.chords.isEmpty {
+                    Text("Tap for alternate fingerings")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
 
             // Content based on display mode
             if displayMode == .chords {
                 if !liveSong.chords.isEmpty {
                     ChordDiagramsGrid(chords: liveSong.chords)
+                        .id(liveSong.chords.joined(separator: ","))
                 } else {
                     VStack(spacing: 12) {
                         Text("No chords added yet")

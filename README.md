@@ -65,6 +65,35 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ### Version 1.3.1 (December 2024)
 
+#### Chord Voicing Management System
+- **Default Voicing Selection** - Smart chord library now picks default (textbook) voicings automatically
+  - Each chord marked as default or alternative voicing
+  - Typing "G" automatically uses standard 320003 fingering
+  - Over 25 chords marked as default (C, D, E, F, G, A, B and their minor/seventh variants)
+- **Alternate Voicing Picker** - Tap any chord pill to see and select different fingerings
+  - View all available voicings side-by-side
+  - Visual comparison with fingerprint notation
+  - "Default" badge highlights standard fingerings
+  - "Create Voicing" button to add custom alternatives
+- **Voicing Notation** - Internal fingerprint system (e.g., "G#320033") keeps voicings separate
+  - Clean display shows only chord name (not notation)
+  - Each unique fingering tracked separately
+  - Backward compatible with existing songs
+- **Custom Chord Integration** - Create custom chords directly from chord input
+  - Type unknown chord → see "Create custom chord" option
+  - Chord name pre-filled for quick creation
+  - Custom chords appear in autocomplete suggestions
+  - Auto-replaces pill when creating from voicing picker
+- **Enhanced Chord Input** - Improved pill-based chord entry
+  - Tap pill to change voicing after adding
+  - Supports chords with spaces (e.g., "C (barre alt)")
+  - Helper text: "Tap for alternate fingerings"
+  - Works in both add and edit song modes
+- **Chord Name Aliases** - Added short names for common chords
+  - E7, Am7, D7, A7, G7, C7, B7, Dm7, Em7, etc.
+  - Duplicates with easier-to-type names
+  - Preserves backward compatibility with full names
+
 #### Tuner Improvements
 - **Corrected String Display** - Tuner now displays strings in correct EADGBE order (low to high)
   - Standard tuning: E A D G B E (left to right)

@@ -149,10 +149,24 @@ class SongStore: ObservableObject {
         var chordSet = Set<String>()
         for song in songs {
             for chord in song.chords {
+                // Keep voicings separate if they're used in different songs
                 chordSet.insert(chord)
             }
         }
-        return Array(chordSet).sorted()
+
+        // Sort by base name, then by fingerprint
+        return Array(chordSet).sorted { a, b in
+            let (baseA, fpA) = ChordLibrary.shared.parseVoicingNotation(a)
+            let (baseB, fpB) = ChordLibrary.shared.parseVoicingNotation(b)
+
+            if baseA != baseB {
+                return baseA < baseB
+            }
+            // Same base name - default first (no fingerprint), then by fingerprint
+            if fpA == nil { return true }
+            if fpB == nil { return false }
+            return fpA! < fpB!
+        }
     }
     
     var songCountText: String {
