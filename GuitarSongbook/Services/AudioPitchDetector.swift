@@ -30,14 +30,14 @@ class AudioPitchDetector: ObservableObject {
         Self.stringsForTuning(selectedTuning)
     }
 
-    // Standard guitar tuning frequencies
+    // Standard guitar tuning frequencies (EADGBE - low to high)
     static let guitarStrings: [GuitarString] = [
-        GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
-        GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
-        GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
-        GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
-        GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
         GuitarString(name: "E", octave: 2, frequency: 82.41, stringNumber: 6),
+        GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+        GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+        GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+        GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+        GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
     ]
 
     // Generate strings for different tunings
@@ -45,57 +45,57 @@ class AudioPitchDetector: ObservableObject {
         switch tuning {
         case "Standard":
             return [
-                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
-                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
-                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
-                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
-                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
                 GuitarString(name: "E", octave: 2, frequency: 82.41, stringNumber: 6),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
             ]
         case "Drop D":
             return [
-                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
-                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
-                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
-                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
-                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
                 GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "E", octave: 4, frequency: 329.63, stringNumber: 1),
             ]
         case "Drop C":
             return [
-                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
-                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
-                GuitarString(name: "F", octave: 3, frequency: 174.61, stringNumber: 3),
-                GuitarString(name: "C", octave: 3, frequency: 130.81, stringNumber: 4),
-                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
                 GuitarString(name: "C", octave: 2, frequency: 65.41, stringNumber: 6),
+                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
+                GuitarString(name: "C", octave: 3, frequency: 130.81, stringNumber: 4),
+                GuitarString(name: "F", octave: 3, frequency: 174.61, stringNumber: 3),
+                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
             ]
         case "Half Step Down":
             return [
-                GuitarString(name: "D#", octave: 4, frequency: 311.13, stringNumber: 1),
-                GuitarString(name: "A#", octave: 3, frequency: 233.08, stringNumber: 2),
-                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
-                GuitarString(name: "C#", octave: 3, frequency: 138.59, stringNumber: 4),
-                GuitarString(name: "G#", octave: 2, frequency: 103.83, stringNumber: 5),
                 GuitarString(name: "D#", octave: 2, frequency: 77.78, stringNumber: 6),
+                GuitarString(name: "G#", octave: 2, frequency: 103.83, stringNumber: 5),
+                GuitarString(name: "C#", octave: 3, frequency: 138.59, stringNumber: 4),
+                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
+                GuitarString(name: "A#", octave: 3, frequency: 233.08, stringNumber: 2),
+                GuitarString(name: "D#", octave: 4, frequency: 311.13, stringNumber: 1),
             ]
         case "Open D":
             return [
-                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
-                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
-                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
-                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
-                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
                 GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+                GuitarString(name: "A", octave: 2, frequency: 110.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "F#", octave: 3, frequency: 185.00, stringNumber: 3),
+                GuitarString(name: "A", octave: 3, frequency: 220.00, stringNumber: 2),
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
             ]
         case "Open G":
             return [
-                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
-                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
-                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
-                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
-                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
                 GuitarString(name: "D", octave: 2, frequency: 73.42, stringNumber: 6),
+                GuitarString(name: "G", octave: 2, frequency: 98.00, stringNumber: 5),
+                GuitarString(name: "D", octave: 3, frequency: 146.83, stringNumber: 4),
+                GuitarString(name: "G", octave: 3, frequency: 196.00, stringNumber: 3),
+                GuitarString(name: "B", octave: 3, frequency: 246.94, stringNumber: 2),
+                GuitarString(name: "D", octave: 4, frequency: 293.66, stringNumber: 1),
             ]
         default:
             // For custom tunings, return standard
