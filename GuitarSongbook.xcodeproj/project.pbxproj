@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -41,7 +41,36 @@
 		11A5CF2D2F019BC400E1351A /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A5CF2C2F019BC400E1351A /* NotificationManager.swift */; };
 		11A5CF302F01A84C00E1351A /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 11A5CF2F2F01A84C00E1351A /* FirebaseAnalytics */; };
 		11A5CF322F01A84C00E1351A /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 11A5CF312F01A84C00E1351A /* FirebaseCore */; };
+		11A5CF342F01AA1E00E1351A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 11A5CF332F01AA1E00E1351A /* GoogleService-Info.plist */; };
+		11A5CF432F029AE300E1351A /* FretNotShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 11A5CF392F029AE300E1351A /* FretNotShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		11A5CF4F2F029ECC00E1351A /* ShareExtensionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11A5CF4E2F029ECC00E1351A /* ShareExtensionHandler.swift */; };
+		11E0CB572F033BBF000EE46D /* ChordChartParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB552F033BBF000EE46D /* ChordChartParser.swift */; };
+		11E0CB582F033BC9000EE46D /* ChordChartParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB552F033BBF000EE46D /* ChordChartParser.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		11A5CF412F029AE300E1351A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 7001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 11A5CF382F029AE300E1351A;
+			remoteInfo = FretNotShareExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		11A5CF482F029AE300E1351A /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				11A5CF432F029AE300E1351A /* FretNotShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		1001 /* GuitarSongbookApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GuitarSongbookApp.swift; sourceTree = "<group>"; };
@@ -77,10 +106,36 @@
 		112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GuitarSongbook.entitlements; sourceTree = "<group>"; };
 		11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsService.swift; sourceTree = "<group>"; };
 		11A5CF2C2F019BC400E1351A /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
+		11A5CF332F01AA1E00E1351A /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		11A5CF392F029AE300E1351A /* FretNotShareExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FretNotShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		11A5CF4E2F029ECC00E1351A /* ShareExtensionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareExtensionHandler.swift; sourceTree = "<group>"; };
+		11A5CF502F03289100E1351A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		11E0CB552F033BBF000EE46D /* ChordChartParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordChartParser.swift; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		11A5CF442F029AE300E1351A /* PBXFileSystemSynchronizedBuildFileExceptionSet */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 11A5CF382F029AE300E1351A /* FretNotShareExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		11A5CF3A2F029AE300E1351A /* FretNotShareExtension */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (11A5CF442F029AE300E1351A /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = FretNotShareExtension; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
+
 /* Begin PBXFrameworksBuildPhase section */
+		11A5CF362F029AE300E1351A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		3001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -93,10 +148,20 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		11E0CB562F033BBF000EE46D /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				11E0CB552F033BBF000EE46D /* ChordChartParser.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		4001 = {
 			isa = PBXGroup;
 			children = (
+				11A5CF332F01AA1E00E1351A /* GoogleService-Info.plist */,
 				4002 /* GuitarSongbook */,
+				11A5CF3A2F029AE300E1351A /* FretNotShareExtension */,
 				4003 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -104,6 +169,8 @@
 		4002 /* GuitarSongbook */ = {
 			isa = PBXGroup;
 			children = (
+				11E0CB562F033BBF000EE46D /* Shared */,
+				11A5CF502F03289100E1351A /* Info.plist */,
 				112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */,
 				1001 /* GuitarSongbookApp.swift */,
 				4004 /* Models */,
@@ -118,6 +185,7 @@
 			isa = PBXGroup;
 			children = (
 				2001 /* GuitarSongbook.app */,
+				11A5CF392F029AE300E1351A /* FretNotShareExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -137,6 +205,7 @@
 		4005 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				11A5CF4E2F029ECC00E1351A /* ShareExtensionHandler.swift */,
 				11A5CF2C2F019BC400E1351A /* NotificationManager.swift */,
 				11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */,
 				1107F1502F00390C0076A235 /* CommunityDataService.swift */,
@@ -176,6 +245,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		11A5CF382F029AE300E1351A /* FretNotShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 11A5CF452F029AE300E1351A /* Build configuration list for PBXNativeTarget "FretNotShareExtension" */;
+			buildPhases = (
+				11A5CF352F029AE300E1351A /* Sources */,
+				11A5CF362F029AE300E1351A /* Frameworks */,
+				11A5CF372F029AE300E1351A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				11A5CF3A2F029AE300E1351A /* FretNotShareExtension */,
+			);
+			name = FretNotShareExtension;
+			packageProductDependencies = (
+			);
+			productName = FretNotShareExtension;
+			productReference = 11A5CF392F029AE300E1351A /* FretNotShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		5001 /* GuitarSongbook */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 6001 /* Build configuration list for PBXNativeTarget "GuitarSongbook" */;
@@ -183,10 +274,12 @@
 				5002 /* Sources */,
 				3001 /* Frameworks */,
 				5003 /* Resources */,
+				11A5CF482F029AE300E1351A /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				11A5CF422F029AE300E1351A /* PBXTargetDependency */,
 			);
 			name = GuitarSongbook;
 			productName = GuitarSongbook;
@@ -200,9 +293,12 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1500;
+				LastSwiftUpdateCheck = 2610;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
+					11A5CF382F029AE300E1351A = {
+						CreatedOnToolsVersion = 26.1.1;
+					};
 					5001 = {
 						CreatedOnToolsVersion = 15.0;
 					};
@@ -225,22 +321,39 @@
 			projectRoot = "";
 			targets = (
 				5001 /* GuitarSongbook */,
+				11A5CF382F029AE300E1351A /* FretNotShareExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		11A5CF372F029AE300E1351A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5003 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				0003 /* Assets.xcassets in Resources */,
+				11A5CF342F01AA1E00E1351A /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		11A5CF352F029AE300E1351A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				11E0CB582F033BC9000EE46D /* ChordChartParser.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		5002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -250,9 +363,11 @@
 				0004 /* Song.swift in Sources */,
 				1107F1472EFC71210076A235 /* ChordDetailPageView.swift in Sources */,
 				0005 /* ChordLibrary.swift in Sources */,
+				11A5CF4F2F029ECC00E1351A /* ShareExtensionHandler.swift in Sources */,
 				0006 /* SpotifyModels.swift in Sources */,
 				0007 /* SongStore.swift in Sources */,
 				0008 /* SpotifyService.swift in Sources */,
+				11E0CB572F033BBF000EE46D /* ChordChartParser.swift in Sources */,
 				0009 /* SongListView.swift in Sources */,
 				1107F1512F00390C0076A235 /* CommunityDataService.swift in Sources */,
 				0010 /* FilterControlsView.swift in Sources */,
@@ -281,7 +396,77 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		11A5CF422F029AE300E1351A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 11A5CF382F029AE300E1351A /* FretNotShareExtension */;
+			targetProxy = 11A5CF412F029AE300E1351A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		11A5CF462F029AE300E1351A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FretNotShareExtension/FretNotShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = US3KMK749L;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FretNotShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FretNotShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akaminsky.fretnot.FretNotShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		11A5CF472F029AE300E1351A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = FretNotShareExtension/FretNotShareExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = US3KMK749L;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FretNotShareExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FretNotShareExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.1;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.akaminsky.fretnot.FretNotShareExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		8001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -417,6 +602,7 @@
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GuitarSongbook/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fret Not";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Fret Not needs microphone access to detect the pitch of your guitar strings for tuning.";
@@ -451,6 +637,7 @@
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = GuitarSongbook/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Fret Not";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.music";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Fret Not needs microphone access to detect the pitch of your guitar strings for tuning.";
@@ -476,6 +663,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		11A5CF452F029AE300E1351A /* Build configuration list for PBXNativeTarget "FretNotShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				11A5CF462F029AE300E1351A /* Debug */,
+				11A5CF472F029AE300E1351A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		6001 /* Build configuration list for PBXNativeTarget "GuitarSongbook" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

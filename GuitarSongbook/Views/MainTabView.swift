@@ -11,6 +11,7 @@ struct MainTabView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
     @EnvironmentObject var tabURLDetector: TabURLDetector
+    @EnvironmentObject var shareExtensionHandler: ShareExtensionHandler
 
     init() {
         // Force bottom tab bar style on iPad
@@ -24,19 +25,19 @@ struct MainTabView: View {
                 .tabItem {
                     Label("Songs", systemImage: "music.note.list")
                 }
-            
+
             // Chords Tab
             ChordLogView()
                 .tabItem {
                     Label("Chords", systemImage: "hand.raised.fingers.spread")
                 }
-            
+
             // Tuner Tab
             TunerView()
                 .tabItem {
                     Label("Tuner", systemImage: "tuningfork")
                 }
-            
+
             // Settings Tab
             SettingsView()
                 .tabItem {
@@ -45,6 +46,30 @@ struct MainTabView: View {
         }
         .tint(.appAccent)
         .tabViewStyle(.automatic)
+        .onAppear {
+            // Check for shared data when view appears
+            shareExtensionHandler.checkForSharedData()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
+            // Check for shared data when app comes to foreground
+            shareExtensionHandler.checkForSharedData()
+        }
+        .sheet(isPresented: $shareExtensionHandler.shouldShowAddSong) {
+            if let sharedData = shareExtensionHandler.sharedData {
+                NavigationStack {
+                    AddSongView(
+                        prefilledChords: sharedData.chords.joined(separator: ", "),
+                        prefilledCapo: sharedData.capo,
+                        prefilledNotes: sharedData.notes
+                    )
+                    .environmentObject(songStore)
+                    .environmentObject(spotifyService)
+                }
+                .onDisappear {
+                    shareExtensionHandler.sharedData = nil
+                }
+            }
+        }
     }
 }
 
@@ -444,5 +469,6 @@ struct SettingsView: View {
         .environmentObject(SongStore())
         .environmentObject(SpotifyService())
         .environmentObject(TabURLDetector())
+        .environmentObject(ShareExtensionHandler())
 }
 

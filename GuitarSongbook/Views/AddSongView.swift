@@ -23,6 +23,7 @@ struct AddSongView: View {
     var prefilledChords: String = ""
     var prefilledCapo: Int = 0
     var prefilledDate: Date = Date()
+    var prefilledNotes: String = ""
     
     @State private var title = ""
     @State private var artist = ""
@@ -214,7 +215,7 @@ struct AddSongView: View {
     private var spotifyLinkSearchSection: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("Link to Spotify")
+                Text("Find on Spotify")
                     .font(.headline)
                 Spacer()
                 Button("Cancel") {
@@ -282,7 +283,9 @@ struct AddSongView: View {
                 ForEach(spotifyService.searchResults) { track in
                     SpotifySearchResultRow(track: track) {
                         if showSpotifySearch {
-                            // Just link the Spotify data, don't replace title/artist
+                            // Update title, artist, and link the Spotify data
+                            title = track.name
+                            artist = track.artistNames
                             spotifyUrl = track.externalUrls.spotify
                             albumCoverUrl = track.albumCoverUrl
                             showSpotifySearch = false
@@ -408,11 +411,15 @@ struct AddSongView: View {
                 .cornerRadius(8)
             } else {
                 Button {
+                    // Autofill search with title and artist if available
+                    if !title.isEmpty || !artist.isEmpty {
+                        searchQuery = "\(artist) \(title)".trimmingCharacters(in: .whitespaces)
+                    }
                     showSpotifySearch = true
                 } label: {
                     HStack {
                         Image(systemName: "link.badge.plus")
-                        Text("Link to Spotify")
+                        Text("Find on Spotify")
                             .font(.subheadline)
                     }
                     .foregroundColor(.appAccent)
@@ -428,6 +435,8 @@ struct AddSongView: View {
                 title: title,
                 artist: artist,
                 onSelect: { track in
+                    title = track.name
+                    artist = track.artistNames
                     spotifyUrl = track.externalUrls.spotify
                     albumCoverUrl = track.albumCoverUrl
                     showSpotifySearch = false
@@ -439,7 +448,7 @@ struct AddSongView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
     }
-    
+
     // MARK: - Editing Header with Spotify Options
     
     private var editingHeaderWithSpotify: some View {
@@ -498,11 +507,15 @@ struct AddSongView: View {
                 .cornerRadius(8)
             } else {
                 Button {
+                    // Autofill search with title and artist if available
+                    if !title.isEmpty || !artist.isEmpty {
+                        searchQuery = "\(artist) \(title)".trimmingCharacters(in: .whitespaces)
+                    }
                     showSpotifySearch = true
                 } label: {
                     HStack {
                         Image(systemName: "link.badge.plus")
-                        Text("Link to Spotify")
+                        Text("Find on Spotify")
                             .font(.subheadline)
                     }
                     .foregroundColor(.appAccent)
@@ -518,6 +531,8 @@ struct AddSongView: View {
                 title: title,
                 artist: artist,
                 onSelect: { track in
+                    title = track.name
+                    artist = track.artistNames
                     spotifyUrl = track.externalUrls.spotify
                     albumCoverUrl = track.albumCoverUrl
                     showSpotifySearch = false
@@ -529,7 +544,7 @@ struct AddSongView: View {
         .background(Color(.systemBackground))
         .cornerRadius(12)
     }
-    
+
     // MARK: - Form Fields
     
     private var formFields: some View {
@@ -582,11 +597,15 @@ struct AddSongView: View {
                             .cornerRadius(8)
                         } else {
                             Button {
+                                // Autofill search with title and artist if available
+                                if !title.isEmpty || !artist.isEmpty {
+                                    searchQuery = "\(artist) \(title)".trimmingCharacters(in: .whitespaces)
+                                }
                                 showSpotifySearch = true
                             } label: {
                                 HStack {
                                     Image(systemName: "link.badge.plus")
-                                    Text("Link to Spotify")
+                                    Text("Find on Spotify")
                                         .font(.subheadline)
                                 }
                                 .foregroundColor(.appAccent)
@@ -604,6 +623,8 @@ struct AddSongView: View {
                     title: title,
                     artist: artist,
                     onSelect: { track in
+                        title = track.name
+                        artist = track.artistNames
                         spotifyUrl = track.externalUrls.spotify
                         albumCoverUrl = track.albumCoverUrl
                         showSpotifySearch = false
@@ -990,7 +1011,20 @@ struct AddSongView: View {
                     await fetchChordSuggestionsForEdit(trackId: trackId)
                 }
             }
-        } else if !prefilledTitle.isEmpty {
+        } else if !prefilledTitle.isEmpty || !prefilledChords.isEmpty {
+            print("🎯 setupInitialValues: Using prefilled data")
+            print("  - prefilledChords: \(prefilledChords)")
+            print("  - prefilledNotes: \(prefilledNotes)")
+
+            // Set to manual entry mode
+            selectedTrack = SpotifyTrack(
+                id: "manual",
+                name: "",
+                artists: [SpotifyArtist(name: "")],
+                album: SpotifyAlbum(name: "", images: []),
+                externalUrls: SpotifyExternalUrls(spotify: "")
+            )
+
             title = prefilledTitle
             artist = prefilledArtist
             chords = prefilledChords
@@ -998,6 +1032,11 @@ struct AddSongView: View {
             dateAdded = prefilledDate
             spotifyUrl = prefilledSpotifyUrl ?? ""
             albumCoverUrl = prefilledAlbumCover
+            notes = prefilledNotes
+            print("  - Set chords to: \(chords)")
+            print("  - Set notes to: \(notes.prefix(50))...")
+        } else {
+            print("🎯 setupInitialValues: No prefilled data")
         }
     }
     
@@ -1490,7 +1529,7 @@ struct SpotifyLinkSheetForEdit: View {
             .onTapGesture {
                 hideKeyboard()
             }
-            .navigationTitle("Link to Spotify")
+            .navigationTitle("Find on Spotify")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

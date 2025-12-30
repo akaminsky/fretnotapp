@@ -13,6 +13,7 @@ struct GuitarSongbookApp: App {
     @StateObject private var songStore = SongStore()
     @StateObject private var spotifyService = SpotifyService()
     @StateObject private var tabURLDetector = TabURLDetector()
+    @StateObject private var shareExtensionHandler = ShareExtensionHandler()
 
     init() {
         // Initialize Firebase
@@ -33,6 +34,10 @@ struct GuitarSongbookApp: App {
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
                 .environmentObject(tabURLDetector)
+                .environmentObject(shareExtensionHandler)
+                .onOpenURL { url in
+                    shareExtensionHandler.handleURL(url)
+                }
         }
     }
 }
