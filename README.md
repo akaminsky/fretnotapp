@@ -63,6 +63,60 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ## Recent Updates
 
+### Version 1.4 (January 2025)
+
+#### Share Extension - Import Chord Charts
+- **Import from Any App** - Share chord charts directly into Fret Not from any app
+  - Works with Ultimate Guitar, Safari, Notes, Messages, Mail, Files, and more
+  - Native iOS share sheet integration
+  - Quick import workflow with confirmation preview
+- **Smart Text Parsing** - Automatically extracts chord information
+  - Detects capo position (e.g., "Capo 2" → sets capo to 2)
+  - Identifies all unique chords in the chart (Am, E7, G, D, etc.)
+  - Preserves full chord chart text in notes for reference
+  - Filters out tablature, instructions, and false positives
+- **Pre-filled Song Entry** - Opens AddSongView with extracted data
+  - Chords field pre-populated with comma-separated chord list
+  - Capo position automatically set
+  - Notes field contains full chord chart for reference
+  - User adds song title/artist manually or links to Spotify
+- **Background Processing** - Data shared via App Group for seamless handoff
+  - Share Extension processes text and saves to shared storage
+  - Main app opens with pre-filled data ready to save
+  - Clean UX with no data loss
+
+#### Chord Library Search
+- **Full Library Lookup** - Search and view any chord from the 200+ chord library
+  - Progressive disclosure: default view shows only your learned chords
+  - Search activates full library (user's chords + all library chords)
+  - No need to add a chord to a song to see how to play it
+- **Smart Search Results** - Partitioned display for better organization
+  - User's chords appear first (chords you've used in songs)
+  - Visual divider separates the two groups
+  - Library chords appear below (chords you haven't used yet)
+  - Alphabetical sorting within each group
+- **Usage Indicators** - Clear feedback about chord usage
+  - Header shows breakdown: "12 chords (4 used in your songs)"
+  - Default view: "5 chords in your songs"
+  - Helps distinguish learned vs. new chords
+- **Enhanced Search** - Improved placeholder text
+  - "Search your chords and library" makes feature discoverable
+  - Works with chord name search (partial matching)
+
+#### Bug Fixes & Improvements
+- **Fixed Chord Pill Drag Crash** - Resolved crash when reordering chord pills via drag-and-drop
+  - Moved binding update from drag event to drop completion
+  - Smooth drag-and-drop experience without crashes
+- **Fixed Notification Scheduling** - Practice and add song reminders now fire reliably
+  - Corrected "Every Other Day" frequency (now schedules 30 notifications over 60 days)
+  - Fixed default settings (reminders now default to enabled as intended)
+  - All frequencies work correctly: Daily, Every Other Day, Weekly
+- **Standardized Chord Names** - Simplified chord library to use standard guitar notation
+  - Changed verbose names to standard: "D Suspended 4" → "Dsus4"
+  - Removed 80+ lines of variation matching code
+  - All 210+ chords now use clean, consistent names
+  - Improved chord matching and search accuracy
+
 ### Version 1.3.1 (December 2024)
 
 #### Chord Voicing Management System
@@ -346,6 +400,8 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 - `CommunityDataService` - Anonymous data contribution and analytics
 - `AnalyticsService` - Firebase Analytics and Supabase tracking
 - `NotificationManager` - Local practice and add song reminder notifications
+- `ShareExtensionHandler` - Share Extension data handling and main app integration
+- `ChordChartParser` - Text parsing for chord chart imports
 
 ### Services
 - **HapticManager** - Provides light, medium, heavy, success, and error haptics
@@ -450,7 +506,7 @@ Available on the [App Store](https://apps.apple.com/us/app/fret-not/id6756530936
 Email: fretnotapp@gmail.com
 
 ## Version
-1.3.1 (Build 5)
+1.4 (Build 6)
 
 ## Author
 Built by Alexa Kaminsky
