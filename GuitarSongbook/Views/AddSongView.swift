@@ -1012,10 +1012,6 @@ struct AddSongView: View {
                 }
             }
         } else if !prefilledTitle.isEmpty || !prefilledChords.isEmpty {
-            print("🎯 setupInitialValues: Using prefilled data")
-            print("  - prefilledChords: \(prefilledChords)")
-            print("  - prefilledNotes: \(prefilledNotes)")
-
             // Set to manual entry mode
             selectedTrack = SpotifyTrack(
                 id: "manual",
@@ -1033,10 +1029,6 @@ struct AddSongView: View {
             spotifyUrl = prefilledSpotifyUrl ?? ""
             albumCoverUrl = prefilledAlbumCover
             notes = prefilledNotes
-            print("  - Set chords to: \(chords)")
-            print("  - Set notes to: \(notes.prefix(50))...")
-        } else {
-            print("🎯 setupInitialValues: No prefilled data")
         }
     }
     

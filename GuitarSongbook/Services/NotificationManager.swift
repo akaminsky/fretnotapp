@@ -26,10 +26,8 @@ class NotificationManager: ObservableObject {
     func requestPermission() async -> Bool {
         do {
             let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
-            print("📱 Notification permission granted: \(granted)")
             return granted
         } catch {
-            print("❌ Error requesting notification permission: \(error)")
             return false
         }
     }
@@ -37,18 +35,14 @@ class NotificationManager: ObservableObject {
     // MARK: - Practice Reminders
 
     func schedulePracticeReminders(frequency: ReminderFrequency, time: Date) {
-        print("📅 Scheduling practice reminders - Frequency: \(frequency.rawValue), Time: \(time)")
         cancelPracticeReminders()
 
         let calendar = Calendar.current
         let components = calendar.dateComponents([.hour, .minute], from: time)
 
         guard let hour = components.hour, let minute = components.minute else {
-            print("❌ Invalid time components")
             return
         }
-
-        print("⏰ Scheduling for \(hour):\(String(format: "%02d", minute))")
 
         let content = UNMutableNotificationContent()
         content.title = "Time to practice! 🎸"
@@ -74,7 +68,6 @@ class NotificationManager: ObservableObject {
         }
 
         notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
-        print("🔕 Cancelled practice reminders")
     }
 
     // MARK: - Add Song Reminders
@@ -113,7 +106,6 @@ class NotificationManager: ObservableObject {
         }
 
         notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
-        print("🔕 Cancelled add song reminders")
     }
 
     // MARK: - General Methods
@@ -126,7 +118,6 @@ class NotificationManager: ObservableObject {
     func rescheduleIfNeeded() {
         // Practice reminders - default to true if key doesn't exist
         let practiceEnabled = UserDefaults.standard.object(forKey: "practiceRemindersEnabled") as? Bool ?? true
-        print("🔄 Reschedule - Practice enabled: \(practiceEnabled)")
 
         if practiceEnabled {
             let frequencyRaw = UserDefaults.standard.string(forKey: "practiceReminderFrequency") ?? ReminderFrequency.everyOtherDay.rawValue
@@ -140,7 +131,6 @@ class NotificationManager: ObservableObject {
 
         // Add song reminders - default to true if key doesn't exist
         let addSongEnabled = UserDefaults.standard.object(forKey: "addSongRemindersEnabled") as? Bool ?? true
-        print("🔄 Reschedule - Add song enabled: \(addSongEnabled)")
 
         if addSongEnabled {
             let frequencyRaw = UserDefaults.standard.string(forKey: "addSongReminderFrequency") ?? ReminderFrequency.weekly.rawValue
@@ -173,11 +163,7 @@ class NotificationManager: ObservableObject {
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
             notificationCenter.add(request) { error in
-                if let error = error {
-                    print("❌ Error scheduling \(identifier): \(error)")
-                } else {
-                    print("✅ Scheduled daily notification \(identifier) for \(hour):\(String(format: "%02d", minute))")
-                }
+                // Silent error handling
             }
 
         case .everyOtherDay:
@@ -201,9 +187,7 @@ class NotificationManager: ObservableObject {
                 let trigger = UNCalendarNotificationTrigger(dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: nextOccurrence), repeats: false)
                 let request = UNNotificationRequest(identifier: "\(identifier)_\(dayOffset)", content: content, trigger: trigger)
                 notificationCenter.add(request) { error in
-                    if let error = error {
-                        print("❌ Error scheduling \(identifier) day \(dayOffset): \(error)")
-                    }
+                    // Silent error handling
                 }
             }
 
@@ -216,11 +200,7 @@ class NotificationManager: ObservableObject {
             let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
             notificationCenter.add(request) { error in
-                if let error = error {
-                    print("❌ Error scheduling \(identifier): \(error)")
-                } else {
-                    print("✅ Scheduled weekly notification \(identifier) for weekday \(dateComponents.weekday ?? 0) at \(hour):\(String(format: "%02d", minute))")
-                }
+                // Silent error handling
             }
         }
     }
