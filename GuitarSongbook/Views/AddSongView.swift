@@ -2053,6 +2053,8 @@ struct ChordDropDelegate: DropDelegate {
 
     func performDrop(info: DropInfo) -> Bool {
         draggingChord = nil
+        // Update the binding now that the drop is complete
+        onDrop()
         return true
     }
 
@@ -2064,10 +2066,10 @@ struct ChordDropDelegate: DropDelegate {
             return
         }
 
+        // Only reorder the array during drag, don't update the binding yet
         withAnimation(.default) {
             chords.move(fromOffsets: IndexSet(integer: fromIndex), toOffset: toIndex > fromIndex ? toIndex + 1 : toIndex)
         }
-        onDrop()
     }
 }
 
