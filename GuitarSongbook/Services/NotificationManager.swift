@@ -26,9 +26,10 @@ class NotificationManager: ObservableObject {
     func requestPermission() async -> Bool {
         do {
             let granted = try await notificationCenter.requestAuthorization(options: [.alert, .sound, .badge])
+            print("📱 Notification permission granted: \(granted)")
             return granted
         } catch {
-            print("Error requesting notification permission: \(error)")
+            print("❌ Error requesting notification permission: \(error)")
             return false
         }
     }
@@ -36,14 +37,18 @@ class NotificationManager: ObservableObject {
     // MARK: - Practice Reminders
 
     func schedulePracticeReminders(frequency: ReminderFrequency, time: Date) {
+        print("📅 Scheduling practice reminders - Frequency: \(frequency.rawValue), Time: \(time)")
         cancelPracticeReminders()
 
         let calendar = Calendar.current
         let components = calendar.dateComponents([.hour, .minute], from: time)
 
         guard let hour = components.hour, let minute = components.minute else {
+            print("❌ Invalid time components")
             return
         }
+
+        print("⏰ Scheduling for \(hour):\(String(format: "%02d", minute))")
 
         let content = UNMutableNotificationContent()
         content.title = "Time to practice! 🎸"
@@ -60,11 +65,16 @@ class NotificationManager: ObservableObject {
     }
 
     func cancelPracticeReminders() {
-        notificationCenter.removePendingNotificationRequests(withIdentifiers: [
-            "practiceReminder",
-            "practiceReminder_first",
-            "practiceReminder_repeat"
-        ])
+        // Cancel single identifier
+        var identifiers = ["practiceReminder"]
+
+        // Cancel all every-other-day notifications
+        for dayOffset in stride(from: 0, through: 60, by: 2) {
+            identifiers.append("practiceReminder_\(dayOffset)")
+        }
+
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
+        print("🔕 Cancelled practice reminders")
     }
 
     // MARK: - Add Song Reminders
@@ -94,11 +104,16 @@ class NotificationManager: ObservableObject {
     }
 
     func cancelAddSongReminders() {
-        notificationCenter.removePendingNotificationRequests(withIdentifiers: [
-            "addSongReminder",
-            "addSongReminder_first",
-            "addSongReminder_repeat"
-        ])
+        // Cancel single identifier
+        var identifiers = ["addSongReminder"]
+
+        // Cancel all every-other-day notifications
+        for dayOffset in stride(from: 0, through: 60, by: 2) {
+            identifiers.append("addSongReminder_\(dayOffset)")
+        }
+
+        notificationCenter.removePendingNotificationRequests(withIdentifiers: identifiers)
+        print("🔕 Cancelled add song reminders")
     }
 
     // MARK: - General Methods
@@ -109,23 +124,29 @@ class NotificationManager: ObservableObject {
     }
 
     func rescheduleIfNeeded() {
-        // Practice reminders
-        let practiceEnabled = UserDefaults.standard.bool(forKey: "practiceRemindersEnabled")
+        // Practice reminders - default to true if key doesn't exist
+        let practiceEnabled = UserDefaults.standard.object(forKey: "practiceRemindersEnabled") as? Bool ?? true
+        print("🔄 Reschedule - Practice enabled: \(practiceEnabled)")
+
         if practiceEnabled {
             let frequencyRaw = UserDefaults.standard.string(forKey: "practiceReminderFrequency") ?? ReminderFrequency.everyOtherDay.rawValue
             let frequency = ReminderFrequency(rawValue: frequencyRaw) ?? .everyOtherDay
-            let time = UserDefaults.standard.object(forKey: "practiceReminderTime") as? Date ?? getDefaultReminderTime()
+            let timeInterval = UserDefaults.standard.object(forKey: "practiceReminderTime") as? TimeInterval
+            let time = timeInterval != nil ? Date(timeIntervalSince1970: timeInterval!) : getDefaultReminderTime()
             schedulePracticeReminders(frequency: frequency, time: time)
         } else {
             cancelPracticeReminders()
         }
 
-        // Add song reminders
-        let addSongEnabled = UserDefaults.standard.bool(forKey: "addSongRemindersEnabled")
+        // Add song reminders - default to true if key doesn't exist
+        let addSongEnabled = UserDefaults.standard.object(forKey: "addSongRemindersEnabled") as? Bool ?? true
+        print("🔄 Reschedule - Add song enabled: \(addSongEnabled)")
+
         if addSongEnabled {
             let frequencyRaw = UserDefaults.standard.string(forKey: "addSongReminderFrequency") ?? ReminderFrequency.weekly.rawValue
             let frequency = ReminderFrequency(rawValue: frequencyRaw) ?? .weekly
-            let time = UserDefaults.standard.object(forKey: "addSongReminderTime") as? Date ?? getDefaultReminderTime()
+            let timeInterval = UserDefaults.standard.object(forKey: "addSongReminderTime") as? TimeInterval
+            let time = timeInterval != nil ? Date(timeIntervalSince1970: timeInterval!) : getDefaultReminderTime()
             scheduleAddSongReminders(frequency: frequency, time: time)
         } else {
             cancelAddSongReminders()
@@ -153,36 +174,36 @@ class NotificationManager: ObservableObject {
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
             notificationCenter.add(request) { error in
                 if let error = error {
-                    print("Error scheduling \(identifier): \(error)")
+                    print("❌ Error scheduling \(identifier): \(error)")
+                } else {
+                    print("✅ Scheduled daily notification \(identifier) for \(hour):\(String(format: "%02d", minute))")
                 }
             }
 
         case .everyOtherDay:
-            // Schedule first notification at the specified time
-            var dateComponents = DateComponents()
-            dateComponents.hour = hour
-            dateComponents.minute = minute
-
-            // Get next occurrence of this time
+            // Schedule notification for every 2 days at the specified time
+            // We need to schedule multiple notifications (iOS limits repeating calendar notifications)
+            let calendar = Calendar.current
             let now = Date()
-            guard let nextOccurrence = calendar.nextDate(after: now, matching: dateComponents, matchingPolicy: .nextTime) else {
-                return
-            }
 
-            let firstTrigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: false)
-            let firstRequest = UNNotificationRequest(identifier: "\(identifier)_first", content: content, trigger: firstTrigger)
-            notificationCenter.add(firstRequest) { error in
-                if let error = error {
-                    print("Error scheduling first \(identifier): \(error)")
+            // Schedule notifications for the next 60 days (30 notifications, every other day)
+            for dayOffset in stride(from: 0, through: 60, by: 2) {
+                var dateComponents = DateComponents()
+                dateComponents.hour = hour
+                dateComponents.minute = minute
+
+                guard let targetDate = calendar.date(byAdding: .day, value: dayOffset, to: now),
+                      let nextOccurrence = calendar.nextDate(after: targetDate, matching: dateComponents, matchingPolicy: .nextTime),
+                      nextOccurrence > now else {
+                    continue
                 }
-            }
 
-            // Schedule repeating every 48 hours
-            let intervalTrigger = UNTimeIntervalNotificationTrigger(timeInterval: 48 * 60 * 60, repeats: true)
-            let repeatRequest = UNNotificationRequest(identifier: "\(identifier)_repeat", content: content, trigger: intervalTrigger)
-            notificationCenter.add(repeatRequest) { error in
-                if let error = error {
-                    print("Error scheduling repeat \(identifier): \(error)")
+                let trigger = UNCalendarNotificationTrigger(dateMatching: calendar.dateComponents([.year, .month, .day, .hour, .minute], from: nextOccurrence), repeats: false)
+                let request = UNNotificationRequest(identifier: "\(identifier)_\(dayOffset)", content: content, trigger: trigger)
+                notificationCenter.add(request) { error in
+                    if let error = error {
+                        print("❌ Error scheduling \(identifier) day \(dayOffset): \(error)")
+                    }
                 }
             }
 
@@ -196,7 +217,9 @@ class NotificationManager: ObservableObject {
             let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
             notificationCenter.add(request) { error in
                 if let error = error {
-                    print("Error scheduling \(identifier): \(error)")
+                    print("❌ Error scheduling \(identifier): \(error)")
+                } else {
+                    print("✅ Scheduled weekly notification \(identifier) for weekday \(dateComponents.weekday ?? 0) at \(hour):\(String(format: "%02d", minute))")
                 }
             }
         }
@@ -216,7 +239,7 @@ class NotificationManager: ObservableObject {
     private func getAddSongMessage() -> String {
         let messages = [
             "Learned something new? Add it to your songbook 📝",
-            "What songs are you working on? Add them here 🎶",
+            "What songs are you working on? Don't forget to add them 🎶",
             "Keep growing your collection! Add more songs 🎵",
             "New songs to add? 📝 Update your songbook"
         ]
