@@ -63,7 +63,7 @@ struct TappableFretboard: View {
     let strings: [String]
 
     private let numFrets = 5
-    private let cellHeight: CGFloat = 55
+    private let cellHeight: CGFloat = 45
 
     var body: some View {
         VStack(spacing: 0) {
@@ -82,7 +82,7 @@ struct TappableFretboard: View {
                     }
                 }
             }
-            .frame(maxHeight: 400)
+            .frame(maxHeight: 275)
         }
     }
 
@@ -207,7 +207,6 @@ struct ChordResultsView: View {
     let chordLibrary: ChordLibrary
 
     @State private var selectedChordForAdding: IdentifiableString?
-    @State private var selectedChordIndex: Int?
     @State private var showingSaveCustomChord = false
 
     private var hasFingers: Bool {
@@ -289,11 +288,10 @@ struct ChordResultsView: View {
             dateCreated: Date()
         )
 
-        Task {
+        Task { @MainActor in
             await CustomChordLibrary.shared.addCustomChord(customChord)
+            selectedChordForAdding = IdentifiableString(value: name)
         }
-
-        selectedChordForAdding = IdentifiableString(value: name)
     }
 
     private func extractBaseChordName(_ displayName: String) -> String {
@@ -323,10 +321,9 @@ struct ChordResultsView: View {
                 Spacer()
 
                 Button {
-                    // Use first match if nothing selected
-                    let index = selectedChordIndex ?? 0
-                    if index < matchedChords.count {
-                        let chordName = matchedChords[index].0
+                    // Use first match
+                    if !matchedChords.isEmpty {
+                        let chordName = matchedChords[0].0
                         selectedChordForAdding = IdentifiableString(value: chordName)
                     }
                 } label: {
@@ -345,45 +342,46 @@ struct ChordResultsView: View {
             }
             .padding(.horizontal)
 
-            ForEach(0..<min(matchedChords.count, 10), id: \.self) { index in
-                let chordTuple = matchedChords[index]
-                let chordName = chordTuple.0
-                let chordData = chordTuple.1
-                let isSelected = (selectedChordIndex ?? 0) == index
+            // Compact text badge pattern
+            VStack(spacing: 12) {
+                if !matchedChords.isEmpty {
+                    Text("Matches these known chords:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
 
-                VStack(spacing: 12) {
-                    // Chord diagram (includes name)
-                    ChordDiagramView(chordName: chordName)
-                        .frame(height: 140)
-
-                    if let barre = chordData.barre {
-                        Text("Barre at fret \(barre)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 12) {
+                        ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
+                            Text(name)
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 8)
+                                .background(Color.green.opacity(0.1))
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                )
+                        }
                     }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(isSelected ? Color.appAccent.opacity(0.15) : Color(.systemGray6))
-                .cornerRadius(12)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12)
-                        .stroke(isSelected ? Color.appAccent : Color.clear, lineWidth: 2)
-                )
-                .onTapGesture {
-                    selectedChordIndex = index
+                } else {
+                    Text("No matching chords found")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
                 }
             }
+            .padding()
+            .background(Color(.systemGray6))
+            .cornerRadius(12)
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
-        .onAppear {
-            // Auto-select first chord
-            if selectedChordIndex == nil && !matchedChords.isEmpty {
-                selectedChordIndex = 0
-            }
-        }
     }
 
     private var placeholderView: some View {
@@ -549,9 +547,17 @@ struct SongSelectorSheet: View {
 struct SaveCustomChordSheet: View {
     @Environment(\.dismiss) var dismiss
     let fingers: [Int]
+    let initialName: String
     let onSave: (String) -> Void
 
     @State private var chordName = ""
+
+    init(fingers: [Int], initialName: String = "", onSave: @escaping (String) -> Void) {
+        self.fingers = fingers
+        self.initialName = initialName
+        self.onSave = onSave
+        _chordName = State(initialValue: initialName)
+    }
 
     var body: some View {
         NavigationStack {
@@ -570,23 +576,38 @@ struct SaveCustomChordSheet: View {
                     .listRowBackground(Color.clear)
                 }
 
-                Section {
+                VStack(alignment: .leading, spacing: 0) {
+                    // Header
+                    Text("Chord Name")
+                        .font(.footnote)
+                        .foregroundColor(.secondary)
+                        .textCase(.uppercase)
+                        .padding(.horizontal, 16)
+                        .padding(.bottom, 8)
+
+                    // Input field
                     TextField("Chord name (e.g., G (Sweet Home))", text: $chordName)
                         .autocapitalization(.words)
                         .autocorrectionDisabled()
-                } header: {
-                    Text("Chord Name")
-                } footer: {
-                    Text("Give your chord a unique name. Include variations in parentheses (e.g., 'G (alt)', 'C (Sweet Home)').")
-                }
+                        .padding(12)
+                        .background(Color(.systemBackground))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color(.systemGray4), lineWidth: 1)
+                        )
+                        .padding(.horizontal, 16)
 
-                Section {
-                    Button("G (variation)") { chordName = "G (variation)" }
-                    Button("C (alt)") { chordName = "C (alt)" }
-                    Button("D (custom)") { chordName = "D (custom)" }
-                } header: {
-                    Text("Quick Templates")
+                    // Helper text
+                    Text("Give your chord a unique name. Include variations in parentheses e.g., G (alt), C (Sweet Home).")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
                 }
+                .listRowInsets(EdgeInsets())
+                .listRowBackground(Color.clear)
+                .padding(.vertical, 12)
             }
             .navigationTitle("Save Custom Chord")
             .navigationBarTitleDisplayMode(.inline)

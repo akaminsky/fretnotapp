@@ -342,11 +342,16 @@ struct EditChordSheet: View {
     let chordName: String
 
     @State private var selectedFingers: [Int] = [0, 0, 0, 0, 0, 0]
-    @State private var customName = ""
+    @State private var fingersForSave: FingerPosition?
     @State private var showingSaveConfirmation = false
     @State private var savedChordName = ""
 
     private let strings = ["E", "A", "D", "G", "B", "e"]
+
+    struct FingerPosition: Identifiable {
+        let id = UUID()
+        let fingers: [Int]
+    }
 
     private var matchedChords: [(String, ChordData)] {
         ChordLibrary.shared.findChordsMatching(fingers: selectedFingers, barre: nil)
@@ -430,32 +435,6 @@ struct EditChordSheet: View {
                     }
 
                     Divider()
-
-                    // Save section
-                    VStack(spacing: 12) {
-                        TextField("Chord name (e.g., G (Sweet Home))", text: $customName)
-                            .textFieldStyle(.roundedBorder)
-                            .padding(.horizontal)
-                    }
-
-                    Button {
-                        saveCustomVariation()
-                    } label: {
-                        Text("Save as Custom Chord")
-                            .fontWeight(.medium)
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.appAccent)
-                    .disabled(customName.trimmingCharacters(in: .whitespaces).isEmpty || !hasFingers)
-                    .padding(.horizontal)
-
-                    if !hasFingers {
-                        Text("Place at least one finger on the fretboard")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                            .padding(.horizontal)
-                    }
                 }
                 .padding()
             }
@@ -465,13 +444,23 @@ struct EditChordSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        fingersForSave = FingerPosition(fingers: selectedFingers)
+                    }
+                    .disabled(!hasFingers)
+                }
             }
             .onAppear {
-                // Pre-fill with chord name and fingering if it exists
-                customName = chordName
+                // Pre-fill with chord fingering if it exists
                 if let chordData = ChordLibrary.shared.findChord(chordName) {
                     selectedFingers = chordData.fingers
                 }
+            }
+        }
+        .sheet(item: $fingersForSave) { position in
+            SaveCustomChordSheet(fingers: position.fingers, initialName: chordName) { name in
+                saveCustomVariation(name: name, fingers: position.fingers)
             }
         }
         .alert("Custom Chord Saved", isPresented: $showingSaveConfirmation) {
@@ -481,18 +470,18 @@ struct EditChordSheet: View {
         }
     }
 
-    private func saveCustomVariation() {
-        let trimmedName = customName.trimmingCharacters(in: .whitespaces)
+    private func saveCustomVariation(name: String, fingers: [Int]) {
+        let trimmedName = name.trimmingCharacters(in: .whitespaces)
 
         // Check if a chord with this name already exists
         if let existingChord = CustomChordLibrary.shared.findCustomChord(byDisplayName: trimmedName) {
             // Update the existing chord
             let updatedChord = CustomChordData(
                 id: existingChord.id,
-                fingers: selectedFingers,
+                fingers: fingers,
                 name: extractBaseChordName(trimmedName),
                 displayName: trimmedName,
-                barre: detectBarre(selectedFingers),
+                barre: detectBarre(fingers),
                 dateCreated: existingChord.dateCreated
             )
             CustomChordLibrary.shared.updateCustomChord(updatedChord)
@@ -500,13 +489,13 @@ struct EditChordSheet: View {
             // Create a new chord
             let customChord = CustomChordData(
                 id: UUID(),
-                fingers: selectedFingers,
+                fingers: fingers,
                 name: extractBaseChordName(trimmedName),
                 displayName: trimmedName,
-                barre: detectBarre(selectedFingers),
+                barre: detectBarre(fingers),
                 dateCreated: Date()
             )
-            Task {
+            Task { @MainActor in
                 await CustomChordLibrary.shared.addCustomChord(customChord)
             }
         }

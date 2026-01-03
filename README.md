@@ -103,6 +103,24 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
   - "Search your chords and library" makes feature discoverable
   - Works with chord name search (partial matching)
 
+#### Chord Creation UX Standardization
+- **Unified Chord Creation Experience** - Standardized UX across all chord creation sheets
+  - Consistent layout: helper text → fretboard → clear button → matching chords
+  - All three sheets (Add Variation, Identify Chord, Edit Chord) now have identical patterns
+  - Compact matching chords section with text badges (3-column grid, up to 6 chords)
+  - Standardized button placement: Cancel (top left), Save (top right)
+  - Removed content-area "Save as Custom Chord" buttons for cleaner interface
+- **Optimized Fretboard Display** - Improved fretboard sizing for better visibility
+  - Shows exactly 5 frets initially (down from 7) with reduced 45pt cell height
+  - Still scrollable to access all 12 frets
+  - Consistent shadow and styling across all fretboards
+  - More compact layout fits better on screen
+- **Enlarged Chord Diagram View** - Tap chord diagrams to see them full-screen
+  - Tap any chord diagram on detail page to enlarge it
+  - 1.8x scale increase for better visibility
+  - Tap anywhere to dismiss and return to detail view
+  - Helpful "Tap anywhere to close" hint text
+
 #### Bug Fixes & Improvements
 - **Fixed Chord Pill Drag Crash** - Resolved crash when reordering chord pills via drag-and-drop
   - Moved binding update from drag event to drop completion
