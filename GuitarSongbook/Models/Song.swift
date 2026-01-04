@@ -7,6 +7,68 @@
 
 import Foundation
 
+// MARK: - Song Link
+
+struct SongLink: Codable, Identifiable, Equatable {
+    let id: UUID
+    var url: String
+    var siteName: String
+    var addedAt: Date
+
+    init(id: UUID = UUID(), url: String, siteName: String? = nil, addedAt: Date = Date()) {
+        self.id = id
+        self.url = url
+        self.siteName = siteName ?? SongLink.detectSiteName(from: url)
+        self.addedAt = addedAt
+    }
+
+    // Auto-detect site name from URL
+    static func detectSiteName(from urlString: String) -> String {
+        guard let url = URL(string: urlString),
+              let host = url.host else {
+            return "Link"
+        }
+
+        // Remove www. and extract domain
+        let domain = host.replacingOccurrences(of: "www.", with: "")
+
+        // Known site mappings
+        let siteMap: [String: String] = [
+            "ultimate-guitar.com": "Ultimate Guitar",
+            "tabs.ultimate-guitar.com": "Ultimate Guitar",
+            "songsterr.com": "Songsterr",
+            "chordify.net": "Chordify",
+            "guitartabs.cc": "Guitar Tabs",
+            "azchords.com": "AZ Chords",
+            "e-chords.com": "E-Chords",
+            "chordie.com": "Chordie",
+            "youtube.com": "YouTube",
+            "youtu.be": "YouTube",
+            "genius.com": "Genius",
+            "azlyrics.com": "AZ Lyrics",
+            "lyrics.com": "Lyrics.com",
+            "metrolyrics.com": "MetroLyrics",
+            "vimeo.com": "Vimeo",
+            "guitartabsexplorer.com": "Guitar Tabs Explorer",
+            "bigbasstabs.com": "Big Bass Tabs",
+            "911tabs.com": "911 Tabs"
+        ]
+
+        // Check for known sites
+        for (pattern, name) in siteMap {
+            if domain.contains(pattern) {
+                return name
+            }
+        }
+
+        // Fallback: capitalize domain name
+        let mainDomain = domain.components(separatedBy: ".").first ?? "Link"
+        return mainDomain.prefix(1).uppercased() + mainDomain.dropFirst()
+    }
+}
+
+// MARK: - Song
+
 struct Song: Identifiable, Codable, Equatable {
     var id: UUID
     var title: String
@@ -17,7 +79,8 @@ struct Song: Identifiable, Codable, Equatable {
     var strumPatterns: [StrumPattern]
     var dateAdded: Date
     var spotifyUrl: String?
-    var tabUrl: String?
+    var tabUrl: String?     // Deprecated - kept for backward compatibility
+    var links: [SongLink]   // New field replacing tabUrl
     var albumCoverUrl: String?
     var notes: String?
     var createdAt: Date
@@ -38,6 +101,7 @@ struct Song: Identifiable, Codable, Equatable {
         dateAdded: Date = Date(),
         spotifyUrl: String? = nil,
         tabUrl: String? = nil,
+        links: [SongLink] = [],
         albumCoverUrl: String? = nil,
         notes: String? = nil,
         createdAt: Date = Date(),
@@ -57,6 +121,7 @@ struct Song: Identifiable, Codable, Equatable {
         self.dateAdded = dateAdded
         self.spotifyUrl = spotifyUrl
         self.tabUrl = tabUrl
+        self.links = links
         self.albumCoverUrl = albumCoverUrl
         self.notes = notes
         self.createdAt = createdAt
@@ -72,7 +137,7 @@ struct Song: Identifiable, Codable, Equatable {
     
     enum CodingKeys: String, CodingKey {
         case id, title, artist, chords, capoPosition, tuning, strumPatterns, dateAdded
-        case spotifyUrl, tabUrl, albumCoverUrl, notes, createdAt
+        case spotifyUrl, tabUrl, links, albumCoverUrl, notes, createdAt
         case isFavorite, categories
         case key, mode, tempo
     }
@@ -97,7 +162,15 @@ struct Song: Identifiable, Codable, Equatable {
         tabUrl = try container.decodeIfPresent(String.self, forKey: .tabUrl)
         albumCoverUrl = try container.decodeIfPresent(String.self, forKey: .albumCoverUrl)
         notes = try container.decodeIfPresent(String.self, forKey: .notes)
-        
+
+        // Decode new links array
+        links = try container.decodeIfPresent([SongLink].self, forKey: .links) ?? []
+
+        // Data migration: Convert old tabUrl to links array if needed
+        if let oldTabUrl = tabUrl, !oldTabUrl.isEmpty, links.isEmpty {
+            links = [SongLink(url: oldTabUrl)]
+        }
+
         // Newer fields - provide defaults if missing
         createdAt = try container.decodeIfPresent(Date.self, forKey: .createdAt) ?? dateAdded
         isFavorite = try container.decodeIfPresent(Bool.self, forKey: .isFavorite) ?? false
@@ -120,7 +193,8 @@ struct Song: Identifiable, Codable, Equatable {
         try container.encode(strumPatterns, forKey: .strumPatterns)
         try container.encode(dateAdded, forKey: .dateAdded)
         try container.encodeIfPresent(spotifyUrl, forKey: .spotifyUrl)
-        try container.encodeIfPresent(tabUrl, forKey: .tabUrl)
+        try container.encodeIfPresent(tabUrl, forKey: .tabUrl)  // Keep for backward compatibility
+        try container.encode(links, forKey: .links)  // New primary field
         try container.encodeIfPresent(albumCoverUrl, forKey: .albumCoverUrl)
         try container.encodeIfPresent(notes, forKey: .notes)
         try container.encode(createdAt, forKey: .createdAt)

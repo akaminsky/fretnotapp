@@ -33,7 +33,9 @@ class CustomChordLibrary: ObservableObject {
 
     private init() {
         setupiCloudSync()
-        loadCustomChords()
+        Task { @MainActor in
+            loadCustomChords()
+        }
     }
 
     // MARK: - iCloud Setup
@@ -64,6 +66,7 @@ class CustomChordLibrary: ObservableObject {
 
     // MARK: - CRUD Operations
 
+    @MainActor
     func addCustomChord(_ chord: CustomChordData) async {
         customChords.append(chord)
         saveCustomChords()
@@ -77,6 +80,7 @@ class CustomChordLibrary: ObservableObject {
         ))
     }
 
+    @MainActor
     func deleteCustomChord(_ id: UUID) -> CustomChordData? {
         guard let index = customChords.firstIndex(where: { $0.id == id }) else {
             return nil
@@ -93,6 +97,7 @@ class CustomChordLibrary: ObservableObject {
         return removed
     }
 
+    @MainActor
     func updateCustomChord(_ chord: CustomChordData) {
         if let index = customChords.firstIndex(where: { $0.id == chord.id }) {
             customChords[index] = chord
@@ -132,6 +137,7 @@ class CustomChordLibrary: ObservableObject {
         }
     }
 
+    @MainActor
     private func loadCustomChords() {
         var data: Data?
 

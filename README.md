@@ -136,6 +136,32 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
   - Tap anywhere to dismiss and return to detail view
   - Helpful "Tap anywhere to close" hint text
 
+#### Multiple Resource Links
+- **Beyond Tab URLs** - Songs can now have multiple resource links of any type
+  - Add tabs, lyrics, videos, or any music resource
+  - Support for multiple links per song (not just one)
+  - Automatic site name detection from URL
+  - Works with 18+ music resource sites
+- **Auto-Detected Site Names** - Smart recognition of popular music sites
+  - **Tab Sites**: Ultimate Guitar, Songsterr, Chordify, E-Chords, and 7 more
+  - **Lyrics Sites**: Genius, AZ Lyrics, Lyrics.com, MetroLyrics
+  - **Video Sites**: YouTube, Vimeo
+  - Graceful fallback: capitalizes domain name for unknown sites
+- **Improved Add/Remove UI** - Consistent with other form inputs
+  - Add Link button spans full width for better discoverability
+  - Each link shows as a pill with site name badge and remove button
+  - "No links added" placeholder when empty
+  - Links display with site name in song detail view
+- **Enhanced Clipboard Detection** - Auto-detection now works for all resource types
+  - Monitors clipboard when returning to app
+  - Detects tabs, lyrics, and video URLs automatically
+  - Prompts to save any recognized music resource link
+  - Adds to links array (doesn't replace existing links)
+- **Backward Compatible** - Seamless migration for existing songs
+  - Old single "Tab URL" field automatically converts to links array
+  - No data loss during upgrade
+  - Continues to work with iCloud sync
+
 #### Bug Fixes & Improvements
 - **Fixed Chord Pill Drag Crash** - Resolved crash when reordering chord pills via drag-and-drop
   - Moved binding update from drag event to drop completion

@@ -35,7 +35,9 @@ struct AddSongView: View {
     @State private var strumPatterns: [StrumPattern] = []
     @State private var dateAdded = Date()
     @State private var spotifyUrl = ""
-    @State private var tabUrl = ""
+    @State private var tabUrl = ""  // Deprecated - kept for backward compatibility
+    @State private var links: [SongLink] = []
+    @State private var showingAddLink = false
     @State private var notes = ""
     @State private var albumCoverUrl: String?
     
@@ -124,6 +126,13 @@ struct AddSongView: View {
             BulkImportView()
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
+        }
+        .sheet(isPresented: $showingAddLink) {
+            AddLinkSheet { url in
+                let link = SongLink(url: url)
+                links.append(link)
+                showingAddLink = false
+            }
         }
         .alert("Delete Song", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) { }
@@ -924,29 +933,67 @@ struct AddSongView: View {
                     .cornerRadius(8)
             }
             
-            // Tab URL
-            FormSection(title: "Tab Link") {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("Tab URL")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundColor(.secondary)
-                        .textCase(.uppercase)
-                    
-                    HStack {
-                        TextField("https://ultimate-guitar.com/...", text: $tabUrl)
-                        
-                        if !tabUrl.isEmpty {
-                            Button {
-                                tabUrl = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(Color(.tertiaryLabel))
+            // Resource Links
+            FormSection(title: "Resource Links") {
+                VStack(alignment: .leading, spacing: 12) {
+                    if links.isEmpty {
+                        Text("No links added")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(12)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                    } else {
+                        ForEach(links) { link in
+                            HStack(spacing: 12) {
+                                // Site name badge
+                                Text(link.siteName)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(Color.orange.opacity(0.15))
+                                    .cornerRadius(6)
+
+                                // URL (truncated)
+                                Text(link.url)
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    .lineLimit(1)
+
+                                Spacer()
+
+                                // Remove button
+                                Button {
+                                    links.removeAll { $0.id == link.id }
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(Color(.tertiaryLabel))
+                                }
+                                .buttonStyle(.plain)
                             }
-                            .buttonStyle(.plain)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 8)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
                         }
                     }
-                    .padding(12)
+
+                    Button {
+                        showingAddLink = true
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Add Link")
+                        }
+                        .font(.caption)
+                        .foregroundColor(.appAccent)
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.vertical, 8)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                 }
@@ -997,6 +1044,7 @@ struct AddSongView: View {
             dateAdded = song.dateAdded
             spotifyUrl = song.spotifyUrl ?? ""
             tabUrl = song.tabUrl ?? ""
+            links = song.links
             notes = song.notes ?? ""
             albumCoverUrl = song.albumCoverUrl
             isFavorite = song.isFavorite
@@ -1174,6 +1222,7 @@ struct AddSongView: View {
             song.dateAdded = dateAdded
             song.spotifyUrl = spotifyUrl.isEmpty ? nil : spotifyUrl
             song.tabUrl = tabUrl.isEmpty ? nil : tabUrl
+            song.links = links
             song.notes = notes.isEmpty ? nil : notes
             song.albumCoverUrl = albumCoverUrl
             song.isFavorite = isFavorite
@@ -1193,6 +1242,7 @@ struct AddSongView: View {
                 dateAdded: dateAdded,
                 spotifyUrl: spotifyUrl.isEmpty ? nil : spotifyUrl,
                 tabUrl: tabUrl.isEmpty ? nil : tabUrl,
+                links: links,
                 albumCoverUrl: albumCoverUrl,
                 notes: notes.isEmpty ? nil : notes,
                 isFavorite: isFavorite,

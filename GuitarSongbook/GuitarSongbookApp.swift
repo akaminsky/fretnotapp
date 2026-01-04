@@ -12,7 +12,7 @@ import FirebaseCore
 struct GuitarSongbookApp: App {
     @StateObject private var songStore = SongStore()
     @StateObject private var spotifyService = SpotifyService()
-    @StateObject private var tabURLDetector = TabURLDetector()
+    @StateObject private var resourceLinkDetector = ResourceLinkDetector()
     @StateObject private var shareExtensionHandler = ShareExtensionHandler()
 
     init() {
@@ -33,7 +33,7 @@ struct GuitarSongbookApp: App {
             MainTabView()
                 .environmentObject(songStore)
                 .environmentObject(spotifyService)
-                .environmentObject(tabURLDetector)
+                .environmentObject(resourceLinkDetector)
                 .environmentObject(shareExtensionHandler)
                 .onOpenURL { url in
                     shareExtensionHandler.handleURL(url)

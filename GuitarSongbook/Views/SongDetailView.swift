@@ -10,7 +10,7 @@ import SwiftUI
 struct SongDetailView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
-    @EnvironmentObject var tabURLDetector: TabURLDetector
+    @EnvironmentObject var resourceLinkDetector: ResourceLinkDetector
     @Environment(\.dismiss) var dismiss
     @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
 
@@ -236,36 +236,59 @@ struct SongDetailView: View {
                 }
             }
 
-            // Tabs
-            PropertyRow(label: "Tabs", icon: "doc.text") {
-                if let tabUrl = liveSong.tabUrl, let url = URL(string: tabUrl) {
-                    HStack(spacing: 12) {
-                        Link(destination: url) {
-                            HStack(spacing: 8) {
-                                Image(systemName: "arrow.up.right")
-                                    .font(.caption)
-                                    .foregroundColor(.appAccent)
-                                Text("Saved")
-                                    .foregroundColor(.appAccent)
+            // Links
+            PropertyRow(label: "Links", icon: "link") {
+                if !liveSong.links.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(liveSong.links) { link in
+                            HStack(spacing: 12) {
+                                // Link with site name
+                                if let url = URL(string: link.url) {
+                                    Link(destination: url) {
+                                        HStack(spacing: 8) {
+                                            Image(systemName: "arrow.up.right")
+                                                .font(.caption)
+                                                .foregroundColor(.appAccent)
+                                            Text(link.siteName)
+                                                .foregroundColor(.appAccent)
+                                        }
+                                    }
+                                    .tint(.appAccent)
+                                }
+
+                                Spacer()
+
+                                // Remove link button
+                                Button {
+                                    var updatedSong = liveSong
+                                    updatedSong.links.removeAll { $0.id == link.id }
+                                    songStore.updateSong(updatedSong)
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .font(.caption)
+                                        .foregroundColor(Color(.tertiaryLabel))
+                                }
+                                .buttonStyle(.plain)
                             }
                         }
-                        .tint(.appAccent)
-                        
-                        // Remove tab link button
+
+                        // Add more links button
                         Button {
-                            var updatedSong = liveSong
-                            updatedSong.tabUrl = nil
-                            songStore.updateSong(updatedSong)
+                            searchForResources()
                         } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .font(.caption)
-                                .foregroundColor(Color(.tertiaryLabel))
+                            HStack(spacing: 8) {
+                                Image(systemName: "plus.circle")
+                                    .font(.caption)
+                                    .foregroundColor(.appAccent)
+                                Text("Add another link")
+                                    .foregroundColor(.appAccent)
+                            }
                         }
                         .buttonStyle(.plain)
                     }
                 } else {
                     Button {
-                        searchUltimateGuitar()
+                        searchForResources()
                     } label: {
                         HStack(spacing: 8) {
                             Image(systemName: "magnifyingglass")
@@ -278,23 +301,23 @@ struct SongDetailView: View {
                     .buttonStyle(.plain)
                 }
             }
-            .onReceive(tabURLDetector.$showingSavePrompt) { showing in
-                if showing && tabURLDetector.pendingSongId == song.id {
+            .onReceive(resourceLinkDetector.$showingSavePrompt) { showing in
+                if showing && resourceLinkDetector.pendingSongId == song.id {
                     showingTabSaveAlert = true
                 }
             }
-            .alert("Save Tab URL?", isPresented: $showingTabSaveAlert) {
+            .alert("Save Link?", isPresented: $showingTabSaveAlert) {
                 Button("Save") {
-                    saveDetectedTabURL()
+                    saveDetectedLink()
                 }
                 Button("Cancel", role: .cancel) {
-                    tabURLDetector.clearDetection()
+                    resourceLinkDetector.clearDetection()
                 }
             } message: {
-                if let siteName = tabURLDetector.detectedSiteName {
+                if let siteName = resourceLinkDetector.detectedSiteName {
                     Text("Found a \(siteName) link in your clipboard. Save it to \"\(liveSong.title)\"?")
                 } else {
-                    Text("Found a tab URL in your clipboard. Save it to this song?")
+                    Text("Found a link in your clipboard. Save it to this song?")
                 }
             }
 
@@ -701,25 +724,26 @@ struct SongDetailView: View {
     }
     
     
-    private func searchUltimateGuitar() {
-        // Start watching for tab URLs when user returns
-        tabURLDetector.startWatchingForSong(song.id)
-        
+    private func searchForResources() {
+        // Start watching for resource URLs when user returns
+        resourceLinkDetector.startWatchingForSong(song.id)
+
         let query = "\(liveSong.artist) \(liveSong.title)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "https://www.ultimate-guitar.com/search.php?search_type=title&value=\(query)"
         if let url = URL(string: urlString) {
             UIApplication.shared.open(url)
         }
     }
-    
-    private func saveDetectedTabURL() {
-        guard let url = tabURLDetector.detectedURL else { return }
+
+    private func saveDetectedLink() {
+        guard let url = resourceLinkDetector.detectedURL else { return }
 
         var updatedSong = liveSong
-        updatedSong.tabUrl = url
+        let newLink = SongLink(url: url)
+        updatedSong.links.append(newLink)
         songStore.updateSong(updatedSong)
 
-        tabURLDetector.clearDetection()
+        resourceLinkDetector.clearDetection()
     }
 
     private func saveChords() {
@@ -1113,5 +1137,5 @@ struct SpotifyLinkSheet: View {
     ))
     .environmentObject(SongStore())
     .environmentObject(SpotifyService())
-    .environmentObject(TabURLDetector())
+    .environmentObject(ResourceLinkDetector())
 }

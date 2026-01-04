@@ -10,7 +10,7 @@ import SwiftUI
 struct MainTabView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
-    @EnvironmentObject var tabURLDetector: TabURLDetector
+    @EnvironmentObject var resourceLinkDetector: ResourceLinkDetector
     @EnvironmentObject var shareExtensionHandler: ShareExtensionHandler
 
     @State private var showingOnboarding = false
@@ -503,7 +503,7 @@ struct SettingsView: View {
     MainTabView()
         .environmentObject(SongStore())
         .environmentObject(SpotifyService())
-        .environmentObject(TabURLDetector())
+        .environmentObject(ResourceLinkDetector())
         .environmentObject(ShareExtensionHandler())
 }
 

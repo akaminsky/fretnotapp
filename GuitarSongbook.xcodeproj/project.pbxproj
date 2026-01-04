@@ -24,7 +24,7 @@
 		0015 /* CategoryManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1015 /* CategoryManagerView.swift */; };
 		0016 /* TunerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1016 /* TunerView.swift */; };
 		0017 /* AudioPitchDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1017 /* AudioPitchDetector.swift */; };
-		0018 /* TabURLDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1018 /* TabURLDetector.swift */; };
+		0018 /* ResourceLinkDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1018 /* ResourceLinkDetector.swift */; };
 		0019 /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1019 /* MainTabView.swift */; };
 		0020 /* ChordLogView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1020 /* ChordLogView.swift */; };
 		0021 /* BulkImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1021 /* BulkImportView.swift */; };
@@ -47,6 +47,8 @@
 		11E0CB572F033BBF000EE46D /* ChordChartParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB552F033BBF000EE46D /* ChordChartParser.swift */; };
 		11E0CB582F033BC9000EE46D /* ChordChartParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB552F033BBF000EE46D /* ChordChartParser.swift */; };
 		11E0CB5A2F09E413000EE46D /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB592F09E413000EE46D /* OnboardingView.swift */; };
+		11E0CB5C2F0AEEB4000EE46D /* ResourceLinkDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB5B2F0AEEB4000EE46D /* ResourceLinkDetector.swift */; };
+		11E0CB5D2F0AEEB5000EE46D /* AddLinkSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11E0CB5E2F0AEEB5000EE46D /* AddLinkSheet.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -91,7 +93,7 @@
 		1015 /* CategoryManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryManagerView.swift; sourceTree = "<group>"; };
 		1016 /* TunerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TunerView.swift; sourceTree = "<group>"; };
 		1017 /* AudioPitchDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPitchDetector.swift; sourceTree = "<group>"; };
-		1018 /* TabURLDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabURLDetector.swift; sourceTree = "<group>"; };
+		1018 /* ResourceLinkDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceLinkDetector.swift; sourceTree = "<group>"; };
 		1019 /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
 		1020 /* ChordLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordLogView.swift; sourceTree = "<group>"; };
 		1021 /* BulkImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BulkImportView.swift; sourceTree = "<group>"; };
@@ -113,6 +115,8 @@
 		11A5CF502F03289100E1351A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		11E0CB552F033BBF000EE46D /* ChordChartParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordChartParser.swift; sourceTree = "<group>"; };
 		11E0CB592F09E413000EE46D /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		11E0CB5B2F0AEEB4000EE46D /* ResourceLinkDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResourceLinkDetector.swift; sourceTree = "<group>"; };
+		11E0CB5E2F0AEEB5000EE46D /* AddLinkSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkSheet.swift; sourceTree = "<group>"; };
 		2001 /* GuitarSongbook.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GuitarSongbook.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -207,6 +211,7 @@
 		4005 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				11E0CB5B2F0AEEB4000EE46D /* ResourceLinkDetector.swift */,
 				11A5CF4E2F029ECC00E1351A /* ShareExtensionHandler.swift */,
 				11A5CF2C2F019BC400E1351A /* NotificationManager.swift */,
 				11A5CF2A2F0048ED00E1351A /* AnalyticsService.swift */,
@@ -217,7 +222,7 @@
 				1024 /* HapticManager.swift */,
 				1017 /* AudioPitchDetector.swift */,
 				1023 /* ChordAudioPlayer.swift */,
-				1018 /* TabURLDetector.swift */,
+				1018 /* ResourceLinkDetector.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -228,6 +233,7 @@
 				11E0CB592F09E413000EE46D /* OnboardingView.swift */,
 				1107F1482EFC75860076A235 /* CustomChordManagerView.swift */,
 				1107F1462EFC71210076A235 /* ChordDetailPageView.swift */,
+				11E0CB5E2F0AEEB5000EE46D /* AddLinkSheet.swift */,
 				1012 /* AddSongView.swift */,
 				1021 /* BulkImportView.swift */,
 				1015 /* CategoryManagerView.swift */,
@@ -366,6 +372,7 @@
 				0004 /* Song.swift in Sources */,
 				1107F1472EFC71210076A235 /* ChordDetailPageView.swift in Sources */,
 				0005 /* ChordLibrary.swift in Sources */,
+				11E0CB5C2F0AEEB4000EE46D /* ResourceLinkDetector.swift in Sources */,
 				11A5CF4F2F029ECC00E1351A /* ShareExtensionHandler.swift in Sources */,
 				0006 /* SpotifyModels.swift in Sources */,
 				0007 /* SongStore.swift in Sources */,
@@ -376,6 +383,7 @@
 				0010 /* FilterControlsView.swift in Sources */,
 				0011 /* QuickAddView.swift in Sources */,
 				0012 /* AddSongView.swift in Sources */,
+				11E0CB5D2F0AEEB5000EE46D /* AddLinkSheet.swift in Sources */,
 				11E0CB5A2F09E413000EE46D /* OnboardingView.swift in Sources */,
 				1107F14F2EFEFB420076A235 /* ChordSuggestionService.swift in Sources */,
 				0013 /* SongDetailView.swift in Sources */,
@@ -384,7 +392,7 @@
 				1107F1492EFC75860076A235 /* CustomChordManagerView.swift in Sources */,
 				0016 /* TunerView.swift in Sources */,
 				0017 /* AudioPitchDetector.swift in Sources */,
-				0018 /* TabURLDetector.swift in Sources */,
+				0018 /* ResourceLinkDetector.swift in Sources */,
 				1107F14C2EFCBFDD0076A235 /* StrumPattern.swift in Sources */,
 				11A5CF2D2F019BC400E1351A /* NotificationManager.swift in Sources */,
 				1107F14D2EFCBFDD0076A235 /* CustomChordLibrary.swift in Sources */,
