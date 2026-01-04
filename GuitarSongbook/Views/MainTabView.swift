@@ -13,6 +13,8 @@ struct MainTabView: View {
     @EnvironmentObject var tabURLDetector: TabURLDetector
     @EnvironmentObject var shareExtensionHandler: ShareExtensionHandler
 
+    @State private var showingOnboarding = false
+
     init() {
         // Force bottom tab bar style on iPad
         UITabBar.appearance().isHidden = false
@@ -47,12 +49,24 @@ struct MainTabView: View {
         .tint(.appAccent)
         .tabViewStyle(.automatic)
         .onAppear {
+            // Check if this is first launch
+            let hasCompletedOnboarding = UserDefaults.standard.bool(forKey: "hasCompletedOnboarding")
+            if !hasCompletedOnboarding {
+                // Small delay to let the UI settle before showing onboarding
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    showingOnboarding = true
+                }
+            }
+
             // Check for shared data when view appears
             shareExtensionHandler.checkForSharedData()
         }
         .onReceive(NotificationCenter.default.publisher(for: UIApplication.willEnterForegroundNotification)) { _ in
             // Check for shared data when app comes to foreground
             shareExtensionHandler.checkForSharedData()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("ShowOnboarding"))) { _ in
+            showingOnboarding = true
         }
         .sheet(isPresented: $shareExtensionHandler.shouldShowAddSong) {
             if let sharedData = shareExtensionHandler.sharedData {
@@ -68,6 +82,11 @@ struct MainTabView: View {
                 .onDisappear {
                     shareExtensionHandler.sharedData = nil
                 }
+            }
+        }
+        .fullScreenCover(isPresented: $showingOnboarding) {
+            OnboardingView {
+                showingOnboarding = false
             }
         }
     }
@@ -366,6 +385,22 @@ struct SettingsView: View {
                 
                 // About Section
                 Section {
+                    Button {
+                        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                        NotificationCenter.default.post(name: NSNotification.Name("ShowOnboarding"), object: nil)
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                                .foregroundColor(.appAccent)
+                                .frame(width: 28)
+
+                            Text("Show Onboarding Again")
+                                .foregroundColor(.primary)
+
+                            Spacer()
+                        }
+                    }
+
                     Link(destination: URL(string: "http://fretnot.app")!) {
                         HStack {
                             Image(systemName: "globe")

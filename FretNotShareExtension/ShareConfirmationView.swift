@@ -13,6 +13,20 @@ struct ShareConfirmationView: View {
     let onConfirm: () -> Void
     let onCancel: () -> Void
 
+    private var capoText: String {
+        if capo == 0 {
+            return "Not detected"
+        }
+        let suffix: String
+        switch capo {
+        case 1: suffix = "st"
+        case 2: suffix = "nd"
+        case 3: suffix = "rd"
+        default: suffix = "th"
+        }
+        return "\(capo)\(suffix) fret"
+    }
+
     var body: some View {
         VStack(spacing: 24) {
             // Header
@@ -29,14 +43,16 @@ struct ShareConfirmationView: View {
 
             // Preview
             VStack(alignment: .leading, spacing: 16) {
-                if capo > 0 {
-                    HStack(spacing: 8) {
-                        Image(systemName: "hand.point.up.left.fill")
-                            .foregroundColor(.orange)
-                        Text("Capo \(capo)")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                    }
+                // Capo section
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Capo:")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+
+                    Text(capoText)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(capo > 0 ? .primary : .secondary)
                 }
 
                 if !chords.isEmpty {
@@ -154,10 +170,19 @@ struct FlowLayout: Layout {
     }
 }
 
-#Preview {
+#Preview("With Capo") {
     ShareConfirmationView(
         capo: 2,
         chords: ["Am", "E7", "G", "D", "F", "C", "Dm"],
+        onConfirm: {},
+        onCancel: {}
+    )
+}
+
+#Preview("No Capo") {
+    ShareConfirmationView(
+        capo: 0,
+        chords: ["Am", "E7", "G", "D"],
         onConfirm: {},
         onCancel: {}
     )

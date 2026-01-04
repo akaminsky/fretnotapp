@@ -103,6 +103,21 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
   - "Search your chords and library" makes feature discoverable
   - Works with chord name search (partial matching)
 
+#### First Launch Onboarding
+- **Welcome Experience** - Beautiful onboarding flow shown on first app launch
+  - Swipeable 7-screen walkthrough using App Store screenshots
+  - Dismissible X button in top corner for easy exit
+  - Only shows once - never interrupts returning users
+  - "Show Onboarding Again" option in Settings for review
+  - Clean, full-screen presentation with page indicators
+
+#### Share Extension Improvements
+- **Improved Capo Display** - Clearer capo information in chord chart imports
+  - Always shows "Capo:" label for consistency
+  - Displays proper ordinal format: "1st fret", "2nd fret", "3rd fret", etc.
+  - Shows "Not detected" when no capo found (previously hidden)
+  - Matches chord display style without icons for cleaner look
+
 #### Chord Creation UX Standardization
 - **Unified Chord Creation Experience** - Standardized UX across all chord creation sheets
   - Consistent layout: helper text → fretboard → clear button → matching chords
