@@ -11,9 +11,21 @@ import SwiftUI
 extension Color {
     // Vibrant orange for buttons, icons, large UI elements
     static let appAccent = Color(red: 0.953, green: 0.549, blue: 0.012) // #F38C03
-    
+
     // Darker orange for text on light backgrounds (meets WCAG AA 4.5:1)
     static let appAccentText = Color(red: 0.702, green: 0.353, blue: 0.0) // #B35A00
+
+    // Warm background color (instead of system gray)
+    static let warmBackground = Color(red: 0.98, green: 0.97, blue: 0.96)
+
+    // Warm cream for input fields (accessible contrast against warm background)
+    static let warmInputBackground = Color(red: 0.995, green: 0.99, blue: 0.985) // rgb(254, 252, 251)
+
+    // Warm border for subtle definition on cards
+    static let warmBorder = Color(red: 0.92, green: 0.90, blue: 0.88) // Warm taupe
+
+    // Medium warm taupe for input field borders - visible against both white and warm backgrounds
+    static let inputBorder = Color(red: 0.824, green: 0.784, blue: 0.745) // rgb(210, 200, 190) #D2C8BE
 }
 
 struct QuickAddView: View {
@@ -150,7 +162,7 @@ struct QuickAddView: View {
                 }
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.warmInputBackground)
             .cornerRadius(10)
             
             // Chords Input
@@ -181,7 +193,7 @@ struct QuickAddView: View {
                     .pickerStyle(.menu)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(8)
-                    .background(Color(.systemGray6))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(8)
                 }
                 
@@ -278,13 +290,15 @@ struct QuickAddView: View {
 struct SpotifySearchField: View {
     @Binding var query: String
     let onSearch: () -> Void
-    
+    @FocusState private var isFocused: Bool
+
     var body: some View {
         HStack {
             TextField("Search Spotify for a song...", text: $query)
+                .focused($isFocused)
                 .textFieldStyle(.plain)
                 .onSubmit(onSearch)
-            
+
             Button(action: onSearch) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(.white)
@@ -294,8 +308,13 @@ struct SpotifySearchField: View {
             }
         }
         .padding(8)
-        .background(Color(.systemGray6))
+        .background(Color.warmInputBackground)
         .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(isFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+        )
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 

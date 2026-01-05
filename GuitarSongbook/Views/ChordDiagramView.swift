@@ -199,8 +199,12 @@ struct ChordDiagramsGrid: View {
                 ChordDiagramView(chordName: chord, onEditRequest: {
                     chordToEdit = EditableChord(name: chord)
                 })
-                .background(Color(.systemBackground))
+                .background(Color.white)
                 .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+                )
                 .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
                 .onTapGesture {
                     selectedChordForVoicingChange = chord
@@ -300,7 +304,7 @@ struct ChangeVoicingSheet: View {
                                 }
                             }
                             .padding()
-                            .background(isCurrent ? Color.green.opacity(0.1) : Color(.systemGray6))
+                            .background(isCurrent ? Color.green.opacity(0.1) : Color.warmInputBackground)
                             .cornerRadius(12)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 12)
@@ -381,8 +385,12 @@ struct EditChordSheet: View {
                     // Editable fretboard
                     TappableFretboard(selectedFingers: $selectedFingers, strings: strings)
                         .padding()
-                        .background(Color(.systemBackground))
+                        .background(Color.white)
                         .cornerRadius(16)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 16)
+                                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+                        )
                         .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
 
                     // Clear button
@@ -430,8 +438,12 @@ struct EditChordSheet: View {
                             }
                         }
                         .padding()
-                        .background(Color(.systemGray6))
+                        .background(Color.warmInputBackground)
                         .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.inputBorder, lineWidth: 1)
+                        )
                     }
 
                     Divider()
@@ -543,5 +555,9 @@ struct EditChordSheet: View {
         ChordDiagramView(chordName: "F")
     }
     .padding()
-    .background(Color(.systemGray6))
+    .background(Color.warmInputBackground)
+    .overlay(
+        RoundedRectangle(cornerRadius: 12)
+            .stroke(Color.inputBorder, lineWidth: 1)
+    )
 }

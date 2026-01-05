@@ -72,7 +72,8 @@ struct ChordLogView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color(.systemGroupedBackground)
+                // Background - warm tone instead of gray
+                Color.warmBackground
                     .ignoresSafeArea()
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -103,12 +104,13 @@ struct ChordLogView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 10)
-                    .background(Color(.systemBackground))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(8)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color(.systemGray4), lineWidth: 1)
+                            .stroke(searchFieldFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
                     )
+                    .animation(.easeInOut(duration: 0.2), value: searchFieldFocused)
                     .padding()
 
                     // Content
@@ -349,16 +351,13 @@ struct ChordCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(12)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemBackground))
-                .shadow(color: Color.black.opacity(0.08), radius: 8, x: 0, y: 2)
-                .shadow(color: Color.black.opacity(0.04), radius: 2, x: 0, y: 1)
-        )
+        .background(Color(.systemBackground))
+        .cornerRadius(16)
         .overlay(
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color(.systemGray5), lineWidth: 0.5)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
         )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
 }
 

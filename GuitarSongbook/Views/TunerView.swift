@@ -13,8 +13,8 @@ struct TunerView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                Color(.systemGroupedBackground)
+                // Background - warm tone
+                Color.warmBackground
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
@@ -263,6 +263,11 @@ struct TunerView: View {
             .padding(12)
             .background(Color(.systemBackground))
             .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
         }
     }
 
@@ -274,7 +279,7 @@ struct TunerView: View {
                 .font(.caption)
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
-            
+
             HStack(spacing: 12) {
                 ForEach(pitchDetector.guitarStrings) { string in
                     Button {
@@ -308,6 +313,11 @@ struct TunerView: View {
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(16)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
     
     // MARK: - Tuner Button

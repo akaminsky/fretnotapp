@@ -32,7 +32,8 @@ struct ChordDetailPageView: View {
 
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground)
+            // Background - warm tone
+            Color.warmBackground
                 .ignoresSafeArea()
 
             ScrollView {
@@ -41,8 +42,12 @@ struct ChordDetailPageView: View {
                 VStack(spacing: 12) {
                     ChordDiagramView(chordName: chordName)
                         .padding()
-                        .background(Color(.systemBackground))
+                        .background(Color.white)
                         .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+                        )
                         .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
                 }
                 .id(customChordLibrary.customChords.count)
@@ -97,8 +102,12 @@ struct ChordDetailPageView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     .padding()
-                                    .background(Color(.systemBackground))
+                                    .background(Color.white)
                                     .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+                                    )
                                     .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
                                 }
                                 .buttonStyle(.plain)
@@ -263,8 +272,12 @@ struct StatCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(Color(.systemGray6))
+        .background(Color.warmInputBackground)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.inputBorder, lineWidth: 1)
+        )
     }
 }
 
@@ -308,8 +321,12 @@ struct AddVariationSheet: View {
                         }
                     }
                     .padding()
-                    .background(Color(.systemGray6))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(12)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(Color.inputBorder, lineWidth: 1)
+                    )
 
                     Divider()
 
@@ -378,8 +395,12 @@ struct AddVariationSheet: View {
                             }
                         }
                         .padding()
-                        .background(Color(.systemGray6))
+                        .background(Color.warmInputBackground)
                         .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color.inputBorder, lineWidth: 1)
+                        )
                     }
 
                     Divider()

@@ -152,7 +152,7 @@ struct TappableFretboard: View {
     private func fretCell(stringIndex: Int, fret: Int) -> some View {
         ZStack {
             Rectangle()
-                .fill(Color(.systemGray6))
+                .fill(Color.warmInputBackground)
                 .overlay(
                     Rectangle()
                         .stroke(Color.primary.opacity(0.15), lineWidth: 0.5)
@@ -210,7 +210,7 @@ struct ChordResultsView: View {
     @State private var showingSaveCustomChord = false
 
     private var hasFingers: Bool {
-        selectedFingers.contains { $0 >= 0 }
+        selectedFingers.contains { $0 > 0 }
     }
 
     private var matchedChords: [(String, ChordData)] {
@@ -274,8 +274,12 @@ struct ChordResultsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(Color.warmInputBackground)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.inputBorder, lineWidth: 1)
+        )
     }
 
     private func saveCustomChord(name: String) {
@@ -376,8 +380,12 @@ struct ChordResultsView: View {
                 }
             }
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.warmInputBackground)
             .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.inputBorder, lineWidth: 1)
+            )
         }
         .padding()
         .background(Color(.systemBackground))
@@ -395,7 +403,7 @@ struct ChordResultsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color(.systemGray6))
+        .background(Color.warmInputBackground)
         .cornerRadius(12)
     }
 }
@@ -586,16 +594,7 @@ struct SaveCustomChordSheet: View {
                         .padding(.bottom, 8)
 
                     // Input field
-                    TextField("Chord name (e.g., G (Sweet Home))", text: $chordName)
-                        .autocapitalization(.words)
-                        .autocorrectionDisabled()
-                        .padding(12)
-                        .background(Color(.systemBackground))
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color(.systemGray4), lineWidth: 1)
-                        )
+                    ChordNameTextField(text: $chordName)
                         .padding(.horizontal, 16)
 
                     // Helper text
@@ -663,6 +662,28 @@ struct MiniChordDiagramPreview: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Chord Name TextField
+
+struct ChordNameTextField: View {
+    @Binding var text: String
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        TextField("Chord name (e.g., G (Sweet Home))", text: $text)
+            .focused($isFocused)
+            .autocapitalization(.words)
+            .autocorrectionDisabled()
+            .padding(12)
+            .background(Color.warmInputBackground)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+            )
+            .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 

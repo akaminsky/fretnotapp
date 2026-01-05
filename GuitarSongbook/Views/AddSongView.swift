@@ -64,7 +64,7 @@ struct AddSongView: View {
     }
 
     enum FocusField {
-        case title, chords
+        case title, chords, newCategory, spotifySearch
     }
 
     var isEditing: Bool {
@@ -97,7 +97,7 @@ struct AddSongView: View {
         .onTapGesture {
             hideKeyboard()
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.warmBackground)
         .navigationTitle(isEditing ? "Edit Song" : "Add Song")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -250,13 +250,14 @@ struct AddSongView: View {
         HStack {
             Image(systemName: "magnifyingglass")
                 .foregroundColor(.secondary)
-            
+
             TextField("Search for a song...", text: $searchQuery)
+                .focused($focusedField, equals: .spotifySearch)
                 .textFieldStyle(.plain)
                 .onSubmit {
                     searchSpotify()
                 }
-            
+
             if !searchQuery.isEmpty {
                 Button {
                     searchQuery = ""
@@ -266,7 +267,7 @@ struct AddSongView: View {
                         .foregroundColor(.secondary)
                 }
             }
-            
+
             Button {
                 searchSpotify()
             } label: {
@@ -278,8 +279,13 @@ struct AddSongView: View {
             .disabled(searchQuery.isEmpty)
         }
         .padding()
-        .background(Color(.systemBackground))
+        .background(Color.warmInputBackground)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(focusedField == .spotifySearch ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+        )
+        .animation(.easeInOut(duration: 0.2), value: focusedField)
     }
     
     @ViewBuilder
@@ -747,8 +753,12 @@ struct AddSongView: View {
                                     }
                                 }
                                 .padding(12)
-                                .background(Color(.systemGray6))
+                                .background(Color.warmInputBackground)
                                 .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.inputBorder, lineWidth: 1)
+                                )
                             }
 
                             ChordPillInput(
@@ -765,8 +775,12 @@ struct AddSongView: View {
                                     .foregroundColor(.secondary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
                                     .padding(12)
-                                    .background(Color(.systemGray6))
+                                    .background(Color.warmInputBackground)
                                     .cornerRadius(8)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.inputBorder, lineWidth: 1)
+                                    )
                             } else {
                                 ForEach(strumPatterns) { pattern in
                                     StrumPatternRow(
@@ -821,14 +835,22 @@ struct AddSongView: View {
                                     if selectedTuningOption == "Other" {
                                         TextField("Enter custom tuning", text: $customTuning)
                                             .padding(8)
-                                            .background(Color(.systemBackground))
+                                            .background(Color.warmInputBackground)
                                             .cornerRadius(6)
+                                            .overlay(
+                                                RoundedRectangle(cornerRadius: 6)
+                                                    .stroke(Color.inputBorder, lineWidth: 1)
+                                            )
                                     }
                                 }
                             }
                             .padding(12)
-                            .background(Color(.systemGray6))
+                            .background(Color.warmInputBackground)
                             .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.inputBorder, lineWidth: 1)
+                            )
                         }
                     }
                 }
@@ -836,11 +858,7 @@ struct AddSongView: View {
 
             // Notes
             FormSection(title: "Notes") {
-                TextField("Add notes on chord order, technique, or playing tips...", text: $notes, axis: .vertical)
-                    .lineLimit(3...6)
-                    .padding(12)
-                    .background(Color(.systemBackground))
-                    .cornerRadius(8)
+                NotesTextField(text: $notes)
             }
 
             // Categories
@@ -863,7 +881,7 @@ struct AddSongView: View {
                             }
                         }
                         .padding(12)
-                        .background(isFavorite ? Color.appAccent.opacity(0.15) : Color(.systemGray6))
+                        .background(isFavorite ? Color.appAccent.opacity(0.15) : Color.warmInputBackground)
                         .cornerRadius(8)
                     }
                     .buttonStyle(.plain)
@@ -880,7 +898,7 @@ struct AddSongView: View {
                             } label: {
                                 HStack {
                                     Image(systemName: "folder.fill")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(selectedCategories.contains(category) ? .appAccent : .secondary)
                                     Text(category)
                                         .foregroundColor(.primary)
                                     Spacer()
@@ -891,7 +909,7 @@ struct AddSongView: View {
                                     }
                                 }
                                 .padding(12)
-                                .background(selectedCategories.contains(category) ? Color(.systemGray4) : Color(.systemGray6))
+                                .background(selectedCategories.contains(category) ? Color.appAccent.opacity(0.15) : Color.warmInputBackground)
                                 .cornerRadius(8)
                             }
                             .buttonStyle(.plain)
@@ -903,7 +921,8 @@ struct AddSongView: View {
                         Image(systemName: "plus.circle")
                             .foregroundColor(.secondary)
                         TextField("Create new list...", text: $newCategoryName)
-                        
+                            .focused($focusedField, equals: .newCategory)
+
                         if !newCategoryName.isEmpty {
                             Button {
                                 songStore.createCategory(newCategoryName)
@@ -918,8 +937,13 @@ struct AddSongView: View {
                         }
                     }
                     .padding(12)
-                    .background(Color(.systemGray6))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(focusedField == .newCategory ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+                    )
+                    .animation(.easeInOut(duration: 0.2), value: focusedField)
                 }
             }
             
@@ -929,8 +953,12 @@ struct AddSongView: View {
                     .labelsHidden()
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
-                    .background(Color(.systemGray6))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(8)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.inputBorder, lineWidth: 1)
+                    )
             }
             
             // Resource Links
@@ -942,8 +970,12 @@ struct AddSongView: View {
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)
-                            .background(Color(.systemGray6))
+                            .background(Color.warmInputBackground)
                             .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.inputBorder, lineWidth: 1)
+                            )
                     } else {
                         ForEach(links) { link in
                             HStack(spacing: 12) {
@@ -976,8 +1008,12 @@ struct AddSongView: View {
                             }
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .background(Color(.systemGray6))
+                            .background(Color.warmInputBackground)
                             .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.inputBorder, lineWidth: 1)
+                            )
                         }
                     }
 
@@ -994,7 +1030,7 @@ struct AddSongView: View {
                     }
                     .buttonStyle(.plain)
                     .padding(.vertical, 8)
-                    .background(Color(.systemGray6))
+                    .background(Color.warmInputBackground)
                     .cornerRadius(8)
                 }
             }
@@ -1409,7 +1445,7 @@ struct SpotifySearchResultRow: View {
 struct FormSection<Content: View>: View {
     let title: String
     @ViewBuilder let content: Content
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(title)
@@ -1417,12 +1453,17 @@ struct FormSection<Content: View>: View {
                 .fontWeight(.semibold)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
-            
+
             content
         }
         .padding()
         .background(Color(.systemBackground))
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
 }
 
@@ -1430,7 +1471,8 @@ struct FormTextField: View {
     let label: String
     @Binding var text: String
     var placeholder: String = ""
-    
+    @FocusState private var isFocused: Bool
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(label)
@@ -1438,12 +1480,37 @@ struct FormTextField: View {
                 .fontWeight(.medium)
                 .foregroundColor(.secondary)
                 .textCase(.uppercase)
-            
+
             TextField(placeholder, text: $text)
+                .focused($isFocused)
                 .padding(12)
-                .background(Color(.systemGray6))
+                .background(Color.warmInputBackground)
                 .cornerRadius(8)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .stroke(isFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+                )
+                .animation(.easeInOut(duration: 0.2), value: isFocused)
         }
+    }
+}
+
+struct NotesTextField: View {
+    @Binding var text: String
+    @FocusState private var isFocused: Bool
+
+    var body: some View {
+        TextField("Add notes on chord order, technique, or playing tips...", text: $text, axis: .vertical)
+            .focused($isFocused)
+            .lineLimit(3...6)
+            .padding(12)
+            .background(Color.warmInputBackground)
+            .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+            )
+            .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 
@@ -1452,12 +1519,13 @@ struct FormTextField: View {
 struct SpotifyLinkSheetForEdit: View {
     @EnvironmentObject var spotifyService: SpotifyService
     @Environment(\.dismiss) var dismiss
-    
+
     let title: String
     let artist: String
     let onSelect: (SpotifyTrack) -> Void
-    
+
     @State private var searchQuery: String = ""
+    @FocusState private var isSearchFocused: Bool
     
     var body: some View {
         NavigationStack {
@@ -1466,13 +1534,14 @@ struct SpotifyLinkSheetForEdit: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    
+
                     TextField("Search Spotify...", text: $searchQuery)
+                        .focused($isSearchFocused)
                         .textFieldStyle(.plain)
                         .onSubmit {
                             searchSpotify()
                         }
-                    
+
                     if !searchQuery.isEmpty {
                         Button {
                             searchQuery = ""
@@ -1482,7 +1551,7 @@ struct SpotifyLinkSheetForEdit: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
+
                     Button("Search") {
                         searchSpotify()
                     }
@@ -1491,8 +1560,13 @@ struct SpotifyLinkSheetForEdit: View {
                     .disabled(searchQuery.isEmpty)
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.warmInputBackground)
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(isSearchFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+                )
+                .animation(.easeInOut(duration: 0.2), value: isSearchFocused)
                 .padding(.horizontal)
                 
                 // Results
@@ -1688,8 +1762,13 @@ struct ChordPillInput: View {
                 }
             }
             .padding(12)
-            .background(Color(.systemGray6))
+            .background(Color.warmInputBackground)
             .cornerRadius(8)
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(isInputFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+            )
+            .animation(.easeInOut(duration: 0.2), value: isInputFocused)
 
             // Helper text
             Text("Tip: Tap a chord pill for alternate fingerings • Use @ to transpose (e.g., Bm@7)")
@@ -1862,7 +1941,7 @@ struct ChordPillInput: View {
                                 .frame(maxWidth: .infinity)
                                 .background(
                                     RoundedRectangle(cornerRadius: 16)
-                                        .fill(voicing.isDefault ? Color.appAccent.opacity(0.1) : Color(.systemGray6))
+                                        .fill(voicing.isDefault ? Color.appAccent.opacity(0.1) : Color.warmInputBackground)
                                 )
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 16)
@@ -2208,7 +2287,7 @@ struct StrumPatternRow: View {
             }
         }
         .padding(12)
-        .background(Color(.systemGray6))
+        .background(Color.warmInputBackground)
         .cornerRadius(8)
         .onAppear {
             // Set initial values from pattern

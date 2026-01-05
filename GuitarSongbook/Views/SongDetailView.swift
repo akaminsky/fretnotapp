@@ -42,7 +42,7 @@ struct SongDetailView: View {
                 VStack(spacing: 0) {
                     // Cover Image - Notion style
                     coverSection
-                    
+
                     // Content
                     VStack(alignment: .leading, spacing: 24) {
                         // Title Section
@@ -81,6 +81,7 @@ struct SongDetailView: View {
                     .padding(20)
                 }
             }
+            .background(Color.warmBackground)
             .ignoresSafeArea(edges: .top)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -518,13 +519,25 @@ struct SongDetailView: View {
                         // Custom label field
                         if quickStrumLabel == "Custom" {
                             TextField("Enter custom label", text: $customStrumLabel)
-                                .textFieldStyle(.roundedBorder)
+                                .padding(12)
+                                .background(Color.warmInputBackground)
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.inputBorder, lineWidth: 1)
+                                )
                         }
 
                         // Custom pattern field
                         if quickStrumPattern == "Custom" {
                             TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
-                                .textFieldStyle(.roundedBorder)
+                                .padding(12)
+                                .background(Color.warmInputBackground)
+                                .cornerRadius(8)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .stroke(Color.inputBorder, lineWidth: 1)
+                                )
                                 .textInputAutocapitalization(.characters)
                                 .autocorrectionDisabled()
                         }
@@ -556,8 +569,13 @@ struct SongDetailView: View {
             }
         }
         .padding(20)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(Color.white)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
 
     private var emptyChordSection: some View {
@@ -659,13 +677,25 @@ struct SongDetailView: View {
                     // Custom label field
                     if quickStrumLabel == "Custom" {
                         TextField("Enter custom label", text: $customStrumLabel)
-                            .textFieldStyle(.roundedBorder)
+                            .padding(12)
+                            .background(Color.warmInputBackground)
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.inputBorder, lineWidth: 1)
+                            )
                     }
 
                     // Custom pattern field
                     if quickStrumPattern == "Custom" {
                         TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
-                            .textFieldStyle(.roundedBorder)
+                            .padding(12)
+                            .background(Color.warmInputBackground)
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(Color.inputBorder, lineWidth: 1)
+                            )
                             .textInputAutocapitalization(.characters)
                             .autocorrectionDisabled()
                     }
@@ -696,8 +726,13 @@ struct SongDetailView: View {
             }
         }
         .padding(20)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(Color.white)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
 
     // MARK: - Notes Section
@@ -719,8 +754,13 @@ struct SongDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(Color.white)
         .cornerRadius(12)
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
+        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
     
     
@@ -981,13 +1021,13 @@ struct SpotifyLinkSheet: View {
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    
+
                     TextField("Search Spotify...", text: $searchQuery)
                         .textFieldStyle(.plain)
                         .onSubmit {
                             searchSpotify()
                         }
-                    
+
                     if !searchQuery.isEmpty {
                         Button {
                             searchQuery = ""
@@ -997,7 +1037,7 @@ struct SpotifyLinkSheet: View {
                                 .foregroundColor(.secondary)
                         }
                     }
-                    
+
                     Button("Search") {
                         searchSpotify()
                     }
@@ -1006,8 +1046,12 @@ struct SpotifyLinkSheet: View {
                     .disabled(searchQuery.isEmpty)
                 }
                 .padding()
-                .background(Color(.systemGray6))
+                .background(Color.warmInputBackground)
                 .cornerRadius(12)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color.inputBorder, lineWidth: 1)
+                )
                 .padding(.horizontal)
                 
                 // Results

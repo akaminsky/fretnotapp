@@ -19,8 +19,8 @@ struct ContentView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background
-                Color(.systemGroupedBackground)
+                // Background - warm tone instead of gray
+                Color.warmBackground
                     .ignoresSafeArea()
                     .contentShape(Rectangle())
                     .onTapGesture {
@@ -218,7 +218,7 @@ struct ContentView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 8)
-            
+
             // Songs list
             List {
                 ForEach(songStore.filteredAndSortedSongs) { song in
@@ -280,7 +280,7 @@ struct ContentView: View {
             .animation(nil, value: songStore.filterCategory)
             .animation(nil, value: songStore.searchText)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Color.warmBackground)
     }
     
     // MARK: - Add Button
@@ -365,12 +365,10 @@ struct SongCard: View {
             
             // Chords Section or Add Chords Button
             if !song.chords.isEmpty && showChords {
-                VStack(spacing: 0) {
-                    Divider()
-                        .padding(.horizontal, 14)
+                Divider()
+                    .padding(.horizontal, 14)
 
-                    chordContent
-                }
+                chordContent
             } else if song.chords.isEmpty {
                 VStack(spacing: 0) {
                     Divider()
@@ -397,8 +395,12 @@ struct SongCard: View {
                 }
             }
         }
-        .background(Color(.systemBackground))
+        .background(Color.white)
         .cornerRadius(8)
+        .overlay(
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+        )
         .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
     }
     
@@ -526,20 +528,26 @@ struct SongCard: View {
             FlowLayout(spacing: 8) {
                 ForEach(song.chords, id: \.self) { chord in
                     Text(chord)
-                        .font(.subheadline)
+                        .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(.primary)
                         .padding(.horizontal, 12)
-                        .padding(.vertical, 6)
-                        .background(Color(.systemGray5))
-                        .cornerRadius(6)
+                        .padding(.vertical, 8)
+                        .background(Color.green.opacity(0.1))
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                        )
                 }
             }
+            .opacity(0)
+            .frame(height: 0)
 
             ChordDiagramsGrid(chords: song.chords)
         }
         .padding(14)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(Color.white)
     }
 
     // MARK: - Quick Add Chords Section
@@ -573,7 +581,7 @@ struct SongCard: View {
             }
         }
         .padding(14)
-        .background(Color(.systemGray6).opacity(0.5))
+        .background(Color.white)
     }
 
     private func saveChords() {
