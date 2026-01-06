@@ -114,346 +114,398 @@ struct SettingsView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                // Library Section
-                Section {
-                    Button {
-                        showingCategoryManager = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "folder")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-                            
-                            Text("Manage Lists")
-                                .foregroundColor(.primary)
-                            
-                            Spacer()
-                            
-                            Text("\(songStore.categories.count)")
-                                .foregroundColor(.secondary)
-                            
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(Color(.tertiaryLabel))
+            ZStack {
+                Color.warmBackground
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        // Library Section
+                        SettingsSection(title: "Library") {
+                            SettingsRow {
+                                Button {
+                                    showingCategoryManager = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "folder")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Manage Lists")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Text("\(songStore.categories.count)")
+                                            .foregroundColor(.secondary)
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(Color(.tertiaryLabel))
+                                    }
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                Button {
+                                    showingBulkImport = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "square.and.arrow.down")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Import Playlist")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(Color(.tertiaryLabel))
+                                    }
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                Button {
+                                    showingCustomChordManager = true
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "star.circle")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Custom Chords")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Text("\(CustomChordLibrary.shared.customChords.count)")
+                                            .foregroundColor(.secondary)
+
+                                        Image(systemName: "chevron.right")
+                                            .font(.caption)
+                                            .foregroundColor(Color(.tertiaryLabel))
+                                    }
+                                }
+                            }
                         }
-                    }
-                    
-                    Button {
-                        showingBulkImport = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "square.and.arrow.down")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Import Playlist")
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(Color(.tertiaryLabel))
-                        }
-                    }
-
-                    Button {
-                        showingCustomChordManager = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "star.circle")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Custom Chords")
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Text("\(CustomChordLibrary.shared.customChords.count)")
-                                .foregroundColor(.secondary)
-
-                            Image(systemName: "chevron.right")
-                                .font(.caption)
-                                .foregroundColor(Color(.tertiaryLabel))
-                        }
-                    }
-                } header: {
-                    Text("Library")
-                }
                 
-                // Stats Section
-                Section {
-                    HStack {
-                        Image(systemName: "music.note")
-                            .foregroundColor(.appAccent)
-                            .frame(width: 28)
-                        
-                        Text("Total Songs")
-                        
-                        Spacer()
-                        
-                        Text("\(songStore.songs.count)")
-                            .foregroundColor(.secondary)
-                            .padding(.trailing, 3)
-                    }
-                    
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.appAccent)
-                            .frame(width: 28)
-                        
-                        Text("Favorites")
-                        
-                        Spacer()
-                        
-                        Text("\(songStore.favoritesCount)")
-                            .foregroundColor(.secondary)
-                            .padding(.trailing, 3)
-                    }
-                    
-                    HStack {
-                        Image(systemName: "guitars")
-                            .foregroundColor(.appAccent)
-                            .frame(width: 28)
-                        
-                        Text("Unique Chords")
-                        
-                        Spacer()
-                        
-                        Text("\(songStore.allUniqueChords.count)")
-                            .foregroundColor(.secondary)
-                            .padding(.trailing, 3)
-                    }
-                } header: {
-                    Text("Stats")
-                }
+                        // Stats Section
+                        SettingsSection(title: "Stats") {
+                            SettingsRow {
+                                HStack {
+                                    Image(systemName: "music.note")
+                                        .foregroundColor(.appAccent)
+                                        .frame(width: 28)
+
+                                    Text("Total Songs")
+
+                                    Spacer()
+
+                                    Text("\(songStore.songs.count)")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                HStack {
+                                    Image(systemName: "star.fill")
+                                        .foregroundColor(.appAccent)
+                                        .frame(width: 28)
+
+                                    Text("Favorites")
+
+                                    Spacer()
+
+                                    Text("\(songStore.favoritesCount)")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                HStack {
+                                    Image(systemName: "guitars")
+                                        .foregroundColor(.appAccent)
+                                        .frame(width: 28)
+
+                                    Text("Unique Chords")
+
+                                    Spacer()
+
+                                    Text("\(songStore.allUniqueChords.count)")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
                 
-                // Sync Section
-                Section {
-                    HStack {
-                        Image(systemName: songStore.iCloudEnabled ? "checkmark.icloud" : "xmark.icloud")
-                            .foregroundColor(songStore.iCloudEnabled ? .green : .secondary)
-                            .frame(width: 28)
-                        
-                        Text("iCloud Sync")
-                        
-                        Spacer()
-                        
-                        Text(songStore.iCloudEnabled ? "Enabled" : "Disabled")
-                            .foregroundColor(.secondary)
-                    }
-                } header: {
-                    Text("Sync")
-                } footer: {
-                    if songStore.iCloudEnabled {
-                        Text("Your songs sync automatically across all your devices.")
-                    } else {
-                        Text("Sign in to iCloud in Settings to sync your songs across devices.")
-                    }
-                }
+                        // Sync Section
+                        SettingsSection(
+                            title: "Sync",
+                            footer: songStore.iCloudEnabled
+                                ? "Your songs sync automatically across all your devices."
+                                : "Sign in to iCloud in Settings to sync your songs across devices."
+                        ) {
+                            SettingsRow {
+                                HStack {
+                                    Image(systemName: songStore.iCloudEnabled ? "checkmark.icloud" : "xmark.icloud")
+                                        .foregroundColor(songStore.iCloudEnabled ? .green : .secondary)
+                                        .frame(width: 28)
 
-                // Community Section
-                Section {
-                    Toggle(isOn: $shareAnonymouslyEnabled) {
-                        HStack {
-                            Image(systemName: "person.3.fill")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
+                                    Text("iCloud Sync")
 
-                            Text("Share Songs Anonymously")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                } header: {
-                    Text("Community")
-                } footer: {
-                    Text("Help other guitarists by anonymously sharing your chord data when you add Spotify songs. No personal information is shared - only chords, capo position, and tuning. Your notes stay private. You can opt out anytime.")
-                }
+                                    Spacer()
 
-                // Practice Reminders Section
-                Section {
-                    Toggle(isOn: $practiceRemindersEnabled) {
-                        HStack {
-                            Image(systemName: "guitars")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Remind me to practice")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .onChange(of: practiceRemindersEnabled) { _, newValue in
-                        if newValue {
-                            NotificationManager.shared.rescheduleIfNeeded()
-                        } else {
-                            NotificationManager.shared.cancelPracticeReminders()
-                        }
-                    }
-
-                    if practiceRemindersEnabled {
-                        Picker("Frequency", selection: $practiceReminderFrequency) {
-                            ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
-                                Text(frequency.rawValue).tag(frequency)
+                                    Text(songStore.iCloudEnabled ? "Enabled" : "Disabled")
+                                        .foregroundColor(.secondary)
+                                }
                             }
                         }
-                        .onChange(of: practiceReminderFrequency) { _, newValue in
-                            UserDefaults.standard.set(newValue.rawValue, forKey: "practiceReminderFrequency")
-                            NotificationManager.shared.rescheduleIfNeeded()
-                        }
 
-                        DatePicker("Time", selection: $practiceReminderTime, displayedComponents: .hourAndMinute)
-                            .onChange(of: practiceReminderTime) { _, newValue in
-                                UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "practiceReminderTime")
-                                NotificationManager.shared.rescheduleIfNeeded()
-                            }
-                    }
-                } header: {
-                    Text("Practice Reminders")
-                } footer: {
-                    Text("Get reminded to practice your songs regularly.")
-                }
+                        // Community Section
+                        SettingsSection(
+                            title: "Community",
+                            footer: "Help other guitarists by anonymously sharing your chord data when you add Spotify songs. No personal information is shared - only chords, capo position, and tuning. Your notes stay private. You can opt out anytime."
+                        ) {
+                            SettingsRow {
+                                Toggle(isOn: $shareAnonymouslyEnabled) {
+                                    HStack {
+                                        Image(systemName: "person.3.fill")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
 
-                // Add Song Reminders Section
-                Section {
-                    Toggle(isOn: $addSongRemindersEnabled) {
-                        HStack {
-                            Image(systemName: "plus.circle")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Remind me to add songs")
-                                .foregroundColor(.primary)
-                        }
-                    }
-                    .onChange(of: addSongRemindersEnabled) { _, newValue in
-                        if newValue {
-                            NotificationManager.shared.rescheduleIfNeeded()
-                        } else {
-                            NotificationManager.shared.cancelAddSongReminders()
-                        }
-                    }
-
-                    if addSongRemindersEnabled {
-                        Picker("Frequency", selection: $addSongReminderFrequency) {
-                            ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
-                                Text(frequency.rawValue).tag(frequency)
+                                        Text("Share Songs Anonymously")
+                                            .foregroundColor(.primary)
+                                    }
+                                }
                             }
                         }
-                        .onChange(of: addSongReminderFrequency) { _, newValue in
-                            UserDefaults.standard.set(newValue.rawValue, forKey: "addSongReminderFrequency")
-                            NotificationManager.shared.rescheduleIfNeeded()
-                        }
 
-                        DatePicker("Time", selection: $addSongReminderTime, displayedComponents: .hourAndMinute)
-                            .onChange(of: addSongReminderTime) { _, newValue in
-                                UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "addSongReminderTime")
-                                NotificationManager.shared.rescheduleIfNeeded()
+                        // Practice Reminders Section
+                        SettingsSection(
+                            title: "Practice Reminders",
+                            footer: "Get reminded to practice your songs regularly."
+                        ) {
+                            SettingsRow {
+                                Toggle(isOn: $practiceRemindersEnabled) {
+                                    HStack {
+                                        Image(systemName: "guitars")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Remind me to practice")
+                                            .foregroundColor(.primary)
+                                    }
+                                }
+                                .onChange(of: practiceRemindersEnabled) { _, newValue in
+                                    if newValue {
+                                        NotificationManager.shared.rescheduleIfNeeded()
+                                    } else {
+                                        NotificationManager.shared.cancelPracticeReminders()
+                                    }
+                                }
                             }
-                    }
-                } header: {
-                    Text("Add Song Reminders")
-                } footer: {
-                    Text("Get reminded to keep growing your songbook.")
-                }
 
-                // Feedback Section
-                Section {
-                    Link(destination: URL(string: "mailto:fretnotapp@gmail.com")!) {
-                        HStack {
-                            Image(systemName: "bubble.left.and.bubble.right")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
+                            if practiceRemindersEnabled {
+                                Divider().padding(.leading, 44)
 
-                            Text("Send Feedback")
-                                .foregroundColor(.primary)
+                                SettingsRow {
+                                    Picker("Frequency", selection: $practiceReminderFrequency) {
+                                        ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
+                                            Text(frequency.rawValue).tag(frequency)
+                                        }
+                                    }
+                                    .onChange(of: practiceReminderFrequency) { _, newValue in
+                                        UserDefaults.standard.set(newValue.rawValue, forKey: "practiceReminderFrequency")
+                                        NotificationManager.shared.rescheduleIfNeeded()
+                                    }
+                                }
 
-                            Spacer()
+                                Divider().padding(.leading, 44)
 
-                            Image(systemName: "envelope")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
+                                SettingsRow {
+                                    DatePicker("Time", selection: $practiceReminderTime, displayedComponents: .hourAndMinute)
+                                        .onChange(of: practiceReminderTime) { _, newValue in
+                                            UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "practiceReminderTime")
+                                            NotificationManager.shared.rescheduleIfNeeded()
+                                        }
+                                }
+                            }
                         }
-                    }
-                    .tint(.appAccent)
-                } header: {
-                    Text("Feedback")
-                } footer: {
-                        Text("Help us make Fret Not better!")
-                }
+
+                        // Add Song Reminders Section
+                        SettingsSection(
+                            title: "Add Song Reminders",
+                            footer: "Get reminded to keep growing your songbook."
+                        ) {
+                            SettingsRow {
+                                Toggle(isOn: $addSongRemindersEnabled) {
+                                    HStack {
+                                        Image(systemName: "plus.circle")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Remind me to add songs")
+                                            .foregroundColor(.primary)
+                                    }
+                                }
+                                .onChange(of: addSongRemindersEnabled) { _, newValue in
+                                    if newValue {
+                                        NotificationManager.shared.rescheduleIfNeeded()
+                                    } else {
+                                        NotificationManager.shared.cancelAddSongReminders()
+                                    }
+                                }
+                            }
+
+                            if addSongRemindersEnabled {
+                                Divider().padding(.leading, 44)
+
+                                SettingsRow {
+                                    Picker("Frequency", selection: $addSongReminderFrequency) {
+                                        ForEach(ReminderFrequency.allCases, id: \.self) { frequency in
+                                            Text(frequency.rawValue).tag(frequency)
+                                        }
+                                    }
+                                    .onChange(of: addSongReminderFrequency) { _, newValue in
+                                        UserDefaults.standard.set(newValue.rawValue, forKey: "addSongReminderFrequency")
+                                        NotificationManager.shared.rescheduleIfNeeded()
+                                    }
+                                }
+
+                                Divider().padding(.leading, 44)
+
+                                SettingsRow {
+                                    DatePicker("Time", selection: $addSongReminderTime, displayedComponents: .hourAndMinute)
+                                        .onChange(of: addSongReminderTime) { _, newValue in
+                                            UserDefaults.standard.set(newValue.timeIntervalSince1970, forKey: "addSongReminderTime")
+                                            NotificationManager.shared.rescheduleIfNeeded()
+                                        }
+                                }
+                            }
+                        }
+
+                        // Feedback Section
+                        SettingsSection(
+                            title: "Feedback",
+                            footer: "Help us make Fret Not better!"
+                        ) {
+                            SettingsRow {
+                                Link(destination: URL(string: "mailto:fretnotapp@gmail.com")!) {
+                                    HStack {
+                                        Image(systemName: "bubble.left.and.bubble.right")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Send Feedback")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Image(systemName: "envelope")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .tint(.appAccent)
+                            }
+                        }
                 
-                // About Section
-                Section {
-                    Button {
-                        UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
-                        NotificationCenter.default.post(name: NSNotification.Name("ShowOnboarding"), object: nil)
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.counterclockwise")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
+                        // About Section
+                        SettingsSection(title: "About") {
+                            SettingsRow {
+                                Button {
+                                    UserDefaults.standard.set(false, forKey: "hasCompletedOnboarding")
+                                    NotificationCenter.default.post(name: NSNotification.Name("ShowOnboarding"), object: nil)
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "arrow.counterclockwise")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
 
-                            Text("Show Onboarding Again")
-                                .foregroundColor(.primary)
+                                        Text("Show Onboarding Again")
+                                            .foregroundColor(.primary)
 
-                            Spacer()
+                                        Spacer()
+                                    }
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                Link(destination: URL(string: "http://fretnot.app")!) {
+                                    HStack {
+                                        Image(systemName: "globe")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Website")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Text("fretnot.app")
+                                            .foregroundColor(.secondary)
+
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .tint(.appAccent)
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                HStack {
+                                    Image(systemName: "info.circle")
+                                        .foregroundColor(.appAccent)
+                                        .frame(width: 28)
+
+                                    Text("Version")
+
+                                    Spacer()
+
+                                    Text("1.3.1")
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+
+                            Divider().padding(.leading, 44)
+
+                            SettingsRow {
+                                Link(destination: URL(string: "https://alexakaminsky.com")!) {
+                                    HStack {
+                                        Image(systemName: "heart.fill")
+                                            .foregroundColor(.appAccent)
+                                            .frame(width: 28)
+
+                                        Text("Built by Alexa Kaminsky")
+                                            .foregroundColor(.primary)
+
+                                        Spacer()
+
+                                        Image(systemName: "arrow.up.right")
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                    }
+                                }
+                                .tint(.appAccent)
+                            }
                         }
                     }
-
-                    Link(destination: URL(string: "http://fretnot.app")!) {
-                        HStack {
-                            Image(systemName: "globe")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Website")
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Text("fretnot.app")
-                                .foregroundColor(.secondary)
-
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .tint(.appAccent)
-                    
-                    HStack {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.appAccent)
-                            .frame(width: 28)
-
-                        Text("Version")
-
-                        Spacer()
-
-                        Text("1.3.1")
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    Link(destination: URL(string: "https://alexakaminsky.com")!) {
-                        HStack {
-                            Image(systemName: "heart.fill")
-                                .foregroundColor(.appAccent)
-                                .frame(width: 28)
-
-                            Text("Built by Alexa Kaminsky")
-                                .foregroundColor(.primary)
-
-                            Spacer()
-
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .tint(.appAccent)
-                } header: {
-                    Text("About")
+                    .padding()
                 }
             }
             .navigationTitle("Settings")
@@ -495,6 +547,64 @@ struct SettingsView: View {
         if let addSongFreqRaw = UserDefaults.standard.string(forKey: "addSongReminderFrequency"),
            let addSongFreq = ReminderFrequency(rawValue: addSongFreqRaw) {
             addSongReminderFrequency = addSongFreq
+        }
+    }
+}
+
+// MARK: - Settings Row Component
+
+struct SettingsRow<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        VStack(spacing: 0) {
+            content
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+        }
+    }
+}
+
+// MARK: - Settings Section Component
+
+struct SettingsSection<Content: View>: View {
+    let title: String
+    let footer: String?
+    @ViewBuilder let content: Content
+
+    init(title: String, footer: String? = nil, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.footer = footer
+        self.content = content()
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.secondary)
+                .textCase(.uppercase)
+                .padding(.horizontal, 16)
+
+            VStack(spacing: 0) {
+                content
+            }
+            .background(Color(.systemBackground))
+            .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+
+            if let footer = footer {
+                Text(footer)
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 4)
+            }
         }
     }
 }

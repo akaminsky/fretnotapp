@@ -490,9 +490,11 @@ struct SongSelectorSheet: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    .listStyle(.plain)
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
                 }
             }
+            .background(Color.warmBackground)
             .navigationTitle("Add \(chordName) to Songs")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -608,6 +610,9 @@ struct SaveCustomChordSheet: View {
                 .listRowBackground(Color.clear)
                 .padding(.vertical, 12)
             }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBackground)
             .navigationTitle("Save Custom Chord")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

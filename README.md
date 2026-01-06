@@ -63,6 +63,39 @@ A comprehensive iOS app for guitarists to track songs, learn chords, and stay in
 
 ## Recent Updates
 
+### Version 1.4.1 (January 2025)
+
+#### Design System & Visual Consistency
+- **Unified Color Palette** - Implemented warm, cohesive color scheme across entire app
+  - Warm cream background (rgb(250, 247, 245)) for all main views
+  - Warm input background (rgb(254, 252, 251)) for form fields
+  - Consistent input borders (rgb(210, 200, 190)) for improved visibility
+  - Orange accent color (rgb(243, 140, 3)) for interactive elements
+- **Interactive Focus States** - All input fields now show visual feedback on interaction
+  - Orange border glow appears when tapping/focusing any text field
+  - Smooth 0.2s animation for focus state transitions
+  - Applied consistently across Add Song, Edit Song, Manage Lists, and all modal sheets
+- **Consistent Card Shadows** - Subtle depth added to all white sections
+  - Standardized shadow: 5% black opacity, 8pt radius, 2pt vertical offset
+  - Applied to song cards, chord cards, form sections, settings sections
+  - White containers now clearly distinguished from warm background
+- **Bottom Sheet Styling** - All modal sheets updated with warm background and shadows
+  - Manage Lists, Manage Custom Chords, Add to Song, Save Custom Chord, Add Link
+  - Grouped list/form style for card-like appearance with shadows
+  - Consistent warm cream background throughout
+- **Settings Page Refactor** - Complete redesign for visual consistency
+  - Converted from native List to custom ScrollView layout
+  - Custom SettingsSection and SettingsRow components
+  - Warm background with white card sections
+  - Consistent shadows and borders matching rest of app
+  - All 8 sections refactored: Library, Stats, Sync, Community, Reminders, Feedback, About
+- **Reusable Components** - Created standardized UI components for consistency
+  - FormTextField: Styled text input with focus states
+  - FormSection: Consistent section container with shadow and border
+  - SettingsSection: Settings-specific section styling
+  - SettingsRow: Padded row component for settings items
+  - ChordNameTextField: Specialized chord name input with validation
+
 ### Version 1.4 (January 2025)
 
 #### Share Extension - Import Chord Charts
@@ -565,7 +598,7 @@ Available on the [App Store](https://apps.apple.com/us/app/fret-not/id6756530936
 Email: fretnotapp@gmail.com
 
 ## Version
-1.4 (Build 6)
+1.4.1 (Build 7)
 
 ## Author
 Built by Alexa Kaminsky

@@ -23,11 +23,11 @@ struct FilterControlsView: View {
                     Image(systemName: "magnifyingglass")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
-                    
+
                     TextField("Search...", text: $songStore.searchText)
                         .font(.subheadline)
                         .focused($searchFieldFocused)
-                    
+
                     if !songStore.searchText.isEmpty {
                         Button {
                             songStore.searchText = ""
@@ -41,12 +41,13 @@ struct FilterControlsView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 10)
                 .frame(height: 40)
-                .background(Color(.systemBackground))
+                .background(Color.warmInputBackground)
                 .cornerRadius(8)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color(.systemGray4), lineWidth: 1)
+                        .stroke(searchFieldFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
                 )
+                .animation(.easeInOut(duration: 0.2), value: searchFieldFocused)
 
                 // Filter Button - Notion style
                 Button {
@@ -327,5 +328,5 @@ struct ActiveFilterChip: View {
         Spacer()
     }
     .padding()
-    .background(Color(.systemGroupedBackground))
+    .background(Color.warmBackground)
 }

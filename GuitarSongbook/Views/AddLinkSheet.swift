@@ -13,6 +13,7 @@ struct AddLinkSheet: View {
 
     @State private var urlText = ""
     @State private var siteName = ""
+    @FocusState private var isURLFocused: Bool
 
     var isValid: Bool {
         guard let url = URL(string: urlText) else { return false }
@@ -24,11 +25,21 @@ struct AddLinkSheet: View {
             Form {
                 Section {
                     TextField("Paste URL here", text: $urlText)
+                        .focused($isURLFocused)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+                        .padding(12)
+                        .background(Color.warmInputBackground)
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isURLFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+                        )
+                        .animation(.easeInOut(duration: 0.2), value: isURLFocused)
                         .onChange(of: urlText) { _, newValue in
                             siteName = SongLink.detectSiteName(from: newValue)
                         }
+                        .listRowBackground(Color.clear)
                 } header: {
                     Text("URL")
                 } footer: {
@@ -46,6 +57,9 @@ struct AddLinkSheet: View {
                     }
                 }
             }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.warmBackground)
             .navigationTitle("Add Link")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

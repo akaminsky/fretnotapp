@@ -43,9 +43,15 @@ struct BulkImportView: View {
                         .fontWeight(.medium)
                         .foregroundColor(.secondary)
                         .textCase(.uppercase)
-                    
+
                     TextField("https://open.spotify.com/playlist/...", text: $playlistURL)
-                        .textFieldStyle(.roundedBorder)
+                        .padding(12)
+                        .background(Color.warmInputBackground)
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color.inputBorder, lineWidth: 1)
+                        )
                         .autocorrectionDisabled()
                         .autocapitalization(.none)
                         .disabled(isImporting)

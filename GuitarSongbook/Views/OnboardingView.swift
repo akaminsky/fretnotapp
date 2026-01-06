@@ -83,7 +83,7 @@ struct OnboardingPageView: View {
         } else {
             // Placeholder for when images aren't added yet
             ZStack {
-                Color(.systemGray6)
+                Color.warmInputBackground
 
                 VStack(spacing: 16) {
                     Image(systemName: "photo")

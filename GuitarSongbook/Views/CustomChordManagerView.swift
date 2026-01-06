@@ -30,6 +30,9 @@ struct CustomChordManagerView: View {
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .background(Color.warmBackground)
         .navigationTitle("Custom Chords")
         .navigationBarTitleDisplayMode(.inline)
         .alert("Delete Custom Chord?", isPresented: $showingDeleteAlert) {

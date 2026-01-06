@@ -17,15 +17,25 @@ struct CategoryManagerView: View {
     @State private var showingDeleteAlert = false
     @State private var showingFavoritesAlert = false
     @State private var categoryToDelete: String? = nil
+    @FocusState private var isNewCategoryFocused: Bool
     
     var body: some View {
         NavigationStack {
             List {
                 // Add new category section
                 Section {
-                    HStack {
+                    HStack(spacing: 12) {
                         TextField("New list name...", text: $newCategoryName)
-                        
+                            .focused($isNewCategoryFocused)
+                            .padding(12)
+                            .background(Color.warmInputBackground)
+                            .cornerRadius(8)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 8)
+                                    .stroke(isNewCategoryFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
+                            )
+                            .animation(.easeInOut(duration: 0.2), value: isNewCategoryFocused)
+
                         Button {
                             addCategory()
                         } label: {
@@ -35,6 +45,7 @@ struct CategoryManagerView: View {
                         }
                         .disabled(newCategoryName.isEmpty)
                     }
+                    .listRowBackground(Color.clear)
                 } header: {
                     Text("Create List")
                 }
@@ -199,9 +210,12 @@ struct CategoryManagerView: View {
             } message: {
                 Text("Favorites cannot be deleted or renamed.")
             }
+            .listStyle(.insetGrouped)
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.warmBackground)
     }
-    
+
     private func addCategory() {
         songStore.createCategory(newCategoryName)
         newCategoryName = ""

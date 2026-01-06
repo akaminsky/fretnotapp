@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+// Warm color palette for consistency with main app
+extension Color {
+    static let warmInputBackground = Color(red: 0.995, green: 0.99, blue: 0.985)
+}
+
 struct ShareConfirmationView: View {
     let capo: Int
     let chords: [String]
@@ -86,7 +91,7 @@ struct ShareConfirmationView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding()
-            .background(Color(.systemGray6))
+            .background(Color.warmInputBackground)
             .cornerRadius(12)
 
             Spacer()

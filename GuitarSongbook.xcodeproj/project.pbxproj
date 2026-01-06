@@ -15,7 +15,6 @@
 		0006 /* SpotifyModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1006 /* SpotifyModels.swift */; };
 		0007 /* SongStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1007 /* SongStore.swift */; };
 		0008 /* SpotifyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1008 /* SpotifyService.swift */; };
-		0009 /* SongListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1009 /* SongListView.swift */; };
 		0010 /* FilterControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1010 /* FilterControlsView.swift */; };
 		0011 /* QuickAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1011 /* QuickAddView.swift */; };
 		0012 /* AddSongView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1012 /* AddSongView.swift */; };
@@ -84,7 +83,6 @@
 		1006 /* SpotifyModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyModels.swift; sourceTree = "<group>"; };
 		1007 /* SongStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongStore.swift; sourceTree = "<group>"; };
 		1008 /* SpotifyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpotifyService.swift; sourceTree = "<group>"; };
-		1009 /* SongListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SongListView.swift; sourceTree = "<group>"; };
 		1010 /* FilterControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilterControlsView.swift; sourceTree = "<group>"; };
 		1011 /* QuickAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddView.swift; sourceTree = "<group>"; };
 		1012 /* AddSongView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSongView.swift; sourceTree = "<group>"; };
@@ -245,7 +243,6 @@
 				1019 /* MainTabView.swift */,
 				1011 /* QuickAddView.swift */,
 				1013 /* SongDetailView.swift */,
-				1009 /* SongListView.swift */,
 				1016 /* TunerView.swift */,
 			);
 			path = Views;
@@ -378,7 +375,6 @@
 				0007 /* SongStore.swift in Sources */,
 				0008 /* SpotifyService.swift in Sources */,
 				11E0CB572F033BBF000EE46D /* ChordChartParser.swift in Sources */,
-				0009 /* SongListView.swift in Sources */,
 				1107F1512F00390C0076A235 /* CommunityDataService.swift in Sources */,
 				0010 /* FilterControlsView.swift in Sources */,
 				0011 /* QuickAddView.swift in Sources */,
