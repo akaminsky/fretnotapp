@@ -551,64 +551,6 @@ struct SettingsView: View {
     }
 }
 
-// MARK: - Settings Row Component
-
-struct SettingsRow<Content: View>: View {
-    @ViewBuilder let content: Content
-
-    var body: some View {
-        VStack(spacing: 0) {
-            content
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-        }
-    }
-}
-
-// MARK: - Settings Section Component
-
-struct SettingsSection<Content: View>: View {
-    let title: String
-    let footer: String?
-    @ViewBuilder let content: Content
-
-    init(title: String, footer: String? = nil, @ViewBuilder content: () -> Content) {
-        self.title = title
-        self.footer = footer
-        self.content = content()
-    }
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(.secondary)
-                .textCase(.uppercase)
-                .padding(.horizontal, 16)
-
-            VStack(spacing: 0) {
-                content
-            }
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-            )
-            .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
-
-            if let footer = footer {
-                Text(footer)
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                    .padding(.horizontal, 16)
-                    .padding(.top, 4)
-            }
-        }
-    }
-}
-
 #Preview {
     MainTabView()
         .environmentObject(SongStore())

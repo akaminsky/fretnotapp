@@ -30,6 +30,21 @@
 		0022 /* ChordIdentifierView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1022 /* ChordIdentifierView.swift */; };
 		0023 /* ChordAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1023 /* ChordAudioPlayer.swift */; };
 		0024 /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1024 /* HapticManager.swift */; };
+		110492612F0D1A5200831028 /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104925A2F0D1A5200831028 /* Colors.swift */; };
+		110492622F0D1A5200831028 /* Spacing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104925D2F0D1A5200831028 /* Spacing.swift */; };
+		110492632F0D1A5200831028 /* Typography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104925E2F0D1A5200831028 /* Typography.swift */; };
+		110492642F0D1A5200831028 /* Shadows.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104925C2F0D1A5200831028 /* Shadows.swift */; };
+		110492652F0D1A5200831028 /* CornerRadius.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104925B2F0D1A5200831028 /* CornerRadius.swift */; };
+		1104926B2F0D1D9400831028 /* InputModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492692F0D1D9400831028 /* InputModifiers.swift */; };
+		1104926C2F0D1D9400831028 /* CardModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492672F0D1D9400831028 /* CardModifiers.swift */; };
+		1104926D2F0D1D9400831028 /* CommonModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492682F0D1D9400831028 /* CommonModifiers.swift */; };
+		1104926E2F0D1D9400831028 /* ButtonModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492662F0D1D9400831028 /* ButtonModifiers.swift */; };
+		1104927A2F0D54C700831028 /* NotesTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492752F0D54C700831028 /* NotesTextField.swift */; };
+		1104927B2F0D54C700831028 /* FormTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492742F0D54C700831028 /* FormTextField.swift */; };
+		1104927C2F0D54C700831028 /* CategoryPill.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1104926F2F0D54C700831028 /* CategoryPill.swift */; };
+		1104927D2F0D54C700831028 /* SettingsRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492772F0D54C700831028 /* SettingsRow.swift */; };
+		1104927E2F0D54C700831028 /* FormSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492712F0D54C700831028 /* FormSection.swift */; };
+		1104927F2F0D54C700831028 /* SettingsSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 110492722F0D54C700831028 /* SettingsSection.swift */; };
 		1107F1472EFC71210076A235 /* ChordDetailPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F1462EFC71210076A235 /* ChordDetailPageView.swift */; };
 		1107F1492EFC75860076A235 /* CustomChordManagerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F1482EFC75860076A235 /* CustomChordManagerView.swift */; };
 		1107F14C2EFCBFDD0076A235 /* StrumPattern.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1107F14B2EFCBFDD0076A235 /* StrumPattern.swift */; };
@@ -98,6 +113,21 @@
 		1022 /* ChordIdentifierView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordIdentifierView.swift; sourceTree = "<group>"; };
 		1023 /* ChordAudioPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordAudioPlayer.swift; sourceTree = "<group>"; };
 		1024 /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		1104925A2F0D1A5200831028 /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		1104925B2F0D1A5200831028 /* CornerRadius.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerRadius.swift; sourceTree = "<group>"; };
+		1104925C2F0D1A5200831028 /* Shadows.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Shadows.swift; sourceTree = "<group>"; };
+		1104925D2F0D1A5200831028 /* Spacing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Spacing.swift; sourceTree = "<group>"; };
+		1104925E2F0D1A5200831028 /* Typography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typography.swift; sourceTree = "<group>"; };
+		110492662F0D1D9400831028 /* ButtonModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonModifiers.swift; sourceTree = "<group>"; };
+		110492672F0D1D9400831028 /* CardModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardModifiers.swift; sourceTree = "<group>"; };
+		110492682F0D1D9400831028 /* CommonModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonModifiers.swift; sourceTree = "<group>"; };
+		110492692F0D1D9400831028 /* InputModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InputModifiers.swift; sourceTree = "<group>"; };
+		1104926F2F0D54C700831028 /* CategoryPill.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryPill.swift; sourceTree = "<group>"; };
+		110492712F0D54C700831028 /* FormSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormSection.swift; sourceTree = "<group>"; };
+		110492722F0D54C700831028 /* SettingsSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSection.swift; sourceTree = "<group>"; };
+		110492742F0D54C700831028 /* FormTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormTextField.swift; sourceTree = "<group>"; };
+		110492752F0D54C700831028 /* NotesTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesTextField.swift; sourceTree = "<group>"; };
+		110492772F0D54C700831028 /* SettingsRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsRow.swift; sourceTree = "<group>"; };
 		1107F1462EFC71210076A235 /* ChordDetailPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordDetailPageView.swift; sourceTree = "<group>"; };
 		1107F1482EFC75860076A235 /* CustomChordManagerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomChordManagerView.swift; sourceTree = "<group>"; };
 		1107F14A2EFCBFDD0076A235 /* CustomChordLibrary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomChordLibrary.swift; sourceTree = "<group>"; };
@@ -152,6 +182,84 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		1104925F2F0D1A5200831028 /* Tokens */ = {
+			isa = PBXGroup;
+			children = (
+				1104925A2F0D1A5200831028 /* Colors.swift */,
+				1104925B2F0D1A5200831028 /* CornerRadius.swift */,
+				1104925C2F0D1A5200831028 /* Shadows.swift */,
+				1104925D2F0D1A5200831028 /* Spacing.swift */,
+				1104925E2F0D1A5200831028 /* Typography.swift */,
+			);
+			path = Tokens;
+			sourceTree = "<group>";
+		};
+		110492602F0D1A5200831028 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				110492792F0D54C700831028 /* Components */,
+				1104926A2F0D1D9400831028 /* ViewModifiers */,
+				1104925F2F0D1A5200831028 /* Tokens */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		1104926A2F0D1D9400831028 /* ViewModifiers */ = {
+			isa = PBXGroup;
+			children = (
+				110492662F0D1D9400831028 /* ButtonModifiers.swift */,
+				110492672F0D1D9400831028 /* CardModifiers.swift */,
+				110492682F0D1D9400831028 /* CommonModifiers.swift */,
+				110492692F0D1D9400831028 /* InputModifiers.swift */,
+			);
+			path = ViewModifiers;
+			sourceTree = "<group>";
+		};
+		110492702F0D54C700831028 /* Buttons */ = {
+			isa = PBXGroup;
+			children = (
+				1104926F2F0D54C700831028 /* CategoryPill.swift */,
+			);
+			path = Buttons;
+			sourceTree = "<group>";
+		};
+		110492732F0D54C700831028 /* Cards */ = {
+			isa = PBXGroup;
+			children = (
+				110492712F0D54C700831028 /* FormSection.swift */,
+				110492722F0D54C700831028 /* SettingsSection.swift */,
+			);
+			path = Cards;
+			sourceTree = "<group>";
+		};
+		110492762F0D54C700831028 /* Inputs */ = {
+			isa = PBXGroup;
+			children = (
+				110492742F0D54C700831028 /* FormTextField.swift */,
+				110492752F0D54C700831028 /* NotesTextField.swift */,
+			);
+			path = Inputs;
+			sourceTree = "<group>";
+		};
+		110492782F0D54C700831028 /* Rows */ = {
+			isa = PBXGroup;
+			children = (
+				110492772F0D54C700831028 /* SettingsRow.swift */,
+			);
+			path = Rows;
+			sourceTree = "<group>";
+		};
+		110492792F0D54C700831028 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				110492702F0D54C700831028 /* Buttons */,
+				110492732F0D54C700831028 /* Cards */,
+				110492762F0D54C700831028 /* Inputs */,
+				110492782F0D54C700831028 /* Rows */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		11E0CB562F033BBF000EE46D /* Shared */ = {
 			isa = PBXGroup;
 			children = (
@@ -173,6 +281,7 @@
 		4002 /* GuitarSongbook */ = {
 			isa = PBXGroup;
 			children = (
+				110492602F0D1A5200831028 /* DesignSystem */,
 				11E0CB562F033BBF000EE46D /* Shared */,
 				11A5CF502F03289100E1351A /* Info.plist */,
 				112D867A2EE38E2900F16C18 /* GuitarSongbook.entitlements */,
@@ -364,6 +473,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1104927A2F0D54C700831028 /* NotesTextField.swift in Sources */,
+				1104927B2F0D54C700831028 /* FormTextField.swift in Sources */,
+				1104927C2F0D54C700831028 /* CategoryPill.swift in Sources */,
+				1104927D2F0D54C700831028 /* SettingsRow.swift in Sources */,
+				1104927E2F0D54C700831028 /* FormSection.swift in Sources */,
+				1104927F2F0D54C700831028 /* SettingsSection.swift in Sources */,
 				0001 /* GuitarSongbookApp.swift in Sources */,
 				0002 /* ContentView.swift in Sources */,
 				0004 /* Song.swift in Sources */,
@@ -383,6 +498,10 @@
 				11E0CB5A2F09E413000EE46D /* OnboardingView.swift in Sources */,
 				1107F14F2EFEFB420076A235 /* ChordSuggestionService.swift in Sources */,
 				0013 /* SongDetailView.swift in Sources */,
+				1104926B2F0D1D9400831028 /* InputModifiers.swift in Sources */,
+				1104926C2F0D1D9400831028 /* CardModifiers.swift in Sources */,
+				1104926D2F0D1D9400831028 /* CommonModifiers.swift in Sources */,
+				1104926E2F0D1D9400831028 /* ButtonModifiers.swift in Sources */,
 				0014 /* ChordDiagramView.swift in Sources */,
 				0015 /* CategoryManagerView.swift in Sources */,
 				1107F1492EFC75860076A235 /* CustomChordManagerView.swift in Sources */,
@@ -391,6 +510,11 @@
 				0018 /* ResourceLinkDetector.swift in Sources */,
 				1107F14C2EFCBFDD0076A235 /* StrumPattern.swift in Sources */,
 				11A5CF2D2F019BC400E1351A /* NotificationManager.swift in Sources */,
+				110492612F0D1A5200831028 /* Colors.swift in Sources */,
+				110492622F0D1A5200831028 /* Spacing.swift in Sources */,
+				110492632F0D1A5200831028 /* Typography.swift in Sources */,
+				110492642F0D1A5200831028 /* Shadows.swift in Sources */,
+				110492652F0D1A5200831028 /* CornerRadius.swift in Sources */,
 				1107F14D2EFCBFDD0076A235 /* CustomChordLibrary.swift in Sources */,
 				0019 /* MainTabView.swift in Sources */,
 				0020 /* ChordLogView.swift in Sources */,

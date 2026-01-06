@@ -7,27 +7,6 @@
 
 import SwiftUI
 
-// Define accent colors globally for reuse
-extension Color {
-    // Vibrant orange for buttons, icons, large UI elements
-    static let appAccent = Color(red: 0.953, green: 0.549, blue: 0.012) // #F38C03
-
-    // Darker orange for text on light backgrounds (meets WCAG AA 4.5:1)
-    static let appAccentText = Color(red: 0.702, green: 0.353, blue: 0.0) // #B35A00
-
-    // Warm background color (instead of system gray)
-    static let warmBackground = Color(red: 0.98, green: 0.97, blue: 0.96)
-
-    // Warm cream for input fields (accessible contrast against warm background)
-    static let warmInputBackground = Color(red: 0.995, green: 0.99, blue: 0.985) // rgb(254, 252, 251)
-
-    // Warm border for subtle definition on cards
-    static let warmBorder = Color(red: 0.92, green: 0.90, blue: 0.88) // Warm taupe
-
-    // Medium warm taupe for input field borders - visible against both white and warm backgrounds
-    static let inputBorder = Color(red: 0.824, green: 0.784, blue: 0.745) // rgb(210, 200, 190) #D2C8BE
-}
-
 struct QuickAddView: View {
     @EnvironmentObject var songStore: SongStore
     @EnvironmentObject var spotifyService: SpotifyService
