@@ -24,6 +24,12 @@ struct WarmTextFieldModifier: ViewModifier {
                         lineWidth: 1
                     )
             )
+            .shadow(
+                color: ShadowStyle.card.color,
+                radius: ShadowStyle.card.radius,
+                x: ShadowStyle.card.x,
+                y: ShadowStyle.card.y
+            )
             .animation(.easeInOut(duration: 0.2), value: focused)
     }
 }
@@ -72,6 +78,12 @@ struct WarmTextEditorModifier: ViewModifier {
                         focused ? Color.appAccent.opacity(0.4) : Color.inputBorder,
                         lineWidth: 1
                     )
+            )
+            .shadow(
+                color: ShadowStyle.card.color,
+                radius: ShadowStyle.card.radius,
+                x: ShadowStyle.card.x,
+                y: ShadowStyle.card.y
             )
             .animation(.easeInOut(duration: 0.2), value: focused)
     }

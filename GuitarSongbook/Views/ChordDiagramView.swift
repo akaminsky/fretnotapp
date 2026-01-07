@@ -199,13 +199,7 @@ struct ChordDiagramsGrid: View {
                 ChordDiagramView(chordName: chord, onEditRequest: {
                     chordToEdit = EditableChord(name: chord)
                 })
-                .background(Color.white)
-                .cornerRadius(8)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-                )
-                .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                .warmCard()
                 .onTapGesture {
                     selectedChordForVoicingChange = chord
                 }
@@ -385,13 +379,7 @@ struct EditChordSheet: View {
                     // Editable fretboard
                     TappableFretboard(selectedFingers: $selectedFingers, strings: strings)
                         .padding()
-                        .background(Color.white)
-                        .cornerRadius(16)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 16)
-                                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                        .warmCard()
 
                     // Clear button
                     Button {
@@ -463,6 +451,7 @@ struct EditChordSheet: View {
                     .disabled(!hasFingers)
                 }
             }
+            .background(Color.warmBackground)
             .onAppear {
                 // Pre-fill with chord fingering if it exists
                 if let chordData = ChordLibrary.shared.findChord(chordName) {

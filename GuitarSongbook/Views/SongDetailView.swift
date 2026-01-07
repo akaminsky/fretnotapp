@@ -380,8 +380,7 @@ struct SongDetailView: View {
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.appAccent)
+                        .primaryButton()
                         .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
                     }
                 }
@@ -402,7 +401,7 @@ struct SongDetailView: View {
 
                         Spacer()
                     }
-                    .padding(12)
+                    .padding(Spacing.md)
                     .background(Color(.systemBackground))
                     .cornerRadius(8)
 
@@ -420,7 +419,7 @@ struct SongDetailView: View {
 
                         Spacer()
                     }
-                    .padding(12)
+                    .padding(Spacing.md)
                     .background(Color(.systemBackground))
                     .cornerRadius(8)
                 }
@@ -441,7 +440,7 @@ struct SongDetailView: View {
 
                                 Spacer()
                             }
-                            .padding(12)
+                            .padding(Spacing.md)
                             .background(Color(.systemBackground))
                             .cornerRadius(8)
                         }
@@ -471,7 +470,7 @@ struct SongDetailView: View {
                                                 .foregroundColor(.red)
                                         }
                                     }
-                                    .padding(12)
+                                    .padding(Spacing.md)
                                     .background(Color(.systemBackground))
                                     .cornerRadius(8)
                                 }
@@ -519,11 +518,11 @@ struct SongDetailView: View {
                         // Custom label field
                         if quickStrumLabel == "Custom" {
                             TextField("Enter custom label", text: $customStrumLabel)
-                                .padding(12)
+                                .padding(Spacing.md)
                                 .background(Color.warmInputBackground)
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
+                                    RoundedRectangle(cornerRadius: CornerRadius.input)
                                         .stroke(Color.inputBorder, lineWidth: 1)
                                 )
                         }
@@ -531,11 +530,11 @@ struct SongDetailView: View {
                         // Custom pattern field
                         if quickStrumPattern == "Custom" {
                             TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
-                                .padding(12)
+                                .padding(Spacing.md)
                                 .background(Color.warmInputBackground)
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                                 .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
+                                    RoundedRectangle(cornerRadius: CornerRadius.input)
                                         .stroke(Color.inputBorder, lineWidth: 1)
                                 )
                                 .textInputAutocapitalization(.characters)
@@ -561,21 +560,14 @@ struct SongDetailView: View {
                                     .fontWeight(.medium)
                                     .frame(maxWidth: .infinity)
                             }
-                            .buttonStyle(.borderedProminent)
-                            .tint(.appAccent)
+                            .primaryButton()
                         }
                     }
                 }
             }
         }
         .padding(20)
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
 
     private var emptyChordSection: some View {
@@ -600,8 +592,7 @@ struct SongDetailView: View {
                             .fontWeight(.medium)
                             .frame(maxWidth: .infinity)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.appAccent)
+                    .primaryButton()
                     .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             } else {
@@ -629,7 +620,7 @@ struct SongDetailView: View {
                                             .foregroundColor(.red)
                                     }
                                 }
-                                .padding(12)
+                                .padding(Spacing.md)
                                 .background(Color(.systemBackground))
                                 .cornerRadius(8)
                             }
@@ -677,11 +668,11 @@ struct SongDetailView: View {
                     // Custom label field
                     if quickStrumLabel == "Custom" {
                         TextField("Enter custom label", text: $customStrumLabel)
-                            .padding(12)
+                            .padding(Spacing.md)
                             .background(Color.warmInputBackground)
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
+                                RoundedRectangle(cornerRadius: CornerRadius.input)
                                     .stroke(Color.inputBorder, lineWidth: 1)
                             )
                     }
@@ -689,11 +680,11 @@ struct SongDetailView: View {
                     // Custom pattern field
                     if quickStrumPattern == "Custom" {
                         TextField("Enter custom pattern (e.g., D-D-U-U-D-U)", text: $customStrumPattern)
-                            .padding(12)
+                            .padding(Spacing.md)
                             .background(Color.warmInputBackground)
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                             .overlay(
-                                RoundedRectangle(cornerRadius: 8)
+                                RoundedRectangle(cornerRadius: CornerRadius.input)
                                     .stroke(Color.inputBorder, lineWidth: 1)
                             )
                             .textInputAutocapitalization(.characters)
@@ -719,20 +710,13 @@ struct SongDetailView: View {
                                 .fontWeight(.medium)
                                 .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.appAccent)
+                        .primaryButton()
                     }
                 }
             }
         }
         .padding(20)
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
 
     // MARK: - Notes Section
@@ -754,13 +738,7 @@ struct SongDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(20)
-        .background(Color.white)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
     
     
@@ -982,6 +960,8 @@ struct CategoryPickerView: View {
                     Text("Lists")
                 }
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
             .navigationTitle("Add to List")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -991,6 +971,7 @@ struct CategoryPickerView: View {
                     }
                 }
             }
+            .background(Color.warmBackground)
         }
         .presentationDetents([.medium, .large])
     }
@@ -1114,7 +1095,7 @@ struct SpotifyLinkSheet: View {
                                             .font(.title2)
                                             .foregroundColor(.appAccent)
                                     }
-                                    .padding(12)
+                                    .padding(Spacing.md)
                                     .background(Color(.systemBackground))
                                     .cornerRadius(10)
                                 }

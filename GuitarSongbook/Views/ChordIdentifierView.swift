@@ -33,9 +33,7 @@ struct ChordIdentifierView: View {
                 // Interactive Fretboard
                 TappableFretboard(selectedFingers: $selectedFingers, strings: strings)
                     .padding()
-                    .background(Color(.systemBackground))
-                    .cornerRadius(16)
-                    .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                    .warmCard()
 
                 // Control button
                 Button {
@@ -53,6 +51,7 @@ struct ChordIdentifierView: View {
             }
             .padding()
         }
+        .background(Color.warmBackground)
     }
 }
 
@@ -269,13 +268,13 @@ struct ChordResultsView: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
                 .background(Color.appAccent)
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
             }
         }
         .padding()
         .frame(maxWidth: .infinity)
         .background(Color.warmInputBackground)
-        .cornerRadius(12)
+        .cornerRadius(CornerRadius.card)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color.inputBorder, lineWidth: 1)
@@ -341,7 +340,7 @@ struct ChordResultsView: View {
                     .padding(.horizontal, 14)
                     .padding(.vertical, 8)
                     .background(Color.appAccent)
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                 }
             }
             .padding(.horizontal)
@@ -366,7 +365,7 @@ struct ChordResultsView: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                                 .background(Color.green.opacity(0.1))
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.green.opacity(0.3), lineWidth: 1)
@@ -381,15 +380,14 @@ struct ChordResultsView: View {
             }
             .padding()
             .background(Color.warmInputBackground)
-            .cornerRadius(12)
+            .cornerRadius(CornerRadius.card)
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color.inputBorder, lineWidth: 1)
             )
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
+        .warmCard()
     }
 
     private var placeholderView: some View {
@@ -403,8 +401,7 @@ struct ChordResultsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color.warmInputBackground)
-        .cornerRadius(12)
+        .warmCard()
     }
 }
 
@@ -681,7 +678,7 @@ struct ChordNameTextField: View {
             .focused($isFocused)
             .autocapitalization(.words)
             .autocorrectionDisabled()
-            .padding(12)
+            .padding(Spacing.md)
             .background(Color.warmInputBackground)
             .cornerRadius(8)
             .overlay(

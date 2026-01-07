@@ -28,9 +28,9 @@ struct AddLinkSheet: View {
                         .focused($isURLFocused)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
-                        .padding(12)
+                        .padding(Spacing.md)
                         .background(Color.warmInputBackground)
-                        .cornerRadius(8)
+                        .cornerRadius(CornerRadius.input)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(isURLFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)

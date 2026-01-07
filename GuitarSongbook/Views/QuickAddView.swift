@@ -33,11 +33,8 @@ struct QuickAddView: View {
                     isPresented = false
                 } label: {
                     Image(systemName: "xmark")
-                        .foregroundColor(.appAccent)
-                        .padding(8)
-                        .background(Color.appAccent.opacity(0.1))
-                        .cornerRadius(6)
                 }
+                .iconButton()
             }
             .padding()
             .background(Color.appAccent.opacity(0.08))
@@ -80,14 +77,12 @@ struct QuickAddView: View {
             }
             .padding()
         }
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .warmCard()
         .overlay(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: CornerRadius.card)
                 .stroke(Color.appAccent, lineWidth: 2)
         )
         .padding(.horizontal)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, y: 5)
         .sheet(isPresented: $showingFullForm) {
             AddSongView(
                 prefilledTitle: selectedTrack?.name ?? "",
@@ -118,7 +113,7 @@ struct QuickAddView: View {
                         .fill(Color(.systemGray5))
                 }
                 .frame(width: 60, height: 60)
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(selectedTrack?.name ?? "")
@@ -217,8 +212,7 @@ struct QuickAddView: View {
                             Text("Add Song")
                         }
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.appAccent)
+                    .primaryButton()
                     .disabled(chords.isEmpty)
                 }
             }
@@ -286,14 +280,8 @@ struct SpotifySearchField: View {
                     .cornerRadius(6)
             }
         }
-        .padding(8)
-        .background(Color.warmInputBackground)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(isFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
-        )
-        .animation(.easeInOut(duration: 0.2), value: isFocused)
+        .padding(Spacing.sm)
+        .warmTextField(focused: isFocused)
     }
 }
 
@@ -315,7 +303,7 @@ struct SpotifyTrackRow: View {
                         .fill(Color(.systemGray5))
                 }
                 .frame(width: 40, height: 40)
-                .cornerRadius(4)
+                .cornerRadius(CornerRadius.sm)
                 
                 VStack(alignment: .leading, spacing: 2) {
                     Text(track.name)

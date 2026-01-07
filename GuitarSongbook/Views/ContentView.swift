@@ -292,12 +292,8 @@ struct ContentView: View {
             Image(systemName: "plus")
                 .font(.title2)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
-                .frame(width: 56, height: 56)
-                .background(Color.appAccent)
-                .clipShape(Circle())
-                .shadow(color: Color.black.opacity(0.2), radius: 8, y: 4)
         }
+        .floatingActionButton()
         .padding(.trailing, 16)
         .padding(.bottom, 16)
     }
@@ -354,13 +350,7 @@ struct SongCard: View {
                 }
             }
         }
-        .background(Color.white)
-        .cornerRadius(8)
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
     
     // MARK: - Main Card Content
@@ -534,8 +524,7 @@ struct SongCard: View {
                         .fontWeight(.medium)
                         .frame(maxWidth: .infinity)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.appAccent)
+                .primaryButton()
                 .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
             }
         }

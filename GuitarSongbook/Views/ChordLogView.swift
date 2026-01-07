@@ -351,13 +351,7 @@ struct ChordCard: View {
         }
         .frame(maxWidth: .infinity)
         .padding(12)
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
 }
 

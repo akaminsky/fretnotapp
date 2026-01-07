@@ -261,13 +261,7 @@ struct TunerView: View {
             }
             .pickerStyle(.menu)
             .padding(12)
-            .background(Color(.systemBackground))
-            .cornerRadius(12)
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-            )
-            .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+            .warmCard()
         }
     }
 
@@ -311,13 +305,7 @@ struct TunerView: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(16)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-        )
-        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+        .warmCard()
     }
     
     // MARK: - Tuner Button

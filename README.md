@@ -2,6 +2,48 @@
 
 A comprehensive iOS app for guitarists to track songs, learn chords, and stay in tune.
 
+---
+
+## 🚨 FOR DEVELOPERS: Design System (READ FIRST)
+
+**Before implementing ANY UI work, you MUST read the design system documentation:**
+
+📚 **[DesignSystem/README.md](DesignSystem/README.md)**
+
+### Critical Rules
+
+**DO:**
+- ✅ Use `.warmCard()` for all top-level white containers
+- ✅ Use `.warmTextField(focused:)` for all text inputs
+- ✅ Use design tokens: `Spacing.md`, `CornerRadius.card`, `Color.appAccent`
+- ✅ Read `DesignSystem/README.md` before starting any UI work
+
+**DON'T:**
+- ❌ Hardcode RGB values - use `Color.appAccent`, `Color.warmBackground`
+- ❌ Use magic numbers - use `Spacing.md` instead of `12`
+- ❌ Manually recreate shadows - use `.warmCard()` instead
+- ❌ Apply `.warmCard()` to nested containers (only top-level)
+
+### Quick Reference
+```swift
+// Correct way to create a card
+VStack {
+    Text("Content")
+}
+.padding(Spacing.lg)
+.warmCard()
+
+// Correct way to create a text field
+@FocusState private var isFocused: Bool
+TextField("Search", text: $query)
+    .focused($isFocused)
+    .warmTextField(focused: isFocused)
+```
+
+**See complete documentation:** [DesignSystem/README.md](DesignSystem/README.md)
+
+---
+
 ## Features
 
 ### 🎵 Song Management

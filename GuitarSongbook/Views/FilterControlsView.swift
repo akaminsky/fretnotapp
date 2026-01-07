@@ -38,13 +38,13 @@ struct FilterControlsView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 12)
+                .padding(.horizontal, Spacing.md)
                 .padding(.vertical, 10)
                 .frame(height: 40)
                 .background(Color.warmInputBackground)
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
                 .overlay(
-                    RoundedRectangle(cornerRadius: 8)
+                    RoundedRectangle(cornerRadius: CornerRadius.input)
                         .stroke(searchFieldFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
                 )
                 .animation(.easeInOut(duration: 0.2), value: searchFieldFocused)
@@ -185,11 +185,8 @@ struct FilterControlsView: View {
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .padding(8)
-                                    .background(Color.appAccent)
-                                    .clipShape(Circle())
                             }
+                            .iconButton(backgroundColor: .appAccent, foregroundColor: .white)
                         }
                     }
                 }
@@ -281,12 +278,12 @@ struct FilterPill: View {
         }
         .fixedSize()
         .font(.subheadline)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
         .background(Color.white)
-        .cornerRadius(8)
+        .cornerRadius(CornerRadius.input)
         .overlay(
-            RoundedRectangle(cornerRadius: 8)
+            RoundedRectangle(cornerRadius: CornerRadius.input)
                 .stroke(value != nil ? Color.appAccent : Color(.systemGray4), lineWidth: 1)
         )
     }
@@ -314,10 +311,10 @@ struct ActiveFilterChip: View {
             }
         }
         .foregroundColor(.appAccent)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
+        .padding(.horizontal, Spacing.md)
+        .padding(.vertical, Spacing.sm)
         .background(Color.appAccent.opacity(0.12))
-        .cornerRadius(20)
+        .cornerRadius(CornerRadius.categoryPill)
     }
 }
 

@@ -21,165 +21,155 @@ struct CategoryManagerView: View {
     
     var body: some View {
         NavigationStack {
-            List {
-                // Add new category section
-                Section {
-                    HStack(spacing: 12) {
-                        TextField("New list name...", text: $newCategoryName)
-                            .focused($isNewCategoryFocused)
-                            .padding(12)
-                            .background(Color.warmInputBackground)
-                            .cornerRadius(8)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(isNewCategoryFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
-                            )
-                            .animation(.easeInOut(duration: 0.2), value: isNewCategoryFocused)
-
-                        Button {
-                            addCategory()
-                        } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(newCategoryName.isEmpty ? .secondary : .appAccent)
-                        }
-                        .disabled(newCategoryName.isEmpty)
-                    }
-                    .listRowBackground(Color.clear)
-                } header: {
-                    Text("Create List")
-                }
-                
-                // All categories (Favorites + Custom)
-                Section {
-                    // Favorites row
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(.appAccent)
-                            .frame(width: 24)
-                        
-                        Text("Favorites")
-                            .fontWeight(.medium)
-                        
-                        Spacer()
-                        
-                        Text("\(songStore.favoritesCount) songs")
-                            .font(.subheadline)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 20) {
+                    // Add new category section
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("CREATE LIST")
+                            .font(.caption)
+                            .fontWeight(.semibold)
                             .foregroundColor(.secondary)
-                    }
-                    .padding(.vertical, 4)
-                    .swipeActions(edge: .trailing) {
-                        Button {
-                            showingFavoritesAlert = true
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                        .tint(.red)
-                        
-                        Button {
-                            showingFavoritesAlert = true
-                        } label: {
-                            Label("Rename", systemImage: "pencil")
-                        }
-                        .tint(.appAccent)
-                    }
-                    .contextMenu {
-                        Button {
-                            showingFavoritesAlert = true
-                        } label: {
-                            Label("Rename", systemImage: "pencil")
-                        }
-                        
-                        Button(role: .destructive) {
-                            showingFavoritesAlert = true
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                        }
-                    }
-                    
-                    // Custom categories
-                    ForEach(songStore.categories, id: \.self) { category in
-                        if editingCategory == category {
-                            // Editing mode
-                            HStack {
-                                Image(systemName: "folder.fill")
-                                    .foregroundColor(.secondary)
-                                    .frame(width: 24)
-                                
-                                TextField("List name", text: $editedName)
-                                    .textFieldStyle(.roundedBorder)
-                                
-                                Button("Save") {
-                                    saveEdit(oldName: category)
-                                }
-                                .buttonStyle(.borderedProminent)
-                                .tint(.appAccent)
-                                
-                                Button {
-                                    editingCategory = nil
-                                } label: {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.secondary)
-                                }
+                            .padding(.horizontal, 20)
+
+                        HStack(spacing: 12) {
+                            TextField("New list name...", text: $newCategoryName)
+                                .focused($isNewCategoryFocused)
+                                .warmTextField(focused: isNewCategoryFocused)
+
+                            Button {
+                                addCategory()
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(newCategoryName.isEmpty ? .secondary : .appAccent)
                             }
-                        } else {
-                            // Display mode
+                            .disabled(newCategoryName.isEmpty)
+                        }
+                        .padding(.horizontal, 20)
+                    }
+
+                    // All categories (Favorites + Custom)
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("LISTS")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 0) {
+                            // Favorites row
                             HStack {
-                                Image(systemName: "folder.fill")
-                                    .foregroundColor(.secondary)
+                                Image(systemName: "star.fill")
+                                    .foregroundColor(.appAccent)
                                     .frame(width: 24)
-                                
-                                Text(category)
+
+                                Text("Favorites")
                                     .fontWeight(.medium)
-                                
+
                                 Spacer()
-                                
-                                Text("\(songStore.songsInCategory(category)) songs")
+
+                                Text("\(songStore.favoritesCount) songs")
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                             }
-                            .padding(.vertical, 4)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 12)
                             .contentShape(Rectangle())
                             .contextMenu {
                                 Button {
-                                    editingCategory = category
-                                    editedName = category
+                                    showingFavoritesAlert = true
                                 } label: {
                                     Label("Rename", systemImage: "pencil")
                                 }
-                                
+
                                 Button(role: .destructive) {
-                                    categoryToDelete = category
-                                    showingDeleteAlert = true
+                                    showingFavoritesAlert = true
                                 } label: {
                                     Label("Delete", systemImage: "trash")
-                                        .foregroundColor(.red)
                                 }
                             }
-                            .swipeActions(edge: .trailing) {
-                                Button(role: .destructive) {
-                                    categoryToDelete = category
-                                    showingDeleteAlert = true
-                                } label: {
-                                    Label("Delete", systemImage: "trash")
+
+                            Divider()
+                                .padding(.leading, 44)
+
+                            // Custom categories
+                            ForEach(songStore.categories, id: \.self) { category in
+                                if editingCategory == category {
+                                    // Editing mode
+                                    HStack {
+                                        Image(systemName: "folder.fill")
+                                            .foregroundColor(.secondary)
+                                            .frame(width: 24)
+
+                                        TextField("List name", text: $editedName)
+                                            .textFieldStyle(.roundedBorder)
+
+                                        Button("Save") {
+                                            saveEdit(oldName: category)
+                                        }
+                                        .primaryButton()
+
+                                        Button {
+                                            editingCategory = nil
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundColor(.secondary)
+                                        }
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                } else {
+                                    // Display mode
+                                    HStack {
+                                        Image(systemName: "folder.fill")
+                                            .foregroundColor(.secondary)
+                                            .frame(width: 24)
+
+                                        Text(category)
+                                            .fontWeight(.medium)
+
+                                        Spacer()
+
+                                        Text("\(songStore.songsInCategory(category)) songs")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 12)
+                                    .contentShape(Rectangle())
+                                    .contextMenu {
+                                        Button {
+                                            editingCategory = category
+                                            editedName = category
+                                        } label: {
+                                            Label("Rename", systemImage: "pencil")
+                                        }
+
+                                        Button(role: .destructive) {
+                                            categoryToDelete = category
+                                            showingDeleteAlert = true
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                                 }
-                                .tint(.red)
-                                
-                                Button {
-                                    editingCategory = category
-                                    editedName = category
-                                } label: {
-                                    Label("Rename", systemImage: "pencil")
+
+                                if category != songStore.categories.last {
+                                    Divider()
+                                        .padding(.leading, 44)
                                 }
-                                .tint(.appAccent)
                             }
                         }
+                        .warmCard()
+                        .padding(.horizontal, 20)
+
+                        Text("Tap and hold to rename or delete lists.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 20)
                     }
-                } header: {
-                    Text("Lists")
-                } footer: {
-                    Text("Swipe left to edit or delete lists.")
                 }
+                .padding(.vertical, 20)
             }
             .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.inline)
@@ -210,10 +200,8 @@ struct CategoryManagerView: View {
             } message: {
                 Text("Favorites cannot be deleted or renamed.")
             }
-            .listStyle(.insetGrouped)
+            .background(Color.warmBackground)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.warmBackground)
     }
 
     private func addCategory() {

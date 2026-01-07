@@ -240,8 +240,7 @@ struct AddSongView: View {
             searchResults
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .warmCard()
     }
     
     // MARK: - Search Components
@@ -330,7 +329,7 @@ struct AddSongView: View {
                     }
             }
             .frame(width: 70, height: 70)
-            .cornerRadius(8)
+            .cornerRadius(CornerRadius.input)
             
             VStack(alignment: .leading, spacing: 4) {
                 if track.id == "manual" {
@@ -366,8 +365,7 @@ struct AddSongView: View {
             }
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .warmCard()
     }
     
     // MARK: - Manual Entry Header with Spotify Options
@@ -387,7 +385,7 @@ struct AddSongView: View {
                         }
                 }
                 .frame(width: 70, height: 70)
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Adding manually")
@@ -423,7 +421,7 @@ struct AddSongView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color.green.opacity(0.1))
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
             } else {
                 Button {
                     // Autofill search with title and artist if available
@@ -441,7 +439,7 @@ struct AddSongView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.appAccent.opacity(0.12))
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                 }
             }
         }
@@ -460,8 +458,7 @@ struct AddSongView: View {
             .environmentObject(spotifyService)
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .warmCard()
     }
 
     // MARK: - Editing Header with Spotify Options
@@ -481,7 +478,7 @@ struct AddSongView: View {
                         }
                 }
                 .frame(width: 70, height: 70)
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title.isEmpty ? editingSong?.title ?? "" : title)
@@ -519,7 +516,7 @@ struct AddSongView: View {
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .background(Color.green.opacity(0.1))
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
             } else {
                 Button {
                     // Autofill search with title and artist if available
@@ -537,7 +534,7 @@ struct AddSongView: View {
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
                     .background(Color.appAccent.opacity(0.12))
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                 }
             }
         }
@@ -556,8 +553,7 @@ struct AddSongView: View {
             .environmentObject(spotifyService)
         }
         .padding()
-        .background(Color(.systemBackground))
-        .cornerRadius(12)
+        .warmCard()
     }
 
     // MARK: - Form Fields
@@ -609,7 +605,7 @@ struct AddSongView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(Color.green.opacity(0.1))
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                         } else {
                             Button {
                                 // Autofill search with title and artist if available
@@ -627,7 +623,7 @@ struct AddSongView: View {
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
                                 .background(Color.appAccent.opacity(0.12))
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                             }
                         }
                     }
@@ -752,9 +748,9 @@ struct AddSongView: View {
                                         }
                                     }
                                 }
-                                .padding(12)
+                                .padding(Spacing.md)
                                 .background(Color.warmInputBackground)
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                                 .overlay(
                                     RoundedRectangle(cornerRadius: 8)
                                         .stroke(Color.inputBorder, lineWidth: 1)
@@ -774,9 +770,9 @@ struct AddSongView: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
                                     .frame(maxWidth: .infinity, alignment: .leading)
-                                    .padding(12)
+                                    .padding(Spacing.md)
                                     .background(Color.warmInputBackground)
-                                    .cornerRadius(8)
+                                    .cornerRadius(CornerRadius.input)
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 8)
                                             .stroke(Color.inputBorder, lineWidth: 1)
@@ -844,9 +840,9 @@ struct AddSongView: View {
                                     }
                                 }
                             }
-                            .padding(12)
+                            .padding(Spacing.md)
                             .background(Color.warmInputBackground)
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.inputBorder, lineWidth: 1)
@@ -880,9 +876,9 @@ struct AddSongView: View {
                                     .fontWeight(.semibold)
                             }
                         }
-                        .padding(12)
+                        .padding(Spacing.md)
                         .background(isFavorite ? Color.appAccent.opacity(0.15) : Color.warmInputBackground)
-                        .cornerRadius(8)
+                        .cornerRadius(CornerRadius.input)
                     }
                     .buttonStyle(.plain)
                     
@@ -908,9 +904,9 @@ struct AddSongView: View {
                                             .fontWeight(.semibold)
                                     }
                                 }
-                                .padding(12)
+                                .padding(Spacing.md)
                                 .background(selectedCategories.contains(category) ? Color.appAccent.opacity(0.15) : Color.warmInputBackground)
-                                .cornerRadius(8)
+                                .cornerRadius(CornerRadius.input)
                             }
                             .buttonStyle(.plain)
                         }
@@ -936,9 +932,9 @@ struct AddSongView: View {
                             }
                         }
                     }
-                    .padding(12)
+                    .padding(Spacing.md)
                     .background(Color.warmInputBackground)
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(focusedField == .newCategory ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
@@ -952,9 +948,9 @@ struct AddSongView: View {
                 DatePicker("", selection: $dateAdded, displayedComponents: .date)
                     .labelsHidden()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(12)
+                    .padding(Spacing.md)
                     .background(Color.warmInputBackground)
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                     .overlay(
                         RoundedRectangle(cornerRadius: 8)
                             .stroke(Color.inputBorder, lineWidth: 1)
@@ -969,9 +965,9 @@ struct AddSongView: View {
                             .font(.subheadline)
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(12)
+                            .padding(Spacing.md)
                             .background(Color.warmInputBackground)
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.inputBorder, lineWidth: 1)
@@ -1009,7 +1005,7 @@ struct AddSongView: View {
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
                             .background(Color.warmInputBackground)
-                            .cornerRadius(8)
+                            .cornerRadius(CornerRadius.input)
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8)
                                     .stroke(Color.inputBorder, lineWidth: 1)
@@ -1031,7 +1027,7 @@ struct AddSongView: View {
                     .buttonStyle(.plain)
                     .padding(.vertical, 8)
                     .background(Color.warmInputBackground)
-                    .cornerRadius(8)
+                    .cornerRadius(CornerRadius.input)
                 }
             }
 
@@ -1434,7 +1430,7 @@ struct SpotifySearchResultRow: View {
                     .font(.title2)
                     .foregroundColor(.appAccent)
             }
-            .padding(12)
+            .padding(Spacing.md)
             .background(Color(.systemBackground))
             .cornerRadius(10)
         }
@@ -1559,7 +1555,7 @@ struct SpotifyLinkSheetForEdit: View {
                                             .font(.title2)
                                             .foregroundColor(.appAccent)
                                     }
-                                    .padding(12)
+                                    .padding(Spacing.md)
                                     .background(Color(.systemBackground))
                                     .cornerRadius(10)
                                 }
@@ -1689,9 +1685,9 @@ struct ChordPillInput: View {
                     }
                 }
             }
-            .padding(12)
+            .padding(Spacing.md)
             .background(Color.warmInputBackground)
-            .cornerRadius(8)
+            .cornerRadius(CornerRadius.input)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(isInputFocused ? Color.appAccent.opacity(0.4) : Color.inputBorder, lineWidth: 1)
@@ -1755,7 +1751,7 @@ struct ChordPillInput: View {
                     }
                 }
                 .background(Color(.systemBackground))
-                .cornerRadius(8)
+                .cornerRadius(CornerRadius.input)
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .strokeBorder(Color(.systemGray4), lineWidth: 1)
@@ -2214,9 +2210,9 @@ struct StrumPatternRow: View {
                     }
             }
         }
-        .padding(12)
+        .padding(Spacing.md)
         .background(Color.warmInputBackground)
-        .cornerRadius(8)
+        .cornerRadius(CornerRadius.input)
         .onAppear {
             // Set initial values from pattern
             if StrumPattern.commonLabels.contains(pattern.label) {

@@ -45,9 +45,9 @@ struct BulkImportView: View {
                         .textCase(.uppercase)
 
                     TextField("https://open.spotify.com/playlist/...", text: $playlistURL)
-                        .padding(12)
+                        .padding(Spacing.md)
                         .background(Color.warmInputBackground)
-                        .cornerRadius(8)
+                        .cornerRadius(CornerRadius.input)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(Color.inputBorder, lineWidth: 1)
@@ -75,7 +75,7 @@ struct BulkImportView: View {
                     .padding()
                     .background(playlistURL.isEmpty || isImporting ? Color.gray : Color.appAccent)
                     .foregroundColor(.white)
-                    .cornerRadius(12)
+                    .cornerRadius(CornerRadius.card)
                 }
                 .disabled(playlistURL.isEmpty || isImporting)
                 
@@ -116,6 +116,7 @@ struct BulkImportView: View {
             } message: {
                 Text(errorMessage)
             }
+            .background(Color.warmBackground)
         }
     }
     

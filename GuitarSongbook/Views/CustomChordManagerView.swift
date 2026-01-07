@@ -15,23 +15,33 @@ struct CustomChordManagerView: View {
     @State private var songsUsingChord: [Song] = []
 
     var body: some View {
-        List {
-            if customLibrary.customChords.isEmpty {
-                emptyStateView
-            } else {
-                ForEach(customLibrary.customChords) { chord in
-                    CustomChordRow(
-                        chord: chord,
-                        songsUsingCount: songStore.songs.filter { $0.chords.contains(chord.displayName) }.count,
-                        onDelete: {
-                            checkChordUsageAndDelete(chord)
+        ScrollView {
+            VStack(spacing: 16) {
+                if customLibrary.customChords.isEmpty {
+                    emptyStateView
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(customLibrary.customChords) { chord in
+                            CustomChordRow(
+                                chord: chord,
+                                songsUsingCount: songStore.songs.filter { $0.chords.contains(chord.displayName) }.count,
+                                onDelete: {
+                                    checkChordUsageAndDelete(chord)
+                                }
+                            )
+
+                            if chord.id != customLibrary.customChords.last?.id {
+                                Divider()
+                                    .padding(.leading, 96)
+                            }
                         }
-                    )
+                    }
+                    .warmCard()
+                    .padding(.horizontal, 20)
                 }
             }
+            .padding(.vertical, 20)
         }
-        .listStyle(.insetGrouped)
-        .scrollContentBackground(.hidden)
         .background(Color.warmBackground)
         .navigationTitle("Custom Chords")
         .navigationBarTitleDisplayMode(.inline)
@@ -72,8 +82,8 @@ struct CustomChordManagerView: View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .listRowBackground(Color.clear)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
     }
 
     private func checkChordUsageAndDelete(_ chord: CustomChordData) {
@@ -138,7 +148,8 @@ struct CustomChordRow: View {
                     .foregroundColor(.red)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
     }
 }
 

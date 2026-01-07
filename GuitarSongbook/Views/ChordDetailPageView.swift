@@ -42,13 +42,7 @@ struct ChordDetailPageView: View {
                 VStack(spacing: 12) {
                     ChordDiagramView(chordName: chordName)
                         .padding()
-                        .background(Color.white)
-                        .cornerRadius(8)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-                        )
-                        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                        .warmCard()
                 }
                 .id(customChordLibrary.customChords.count)
                 .onTapGesture {
@@ -102,13 +96,7 @@ struct ChordDetailPageView: View {
                                             .foregroundColor(.secondary)
                                     }
                                     .padding()
-                                    .background(Color.white)
-                                    .cornerRadius(8)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 8)
-                                            .stroke(Color.black.opacity(0.08), lineWidth: 0.5)
-                                    )
-                                    .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                                    .warmCard()
                                 }
                                 .buttonStyle(.plain)
                             }
@@ -346,9 +334,7 @@ struct AddVariationSheet: View {
                     // Editable fretboard
                     TappableFretboard(selectedFingers: $selectedFingers, strings: strings)
                         .padding()
-                        .background(Color(.systemBackground))
-                        .cornerRadius(16)
-                        .shadow(color: Color.black.opacity(0.05), radius: 8, y: 2)
+                        .warmCard()
 
                     // Clear button
                     Button {
@@ -420,6 +406,7 @@ struct AddVariationSheet: View {
                     .disabled(!hasFingers)
                 }
             }
+            .background(Color.warmBackground)
             .onAppear {
                 // Pre-fill with chord fingering if it exists
                 if let chordData = ChordLibrary.shared.findChord(chordName) {
