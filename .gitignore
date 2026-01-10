@@ -9,3 +9,18 @@ GoogleService-Info.plist
 # Build
 build/
 DerivedData/
+
+# Backend Dependencies
+node_modules/
+package-lock.json
+
+# Netlify
+.netlify/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*

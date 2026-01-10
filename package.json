@@ -1,0 +1,15 @@
+{
+  "name": "guitar-songbook",
+  "version": "1.0.0",
+  "description": "Guitar songbook with Spotify integration",
+  "scripts": {
+    "dev": "netlify dev"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "netlify-cli": "^15.0.0"
+  }
+}
