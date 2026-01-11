@@ -358,18 +358,24 @@ struct ChordResultsView: View {
                         GridItem(.flexible())
                     ], spacing: 12) {
                         ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
-                            Text(name)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(Color.green.opacity(0.1))
-                                .cornerRadius(CornerRadius.input)
-                                .overlay(
-                                    RoundedRectangle(cornerRadius: 8)
-                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                                )
+                            Button {
+                                selectedChordForAdding = IdentifiableString(value: name)
+                            } label: {
+                                Text(name)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                    .foregroundColor(.primary)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .frame(maxWidth: .infinity)
+                                    .background(Color.green.opacity(0.1))
+                                    .cornerRadius(CornerRadius.input)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 8)
+                                            .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
                 } else {

@@ -338,6 +338,7 @@ struct EditChordSheet: View {
     @Environment(\.dismiss) var dismiss
     @EnvironmentObject var songStore: SongStore
     let chordName: String
+    var onMatchedChordSelected: ((String) -> Void)? = nil
 
     @State private var selectedFingers: [Int] = [0, 0, 0, 0, 0, 0]
     @State private var fingersForSave: FingerPosition?
@@ -405,18 +406,26 @@ struct EditChordSheet: View {
                                     GridItem(.flexible())
                                 ], spacing: 12) {
                                     ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
-                                        Text(name)
-                                            .font(.subheadline)
-                                            .fontWeight(.medium)
-                                            .foregroundColor(.primary)
-                                            .padding(.horizontal, 12)
-                                            .padding(.vertical, 8)
-                                            .background(Color.green.opacity(0.1))
-                                            .cornerRadius(8)
-                                            .overlay(
-                                                RoundedRectangle(cornerRadius: 8)
-                                                    .stroke(Color.green.opacity(0.3), lineWidth: 1)
-                                            )
+                                        Button {
+                                            // Notify parent if callback exists, otherwise just dismiss
+                                            onMatchedChordSelected?(name)
+                                            dismiss()
+                                        } label: {
+                                            Text(name)
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(.primary)
+                                                .padding(.horizontal, 12)
+                                                .padding(.vertical, 8)
+                                                .frame(maxWidth: .infinity)
+                                                .background(Color.green.opacity(0.1))
+                                                .cornerRadius(8)
+                                                .overlay(
+                                                    RoundedRectangle(cornerRadius: 8)
+                                                        .stroke(Color.green.opacity(0.3), lineWidth: 1)
+                                                )
+                                        }
+                                        .buttonStyle(.plain)
                                     }
                                 }
                             } else {

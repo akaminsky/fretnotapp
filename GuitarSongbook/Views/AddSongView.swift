@@ -1909,7 +1909,14 @@ struct ChordPillInput: View {
             .presentationDetents([.medium, .large])
         }
         .sheet(item: $customChordToCreate) { customChord in
-            EditChordSheet(chordName: customChord.chordName)
+            EditChordSheet(chordName: customChord.chordName, onMatchedChordSelected: { selectedChordName in
+                // Add the matched chord to the song
+                let newChord = ValidatedChord(name: selectedChordName, isValid: true)
+                validatedChords.append(newChord)
+                updateBinding()
+                haptics.light()
+                inputText = ""
+            })
                 .environmentObject(songStore)
                 .onDisappear {
                     // If we were replacing a chord, check if a new custom chord was created
