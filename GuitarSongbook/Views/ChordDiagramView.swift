@@ -186,6 +186,7 @@ struct ChordDiagramsGrid: View {
     let chords: [String]
     @State private var chordToEdit: EditableChord?
     @State private var selectedChordForVoicingChange: String?
+    @State private var chordForCustomVariation: String?
     @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
     @EnvironmentObject var songStore: SongStore
 
@@ -221,8 +222,30 @@ struct ChordDiagramsGrid: View {
                 originalChordName: selection.originalChord,
                 onVoicingSelected: { newVoicing in
                     updateSongChord(from: selection.originalChord, to: newVoicing)
+                },
+                onCreateCustomVariation: {
+                    // Dismiss voicing picker first, then show custom chord sheet
+                    let baseName = ChordLibrary.shared.parseVoicingNotation(selection.originalChord).baseName
+                    selectedChordForVoicingChange = nil
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        chordForCustomVariation = baseName
+                    }
                 }
             )
+            .environmentObject(songStore)
+        }
+        .sheet(item: Binding(
+            get: { chordForCustomVariation.map { EditableChord(name: $0) } },
+            set: { chordForCustomVariation = $0?.name }
+        )) { editableChord in
+            EditChordSheet(chordName: editableChord.name, onMatchedChordSelected: { selectedChordName in
+                // Find the song and update the chord
+                if let originalChord = chords.first(where: {
+                    ChordLibrary.shared.parseVoicingNotation($0).baseName == editableChord.name
+                }) {
+                    updateSongChord(from: originalChord, to: selectedChordName)
+                }
+            })
             .environmentObject(songStore)
         }
     }
@@ -252,6 +275,7 @@ struct VoicingSelection: Identifiable {
 struct ChangeVoicingSheet: View {
     let originalChordName: String
     let onVoicingSelected: (String) -> Void
+    let onCreateCustomVariation: () -> Void
     @Environment(\.dismiss) var dismiss
 
     private var baseName: String {
@@ -273,49 +297,66 @@ struct ChangeVoicingSheet: View {
                     .font(.headline)
 
                 ScrollView {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
-                        ForEach(Array(voicings.enumerated()), id: \.offset) { index, voicing in
-                            let fp = ChordLibrary.shared.fingersToFingerprint(voicing.fingers)
-                            let isCurrent = fp == currentFingerprint || (currentFingerprint == nil && voicing.isDefault)
+                    VStack(spacing: 16) {
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 16) {
+                            ForEach(Array(voicings.enumerated()), id: \.offset) { index, voicing in
+                                let fp = ChordLibrary.shared.fingersToFingerprint(voicing.fingers)
+                                let isCurrent = fp == currentFingerprint || (currentFingerprint == nil && voicing.isDefault)
 
-                            VStack {
-                                ChordDiagramCanvas(
-                                    chordData: voicing,
-                                    strings: ["E","A","D","G","B","e"]
+                                VStack {
+                                    ChordDiagramCanvas(
+                                        chordData: voicing,
+                                        strings: ["E","A","D","G","B","e"]
+                                    )
+                                    .frame(height: 140)
+
+                                    if voicing.isDefault {
+                                        Text("Default")
+                                            .font(.caption)
+                                            .foregroundColor(.appAccent)
+                                    }
+
+                                    if isCurrent {
+                                        Text("Current")
+                                            .font(.caption)
+                                            .foregroundColor(.green)
+                                    }
+                                }
+                                .padding()
+                                .background(isCurrent ? Color.green.opacity(0.1) : Color.warmInputBackground)
+                                .cornerRadius(12)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .strokeBorder(isCurrent ? Color.green : Color.clear, lineWidth: 2)
                                 )
-                                .frame(height: 140)
-
-                                if voicing.isDefault {
-                                    Text("Default")
-                                        .font(.caption)
-                                        .foregroundColor(.appAccent)
+                                .onTapGesture {
+                                    // Only add fingerprint notation for non-default voicings
+                                    let newName: String
+                                    if voicing.isDefault {
+                                        newName = baseName
+                                    } else {
+                                        newName = "\(baseName)#\(fp)"
+                                    }
+                                    onVoicingSelected(newName)
+                                    dismiss()
                                 }
-
-                                if isCurrent {
-                                    Text("Current")
-                                        .font(.caption)
-                                        .foregroundColor(.green)
-                                }
-                            }
-                            .padding()
-                            .background(isCurrent ? Color.green.opacity(0.1) : Color.warmInputBackground)
-                            .cornerRadius(12)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .strokeBorder(isCurrent ? Color.green : Color.clear, lineWidth: 2)
-                            )
-                            .onTapGesture {
-                                // Only add fingerprint notation for non-default voicings
-                                let newName: String
-                                if voicing.isDefault {
-                                    newName = baseName
-                                } else {
-                                    newName = "\(baseName)#\(fp)"
-                                }
-                                onVoicingSelected(newName)
-                                dismiss()
                             }
                         }
+
+                        // Create Custom Variation button
+                        Button {
+                            onCreateCustomVariation()
+                            dismiss()
+                        } label: {
+                            Label("Create Custom Variation", systemImage: "plus.circle.fill")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(Color.appAccent)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal, 4)
                     }
                     .padding()
                 }
@@ -524,7 +565,16 @@ struct EditChordSheet: View {
         }
 
         savedChordName = trimmedName
-        showingSaveConfirmation = true
+
+        // If we have a callback (from voicing picker), call it and dismiss immediately
+        // This avoids showing an alert from within a nested sheet which can cause crashes
+        if let callback = onMatchedChordSelected {
+            callback(trimmedName)
+            dismiss()
+        } else {
+            // Otherwise show confirmation alert
+            showingSaveConfirmation = true
+        }
     }
 
     private func extractBaseChordName(_ displayName: String) -> String {
