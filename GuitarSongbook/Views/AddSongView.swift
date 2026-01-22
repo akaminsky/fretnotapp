@@ -1431,10 +1431,9 @@ struct SpotifySearchResultRow: View {
                     .foregroundColor(.appAccent)
             }
             .padding(Spacing.md)
-            .background(Color(.systemBackground))
-            .cornerRadius(10)
         }
         .buttonStyle(.plain)
+        .warmCard()
     }
 }
 
@@ -1556,10 +1555,9 @@ struct SpotifyLinkSheetForEdit: View {
                                             .foregroundColor(.appAccent)
                                     }
                                     .padding(Spacing.md)
-                                    .background(Color(.systemBackground))
-                                    .cornerRadius(10)
                                 }
                                 .buttonStyle(.plain)
+                                .warmCard()
                             }
                         }
                         .padding(.horizontal)
