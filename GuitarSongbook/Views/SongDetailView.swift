@@ -85,19 +85,6 @@ struct SongDetailView: View {
             .ignoresSafeArea(edges: .top)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.body.weight(.medium))
-                            .foregroundColor(.secondary)
-                            .frame(width: 32, height: 32)
-                            .background(Color(.systemBackground).opacity(0.8))
-                            .clipShape(Circle())
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack(spacing: 12) {
                         // Spotify play button

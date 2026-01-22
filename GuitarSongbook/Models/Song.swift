@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Song Link
 
-struct SongLink: Codable, Identifiable, Equatable {
+struct SongLink: Codable, Identifiable, Equatable, Hashable {
     let id: UUID
     var url: String
     var siteName: String
@@ -69,7 +69,7 @@ struct SongLink: Codable, Identifiable, Equatable {
 
 // MARK: - Song
 
-struct Song: Identifiable, Codable, Equatable {
+struct Song: Identifiable, Codable, Equatable, Hashable {
     var id: UUID
     var title: String
     var artist: String

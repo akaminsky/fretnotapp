@@ -354,11 +354,8 @@ struct AddVariationSheet: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
 
-                                LazyVGrid(columns: [
-                                    GridItem(.flexible()),
-                                    GridItem(.flexible()),
-                                    GridItem(.flexible())
-                                ], spacing: 12) {
+                                let columns = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: columns), spacing: 12) {
                                     ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
                                         Button {
                                             onSave(name)

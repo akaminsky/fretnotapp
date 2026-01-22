@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct StrumPattern: Identifiable, Codable, Equatable {
+struct StrumPattern: Identifiable, Codable, Equatable, Hashable {
     let id: UUID
     var label: String
     var pattern: String

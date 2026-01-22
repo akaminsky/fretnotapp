@@ -12,9 +12,8 @@ struct ContentView: View {
     @EnvironmentObject var spotifyService: SpotifyService
     @ObservedObject private var customChordLibrary = CustomChordLibrary.shared
 
-    @State private var showingAddSong = false
-    @State private var selectedSong: Song?
     @State private var songToEdit: Song?
+    @State private var selectedSongForDetail: Song?
     
     var body: some View {
         NavigationStack {
@@ -58,10 +57,8 @@ struct ContentView: View {
             }
             .navigationTitle("Songs")
             .navigationBarTitleDisplayMode(.large)
-        }
-        .sheet(isPresented: $showingAddSong) {
-            NavigationStack {
-                AddSongView()
+            .navigationDestination(item: $selectedSongForDetail) { song in
+                SongDetailView(song: song)
                     .environmentObject(songStore)
                     .environmentObject(spotifyService)
             }
@@ -72,11 +69,6 @@ struct ContentView: View {
                     .environmentObject(songStore)
                     .environmentObject(spotifyService)
             }
-        }
-        .sheet(item: $selectedSong) { song in
-            SongDetailView(song: song)
-                .environmentObject(songStore)
-                .environmentObject(spotifyService)
         }
     }
     
@@ -180,9 +172,9 @@ struct ContentView: View {
                         .multilineTextAlignment(.center)
                         .lineSpacing(4)
                     
-                    Button {
-                        showingAddSong = true
-                    } label: {
+                    NavigationLink(destination: AddSongView()
+                        .environmentObject(songStore)
+                        .environmentObject(spotifyService)) {
                         HStack(spacing: 8) {
                             Image(systemName: "plus")
                                 .fontWeight(.semibold)
@@ -224,7 +216,7 @@ struct ContentView: View {
                 ForEach(songStore.filteredAndSortedSongs) { song in
                     SongCard(
                         song: song,
-                        onTap: { selectedSong = song },
+                        onTap: { selectedSongForDetail = song },
                         onEdit: { songToEdit = song },
                         onDelete: { songStore.deleteSong(song) },
                         onToggleFavorite: { songStore.toggleFavorite(song) },
@@ -286,9 +278,9 @@ struct ContentView: View {
     // MARK: - Add Button
     
     private var addButton: some View {
-        Button {
-            showingAddSong = true
-        } label: {
+        NavigationLink(destination: AddSongView()
+            .environmentObject(songStore)
+            .environmentObject(spotifyService)) {
             Image(systemName: "plus")
                 .font(.title2)
                 .fontWeight(.semibold)
@@ -381,12 +373,12 @@ struct SongCard: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                     .lineLimit(1)
-                
+
                 Text(song.artist)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(1)
-                
+
                 // Chords and Capo as simple text
                 if !song.chords.isEmpty || song.capoPosition > 0 {
                     HStack(spacing: 4) {
@@ -396,7 +388,7 @@ struct SongCard: View {
                                 .foregroundColor(Color(.tertiaryLabel))
                                 .lineLimit(1)
                         }
-                        
+
                         if song.capoPosition > 0 {
                             if !song.chords.isEmpty {
                                 Text("•")
@@ -410,9 +402,9 @@ struct SongCard: View {
                     }
                 }
             }
-            
+
             Spacer()
-            
+
             // Favorite Button
             Button(action: onToggleFavorite) {
                 Image(systemName: song.isFavorite ? "star.fill" : "star")
@@ -420,7 +412,7 @@ struct SongCard: View {
                     .foregroundColor(song.isFavorite ? .appAccent : Color(.quaternaryLabel))
             }
             .buttonStyle(.plain)
-            
+
             // View Details Button
             Button(action: onTap) {
                 HStack(spacing: 4) {
@@ -433,32 +425,6 @@ struct SongCard: View {
                 .foregroundColor(.appAccent)
             }
             .buttonStyle(.plain)
-
-            // Context Menu (accessible via long-press on card)
-            .contextMenu {
-                Button {
-                    onEdit()
-                } label: {
-                    Label("Edit", systemImage: "pencil")
-                }
-
-                if let spotifyUrl = song.spotifyUrl,
-                   let url = URL(string: spotifyUrl) {
-                    Button {
-                        UIApplication.shared.open(url)
-                    } label: {
-                        Label("Play on Spotify", systemImage: "play.fill")
-                    }
-                }
-
-                Divider()
-
-                Button(role: .destructive) {
-                    onDelete()
-                } label: {
-                    Label("Delete", systemImage: "trash")
-                }
-            }
         }
         .padding(14)
         .frame(minHeight: 84)
@@ -466,6 +432,30 @@ struct SongCard: View {
         .onTapGesture {
             if !song.chords.isEmpty {
                 showChords.toggle()
+            }
+        }
+        .contextMenu {
+            Button {
+                onEdit()
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+
+            if let spotifyUrl = song.spotifyUrl,
+               let url = URL(string: spotifyUrl) {
+                Button {
+                    UIApplication.shared.open(url)
+                } label: {
+                    Label("Play on Spotify", systemImage: "play.fill")
+                }
+            }
+
+            Divider()
+
+            Button(role: .destructive) {
+                onDelete()
+            } label: {
+                Label("Delete", systemImage: "trash")
             }
         }
     }

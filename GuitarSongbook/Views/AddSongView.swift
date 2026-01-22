@@ -101,21 +101,18 @@ struct AddSongView: View {
         .navigationTitle(isEditing ? "Edit Song" : "Add Song")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
-                    dismiss()
-                }
-            }
-            
-            ToolbarItem(placement: .confirmationAction) {
-                if isSaving {
-                    ProgressView()
-                } else {
-                    Button(isEditing ? "Save" : "Add Song") {
-                        saveSong()
+            // Only show Add Song button when not in initial Spotify search state
+            if !(selectedTrack == nil && !isEditing && title.isEmpty) {
+                ToolbarItem(placement: .confirmationAction) {
+                    if isSaving {
+                        ProgressView()
+                    } else {
+                        Button(isEditing ? "Save" : "Add Song") {
+                            saveSong()
+                        }
+                        .fontWeight(.semibold)
+                        .disabled(title.isEmpty || (chordSuggestionService?.isSuggesting ?? false))
                     }
-                    .fontWeight(.semibold)
-                    .disabled(title.isEmpty || (chordSuggestionService?.isSuggesting ?? false))
                 }
             }
         }
