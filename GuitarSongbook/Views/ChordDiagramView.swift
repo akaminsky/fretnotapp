@@ -191,7 +191,7 @@ struct ChordDiagramsGrid: View {
     @EnvironmentObject var songStore: SongStore
 
     private var columnCount: Int {
-        UIDevice.current.userInterfaceIdiom == .pad ? 5 : 3
+        UIDevice.current.userInterfaceIdiom == .pad ? 6 : 3
     }
 
     var body: some View {
@@ -441,7 +441,7 @@ struct EditChordSheet: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
 
-                                let columns = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                                let columns = UIDevice.current.userInterfaceIdiom == .pad ? 5 : 3
                                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: columns), spacing: 12) {
                                     ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
                                         Button {
