@@ -73,13 +73,33 @@ struct OnboardingView: View {
 struct OnboardingPageView: View {
     let imageName: String
 
+    private var isIPad: Bool {
+        UIDevice.current.userInterfaceIdiom == .pad
+    }
+
     var body: some View {
         // Try to load the image, show placeholder if not found
         if let uiImage = UIImage(named: imageName) {
-            Image(uiImage: uiImage)
-                .resizable()
-                .scaledToFill()
-                .ignoresSafeArea()
+            if isIPad {
+                // iPad: Show image at natural size, centered on dark background
+                ZStack {
+                    Color.black
+                        .ignoresSafeArea()
+
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFit()
+                        .cornerRadius(20)
+                        .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+                        .padding(40)
+                }
+            } else {
+                // iPhone: Fill screen as before
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+            }
         } else {
             // Placeholder for when images aren't added yet
             ZStack {
