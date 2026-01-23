@@ -543,7 +543,7 @@
 				CODE_SIGN_ENTITLEMENTS = FretNotShareExtension/FretNotShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = US3KMK749L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FretNotShareExtension/Info.plist;
@@ -574,7 +574,7 @@
 				CODE_SIGN_ENTITLEMENTS = FretNotShareExtension/FretNotShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = US3KMK749L;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = FretNotShareExtension/Info.plist;
@@ -730,7 +730,7 @@
 				CODE_SIGN_ENTITLEMENTS = GuitarSongbook/GuitarSongbook.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -765,7 +765,7 @@
 				CODE_SIGN_ENTITLEMENTS = GuitarSongbook/GuitarSongbook.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 6;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = US3KMK749L;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
