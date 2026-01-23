@@ -109,7 +109,7 @@ struct SongDetailView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingEditSheet) {
+            .fullScreenCover(isPresented: $showingEditSheet) {
                 NavigationStack {
                     AddSongView(editingSong: liveSong)
                         .environmentObject(songStore)

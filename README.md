@@ -107,6 +107,21 @@ TextField("Search", text: $query)
 
 ### Version 1.4.1 (January 2025)
 
+#### iPad Optimization
+- **Unified Layout System** - All pages now use consistent 800pt max width on iPad
+  - Song list, settings, add/edit song, category manager all constrained to 800pt
+  - Adaptive spacing tokens: 32pt margins on iPad vs 16pt on iPhone
+  - Custom navigation titles on iPad positioned within content for alignment
+- **Enhanced Modal Experience** - Full-screen modals on iPad for better screen utilization
+  - All sheets converted to full-screen presentation on iPad
+  - Chord identifier and add variation content constrained to 800pt within modals
+  - Maintains clean, focused layout while using available screen space
+- **Adaptive Design Tokens** - Smart spacing that adjusts based on device
+  - `Spacing.horizontalPadding`: 32pt on iPad, 16pt on iPhone
+  - `Spacing.cardPadding`: 16pt on iPad, 12pt on iPhone
+  - `Spacing.sectionSpacing`: 24pt on iPad, 16pt on iPhone
+  - Consistent visual rhythm across all screen sizes
+
 #### Design System & Visual Consistency
 - **Unified Color Palette** - Implemented warm, cohesive color scheme across entire app
   - Warm cream background (rgb(250, 247, 245)) for all main views

@@ -80,7 +80,7 @@ struct ContentView: View {
                     .environmentObject(spotifyService)
             }
         }
-        .sheet(item: $songToEdit) { song in
+        .fullScreenCover(item: $songToEdit) { song in
             NavigationStack {
                 AddSongView(editingSong: song)
                     .environmentObject(songStore)

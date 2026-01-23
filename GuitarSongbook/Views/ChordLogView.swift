@@ -131,7 +131,7 @@ struct ChordLogView: View {
                 }
             }
             .navigationTitle("Chords")
-            .sheet(isPresented: $showingIdentifier) {
+            .fullScreenCover(isPresented: $showingIdentifier) {
                 NavigationStack {
                     ChordIdentifierView()
                         .navigationTitle("Identify and add a chord")

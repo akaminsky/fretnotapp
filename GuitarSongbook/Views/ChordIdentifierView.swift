@@ -50,6 +50,7 @@ struct ChordIdentifierView: View {
                     .environmentObject(songStore)
             }
             .padding()
+            .maxWidthContainer(800)
         }
         .background(Color.warmBackground)
     }

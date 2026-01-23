@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct CustomChordManagerView: View {
+    @Environment(\.dismiss) var dismiss
     @EnvironmentObject var songStore: SongStore
     @ObservedObject var customLibrary = CustomChordLibrary.shared
     @State private var showingDeleteAlert = false
@@ -45,6 +46,13 @@ struct CustomChordManagerView: View {
         .background(Color.warmBackground)
         .navigationTitle("Custom Chords")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .confirmationAction) {
+                Button("Done") {
+                    dismiss()
+                }
+            }
+        }
         .alert("Delete Custom Chord?", isPresented: $showingDeleteAlert) {
             Button("Cancel", role: .cancel) {
                 chordToDelete = nil

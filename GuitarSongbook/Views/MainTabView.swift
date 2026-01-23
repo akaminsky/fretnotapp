@@ -526,16 +526,16 @@ struct SettingsView: View {
             .onAppear {
                 loadNotificationSettings()
             }
-            .sheet(isPresented: $showingCategoryManager) {
+            .fullScreenCover(isPresented: $showingCategoryManager) {
                 CategoryManagerView()
                     .environmentObject(songStore)
             }
-            .sheet(isPresented: $showingBulkImport) {
+            .fullScreenCover(isPresented: $showingBulkImport) {
                 BulkImportView()
                     .environmentObject(songStore)
                     .environmentObject(spotifyService)
             }
-            .sheet(isPresented: $showingCustomChordManager) {
+            .fullScreenCover(isPresented: $showingCustomChordManager) {
                 NavigationStack {
                     CustomChordManagerView()
                         .environmentObject(songStore)

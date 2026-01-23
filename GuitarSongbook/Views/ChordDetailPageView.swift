@@ -168,7 +168,7 @@ struct ChordDetailPageView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingAddVariation) {
+        .fullScreenCover(isPresented: $showingAddVariation) {
             AddVariationSheet(chordName: chordName, onSave: { newName in
                 // If chord was renamed, dismiss this view to go back to chord list
                 if newName != chordName {
@@ -177,7 +177,7 @@ struct ChordDetailPageView: View {
             })
             .environmentObject(songStore)
         }
-        .sheet(isPresented: $showingAddToSong) {
+        .fullScreenCover(isPresented: $showingAddToSong) {
             SongSelectorSheet(chordName: chordName)
                 .environmentObject(songStore)
         }
@@ -408,6 +408,7 @@ struct AddVariationSheet: View {
                     Divider()
                 }
                 .padding()
+                .maxWidthContainer(800)
             }
             .navigationTitle("Add Variation")
             .navigationBarTitleDisplayMode(.inline)
