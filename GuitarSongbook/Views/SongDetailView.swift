@@ -44,12 +44,12 @@ struct SongDetailView: View {
                     coverSection
 
                     // Content
-                    VStack(alignment: .leading, spacing: 24) {
+                    VStack(alignment: .leading, spacing: Spacing.sectionSpacing) {
                         // Title Section
                         titleSection
 
                         // Chord Diagrams, Tuning & Strum Patterns
-                        VStack(spacing: 12) {
+                        VStack(spacing: Spacing.cardPadding) {
                             // Toggle between chords, tuning, and strumming
                             Picker("Display Mode", selection: $displayMode) {
                                 Text("Chords").tag(DisplayMode.chords)
@@ -78,7 +78,8 @@ struct SongDetailView: View {
                         // Properties - Notion style (includes Key & BPM)
                         propertiesSection
                     }
-                    .padding(20)
+                    .padding(Spacing.contentPadding)
+                    .maxWidthContainer(800)
                 }
             }
             .background(Color.warmBackground)
@@ -177,7 +178,7 @@ struct SongDetailView: View {
     // MARK: - Properties Section
     
     private var propertiesSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
             // Date Added
             PropertyRow(label: "Added", icon: "calendar") {
                 Text(liveSong.formattedDate)
@@ -330,7 +331,7 @@ struct SongDetailView: View {
     // MARK: - Chord Section
 
     private var chordSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Image(systemName: displayMode == .chords ? "hand.raised" : displayMode == .tuning ? "tuningfork" : "waveform")
@@ -353,7 +354,7 @@ struct SongDetailView: View {
                     ChordDiagramsGrid(chords: liveSong.chords)
                         .id(liveSong.chords.joined(separator: ","))
                 } else {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.cardPadding) {
                         Text("No chords added yet")
                             .font(.subheadline)
                             .foregroundColor(.secondary)
@@ -373,7 +374,7 @@ struct SongDetailView: View {
                 }
             } else if displayMode == .tuning {
                 // Tuning section
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                     // Capo
                     HStack(alignment: .top, spacing: 12) {
                         Text("Capo")
@@ -412,7 +413,7 @@ struct SongDetailView: View {
                 }
             } else {
                 if !liveSong.strumPatterns.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                         ForEach(liveSong.strumPatterns) { pattern in
                             HStack(alignment: .top, spacing: 12) {
                                 Text(pattern.label)
@@ -433,7 +434,7 @@ struct SongDetailView: View {
                         }
                     }
                 } else {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.cardPadding) {
                         if !tempStrumPatterns.isEmpty {
                             VStack(alignment: .leading, spacing: 8) {
                                 ForEach(tempStrumPatterns) { pattern in
@@ -553,12 +554,12 @@ struct SongDetailView: View {
                 }
             }
         }
-        .padding(20)
+        .padding(Spacing.contentPadding)
         .warmCard()
     }
 
     private var emptyChordSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
             HStack {
                 Image(systemName: displayMode == .chords ? "hand.raised" : "waveform")
                     .foregroundColor(.secondary)
@@ -569,7 +570,7 @@ struct SongDetailView: View {
 
             // Content based on display mode
             if displayMode == .chords {
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.cardPadding) {
                     ChordPillInput(chords: $quickChordInput)
 
                     Button {
@@ -583,7 +584,7 @@ struct SongDetailView: View {
                     .disabled(quickChordInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             } else {
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.cardPadding) {
                     if !tempStrumPatterns.isEmpty {
                         VStack(alignment: .leading, spacing: 8) {
                             ForEach(tempStrumPatterns) { pattern in
@@ -702,14 +703,14 @@ struct SongDetailView: View {
                 }
             }
         }
-        .padding(20)
+        .padding(Spacing.contentPadding)
         .warmCard()
     }
 
     // MARK: - Notes Section
 
     private func notesSection(_ notes: String) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
             HStack {
                 Image(systemName: "note.text")
                     .foregroundColor(.secondary)
@@ -724,7 +725,7 @@ struct SongDetailView: View {
                 .lineSpacing(6)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
+        .padding(Spacing.contentPadding)
         .warmCard()
     }
     

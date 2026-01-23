@@ -119,7 +119,17 @@ struct SettingsView: View {
                     .ignoresSafeArea()
 
                 ScrollView {
-                    VStack(spacing: 16) {
+                    VStack(spacing: Spacing.sectionSpacing) {
+                        // Custom title (constrained on iPad)
+                        if UIDevice.current.userInterfaceIdiom == .pad {
+                            HStack {
+                                Text("Settings")
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                Spacer()
+                            }
+                        }
+
                         // Library Section
                         SettingsSection(title: "Library") {
                             SettingsRow {
@@ -505,10 +515,14 @@ struct SettingsView: View {
                             }
                         }
                     }
-                    .padding()
+                    .padding(Spacing.contentPadding)
+                    .frame(maxWidth: .infinity) // Allow full width for background
+                    .maxWidthContainer(800)
                 }
+                .scrollIndicators(.hidden)
             }
-            .navigationTitle("Settings")
+            .navigationTitle(UIDevice.current.userInterfaceIdiom == .pad ? "" : "Settings")
+            .navigationBarTitleDisplayMode(UIDevice.current.userInterfaceIdiom == .pad ? .inline : .automatic)
             .onAppear {
                 loadNotificationSettings()
             }

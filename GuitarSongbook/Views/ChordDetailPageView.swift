@@ -37,9 +37,19 @@ struct ChordDetailPageView: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 24) {
+                VStack(spacing: Spacing.sectionSpacing) {
+                // Custom title (constrained on iPad)
+                if UIDevice.current.userInterfaceIdiom == .pad {
+                    HStack {
+                        Text(chordName)
+                            .font(.largeTitle)
+                            .fontWeight(.bold)
+                        Spacer()
+                    }
+                }
+
                 // Large chord diagram
-                VStack(spacing: 12) {
+                VStack(spacing: Spacing.cardPadding) {
                     ChordDiagramView(chordName: chordName)
                         .padding()
                         .warmCard()
@@ -51,10 +61,9 @@ struct ChordDetailPageView: View {
 
                 // Songs list
                 if !songsUsingChord.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                         Text("Used in \(songsUsingChord.count) \(songsUsingChord.count == 1 ? "song" : "songs")")
                             .font(.headline)
-                            .padding(.horizontal)
 
                         VStack(spacing: 8) {
                             ForEach(songsUsingChord) { song in
@@ -101,10 +110,9 @@ struct ChordDetailPageView: View {
                                 .buttonStyle(.plain)
                             }
                         }
-                        .padding(.horizontal)
                     }
                 } else {
-                    VStack(spacing: 12) {
+                    VStack(spacing: Spacing.cardPadding) {
                         Image(systemName: "music.note.list")
                             .font(.largeTitle)
                             .foregroundColor(.secondary)
@@ -115,11 +123,15 @@ struct ChordDetailPageView: View {
                     .padding(.vertical, 40)
                 }
                 }
-                .padding(.vertical)
+                .padding(.horizontal, Spacing.contentPadding)
+                .padding(.vertical, Spacing.contentPadding)
+                .frame(maxWidth: .infinity) // Allow full width for background
+                .maxWidthContainer(800)
             }
+            .scrollIndicators(.hidden)
         }
-        .navigationTitle(chordName)
-        .navigationBarTitleDisplayMode(.large)
+        .navigationTitle(UIDevice.current.userInterfaceIdiom == .pad ? "" : chordName)
+        .navigationBarTitleDisplayMode(UIDevice.current.userInterfaceIdiom == .pad ? .inline : .large)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
@@ -354,7 +366,7 @@ struct AddVariationSheet: View {
                                     .font(.subheadline)
                                     .foregroundColor(.secondary)
 
-                                let columns = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                                let columns = UIDevice.current.userInterfaceIdiom == .pad ? 5 : 3
                                 LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: columns), spacing: 12) {
                                     ForEach(matchedChords.prefix(6), id: \.0) { (name, _) in
                                         Button {

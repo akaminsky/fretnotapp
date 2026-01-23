@@ -28,16 +28,33 @@ struct ContentView: View {
                     }
 
                 VStack(spacing: 0) {
+                    // Custom title (constrained on iPad)
+                    if UIDevice.current.userInterfaceIdiom == .pad {
+                        HStack {
+                            Text("Songs")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                            Spacer()
+                        }
+                        .padding(.horizontal, Spacing.horizontalPadding)
+                        .padding(.top, Spacing.cardPadding)
+                        .maxWidthContainer(800)
+                    }
+
                     // Category Pills
                     categoryPills
-                    
+
                     // Filter Controls
-                    FilterControlsView()
-                        .padding(.horizontal)
-                        .padding(.top, 4)
-                        .animation(nil, value: songStore.filterChord)
-                        .animation(nil, value: songStore.filterCapo)
-                    
+                    HStack {
+                        FilterControlsView()
+                            .padding(.horizontal, Spacing.horizontalPadding)
+                            .padding(.top, 4)
+                            .animation(nil, value: songStore.filterChord)
+                            .animation(nil, value: songStore.filterCapo)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .maxWidthContainer(800)
+
                     // Song List or Empty State
                     if songStore.filteredAndSortedSongs.isEmpty {
                         emptyState
@@ -55,8 +72,8 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("Songs")
-            .navigationBarTitleDisplayMode(.large)
+            .navigationTitle(UIDevice.current.userInterfaceIdiom == .pad ? "" : "Songs")
+            .navigationBarTitleDisplayMode(UIDevice.current.userInterfaceIdiom == .pad ? .inline : .large)
             .navigationDestination(item: $selectedSongForDetail) { song in
                 SongDetailView(song: song)
                     .environmentObject(songStore)
@@ -75,44 +92,48 @@ struct ContentView: View {
     // MARK: - Category Pills
     
     private var categoryPills: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
-                // All songs
-                CategoryPill(
-                    title: "All",
-                    count: songStore.songs.count,
-                    isSelected: songStore.filterCategory.isEmpty,
-                    color: .appAccent
-                ) {
-                    songStore.filterCategory = ""
-                }
-                
-                // Favorites
-                CategoryPill(
-                    title: "Favorites",
-                    count: songStore.favoritesCount,
-                    isSelected: songStore.filterCategory == "favorites",
-                    color: .appAccent,
-                    icon: "star.fill"
-                ) {
-                    songStore.filterCategory = songStore.filterCategory == "favorites" ? "" : "favorites"
-                }
-                
-                // Custom categories
-                ForEach(songStore.categories, id: \.self) { category in
+        HStack {
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    // All songs
                     CategoryPill(
-                        title: category,
-                        count: songStore.songsInCategory(category),
-                        isSelected: songStore.filterCategory == category,
+                        title: "All",
+                        count: songStore.songs.count,
+                        isSelected: songStore.filterCategory.isEmpty,
                         color: .appAccent
                     ) {
-                        songStore.filterCategory = songStore.filterCategory == category ? "" : category
+                        songStore.filterCategory = ""
+                    }
+
+                    // Favorites
+                    CategoryPill(
+                        title: "Favorites",
+                        count: songStore.favoritesCount,
+                        isSelected: songStore.filterCategory == "favorites",
+                        color: .appAccent,
+                        icon: "star.fill"
+                    ) {
+                        songStore.filterCategory = songStore.filterCategory == "favorites" ? "" : "favorites"
+                    }
+
+                    // Custom categories
+                    ForEach(songStore.categories, id: \.self) { category in
+                        CategoryPill(
+                            title: category,
+                            count: songStore.songsInCategory(category),
+                            isSelected: songStore.filterCategory == category,
+                            color: .appAccent
+                        ) {
+                            songStore.filterCategory = songStore.filterCategory == category ? "" : category
+                        }
                     }
                 }
+                .padding(.horizontal, Spacing.horizontalPadding)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
         }
+        .frame(maxWidth: .infinity)
+        .maxWidthContainer(800)
     }
     
     // MARK: - Empty State
@@ -203,17 +224,22 @@ struct ContentView: View {
         VStack(spacing: 0) {
             // Song count header
             HStack {
-                Text(songStore.songCountText)
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                Spacer()
+                HStack {
+                    Text(songStore.songCountText)
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                    Spacer()
+                }
+                .padding(.horizontal, Spacing.horizontalPadding)
             }
-            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity)
+            .maxWidthContainer(800)
             .padding(.vertical, 8)
 
             // Songs list
-            List {
-                ForEach(songStore.filteredAndSortedSongs) { song in
+            HStack {
+                List {
+                    ForEach(songStore.filteredAndSortedSongs) { song in
                     SongCard(
                         song: song,
                         onTap: { selectedSongForDetail = song },
@@ -227,7 +253,12 @@ struct ContentView: View {
                         }
                     )
                     .listRowBackground(Color.clear)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .listRowInsets(EdgeInsets(
+                        top: 6,
+                        leading: Spacing.horizontalPadding,
+                        bottom: 6,
+                        trailing: Spacing.horizontalPadding
+                    ))
                     .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                         Button(role: .destructive) {
@@ -271,6 +302,9 @@ struct ContentView: View {
             .animation(nil, value: songStore.filterCapo)
             .animation(nil, value: songStore.filterCategory)
             .animation(nil, value: songStore.searchText)
+            }
+            .frame(maxWidth: .infinity)
+            .maxWidthContainer(800)
         }
         .background(Color.warmBackground)
     }
@@ -286,8 +320,8 @@ struct ContentView: View {
                 .fontWeight(.semibold)
         }
         .floatingActionButton()
-        .padding(.trailing, 16)
-        .padding(.bottom, 16)
+        .padding(.trailing, Spacing.horizontalPadding)
+        .padding(.bottom, Spacing.horizontalPadding)
     }
 }
 
@@ -304,6 +338,13 @@ struct SongCard: View {
     @State private var showChords = false
     @State private var showQuickAddChords = false
     @State private var quickChordInput = ""
+
+    private let chordLibrary = ChordLibrary.shared
+
+    // Extract base chord names without voicing notation for display
+    private var displayChordNames: [String] {
+        song.chords.map { chordLibrary.parseVoicingNotation($0).baseName }
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -383,7 +424,7 @@ struct SongCard: View {
                 if !song.chords.isEmpty || song.capoPosition > 0 {
                     HStack(spacing: 4) {
                         if !song.chords.isEmpty {
-                            Text(song.chords.joined(separator: " · "))
+                            Text(displayChordNames.joined(separator: " · "))
                                 .font(.caption)
                                 .foregroundColor(Color(.tertiaryLabel))
                                 .lineLimit(1)

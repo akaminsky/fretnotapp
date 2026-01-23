@@ -220,11 +220,10 @@ struct ChordLogView: View {
                     .padding(.vertical, 40)
                 } else if searchText.isEmpty {
                     // Default view: single grid of user's chords
-                    LazyVGrid(columns: [
-                        GridItem(.flexible(), spacing: 28),
-                        GridItem(.flexible(), spacing: 28),
-                        GridItem(.flexible(), spacing: 28)
-                    ], spacing: 28) {
+                    LazyVGrid(columns: Array(
+                        repeating: GridItem(.flexible(), spacing: 28),
+                        count: UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                    ), spacing: 28) {
                         ForEach(displayedChords) { item in
                             NavigationLink(destination: ChordDetailPageView(chordName: item.name).environmentObject(songStore)) {
                                 ChordCard(
@@ -241,11 +240,10 @@ struct ChordLogView: View {
                     VStack(spacing: 20) {
                         // User's chords section
                         if !userChordsInSearch.isEmpty {
-                            LazyVGrid(columns: [
-                                GridItem(.flexible(), spacing: 28),
-                                GridItem(.flexible(), spacing: 28),
-                                GridItem(.flexible(), spacing: 28)
-                            ], spacing: 28) {
+                            LazyVGrid(columns: Array(
+                                repeating: GridItem(.flexible(), spacing: 28),
+                                count: UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                            ), spacing: 28) {
                                 ForEach(userChordsInSearch) { item in
                                     NavigationLink(destination: ChordDetailPageView(chordName: item.name).environmentObject(songStore)) {
                                         ChordCard(
@@ -267,11 +265,10 @@ struct ChordLogView: View {
 
                         // Library chords section
                         if !libraryChordsInSearch.isEmpty {
-                            LazyVGrid(columns: [
-                                GridItem(.flexible(), spacing: 28),
-                                GridItem(.flexible(), spacing: 28),
-                                GridItem(.flexible(), spacing: 28)
-                            ], spacing: 28) {
+                            LazyVGrid(columns: Array(
+                                repeating: GridItem(.flexible(), spacing: 28),
+                                count: UIDevice.current.userInterfaceIdiom == .pad ? 4 : 3
+                            ), spacing: 28) {
                                 ForEach(libraryChordsInSearch) { item in
                                     NavigationLink(destination: ChordDetailPageView(chordName: item.name).environmentObject(songStore)) {
                                         ChordCard(

@@ -31,4 +31,30 @@ enum Spacing {
     /// Extra extra large spacing - 24pt
     /// Usage: major section separators, page-level spacing
     static let xxl: CGFloat = 24
+
+    // MARK: - Adaptive Spacing (iPad-aware)
+
+    /// Adaptive horizontal padding - 16pt on iPhone, 32pt on iPad
+    /// Usage: Main container horizontal padding
+    static var horizontalPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 32 : 16
+    }
+
+    /// Adaptive card padding - 12pt on iPhone, 16pt on iPad
+    /// Usage: Internal card padding
+    static var cardPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 16 : 12
+    }
+
+    /// Adaptive section spacing - 16pt on iPhone, 24pt on iPad
+    /// Usage: Spacing between major sections
+    static var sectionSpacing: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 24 : 16
+    }
+
+    /// Adaptive content padding - 20pt on iPhone, 24pt on iPad
+    /// Usage: Content area padding
+    static var contentPadding: CGFloat {
+        UIDevice.current.userInterfaceIdiom == .pad ? 24 : 20
+    }
 }

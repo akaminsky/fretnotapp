@@ -73,7 +73,7 @@ struct AddSongView: View {
     
     var body: some View {
         ScrollView {
-            VStack(spacing: 20) {
+            VStack(spacing: Spacing.sectionSpacing) {
                 // STEP 1: Spotify Search (if no track selected and not editing)
                 if selectedTrack == nil && !isEditing && title.isEmpty {
                     spotifySearchSection
@@ -91,7 +91,8 @@ struct AddSongView: View {
                     formFields
                 }
             }
-            .padding()
+            .padding(Spacing.contentPadding)
+            .maxWidthContainer(800)
         }
         .scrollDismissesKeyboard(.interactively)
         .onTapGesture {
@@ -556,7 +557,7 @@ struct AddSongView: View {
     // MARK: - Form Fields
     
     private var formFields: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: Spacing.sectionSpacing) {
             // Song Details (only show when editing without Spotify link or adding manually)
             if (isEditing && spotifyUrl.isEmpty) || selectedTrack?.id == "manual" {
                 FormSection(title: "Song Details") {
@@ -644,7 +645,7 @@ struct AddSongView: View {
 
             // Guitar Info
             FormSection(title: "Guitar Info") {
-                VStack(spacing: 16) {
+                VStack(spacing: Spacing.cardPadding) {
                     // Segmented control for sections
                     Picker("Guitar Section", selection: $guitarSection) {
                         Text("Chords").tag(GuitarSection.chords)
@@ -655,7 +656,7 @@ struct AddSongView: View {
 
                     // Conditional content based on selected section
                     if guitarSection == .chords {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                             // Capo Position
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("Capo Position")
@@ -761,7 +762,7 @@ struct AddSongView: View {
                             )
                         }
                     } else if guitarSection == .strumPatterns {
-                        VStack(alignment: .leading, spacing: 12) {
+                        VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                             if strumPatterns.isEmpty {
                                 Text("No strum patterns added")
                                     .font(.subheadline)
@@ -796,8 +797,8 @@ struct AddSongView: View {
                             }
                         }
                     } else {
-                        VStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 12) {
+                        VStack(spacing: Spacing.cardPadding) {
+                            VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text("Tuning")
                                         .font(.caption)
@@ -856,7 +857,7 @@ struct AddSongView: View {
 
             // Categories
             FormSection(title: "Lists") {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                     // Favorites toggle
                     Button {
                         isFavorite.toggle()
@@ -956,7 +957,7 @@ struct AddSongView: View {
             
             // Resource Links
             FormSection(title: "Resource Links") {
-                VStack(alignment: .leading, spacing: 12) {
+                VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                     if links.isEmpty {
                         Text("No links added")
                             .font(.subheadline)

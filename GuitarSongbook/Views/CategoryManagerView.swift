@@ -22,14 +22,14 @@ struct CategoryManagerView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
+                VStack(alignment: .leading, spacing: Spacing.sectionSpacing) {
                     // Add new category section
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                         Text("CREATE LIST")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, Spacing.contentPadding)
 
                         HStack(spacing: 12) {
                             TextField("New list name...", text: $newCategoryName)
@@ -45,16 +45,16 @@ struct CategoryManagerView: View {
                             }
                             .disabled(newCategoryName.isEmpty)
                         }
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, Spacing.contentPadding)
                     }
 
                     // All categories (Favorites + Custom)
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .leading, spacing: Spacing.cardPadding) {
                         Text("LISTS")
                             .font(.caption)
                             .fontWeight(.semibold)
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, Spacing.contentPadding)
 
                         VStack(spacing: 0) {
                             // Favorites row
@@ -161,15 +161,16 @@ struct CategoryManagerView: View {
                             }
                         }
                         .warmCard()
-                        .padding(.horizontal, 20)
+                        .padding(.horizontal, Spacing.contentPadding)
 
                         Text("Tap and hold to rename or delete lists.")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                            .padding(.horizontal, 20)
+                            .padding(.horizontal, Spacing.contentPadding)
                     }
                 }
-                .padding(.vertical, 20)
+                .padding(.vertical, Spacing.contentPadding)
+                .maxWidthContainer(800)
             }
             .navigationTitle("Lists")
             .navigationBarTitleDisplayMode(.inline)
